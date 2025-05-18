@@ -71,15 +71,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
-  addUserToGroup: a
-    .mutation()
-    .arguments({
-      userId: a.string().required(),
-      groupName: a.string().required(),
-    })
-    .authorization((allow) => [allow.group("ADMINS")])
-
-    .returns(a.json())
+ 
 });
 
 // Used for code completion / highlighting when making requests from frontend
