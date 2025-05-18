@@ -17,6 +17,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - echo "Using Node.js 20"
         - nvm install 20
         - nvm use 20
         - node -v
@@ -26,10 +27,10 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    baseDirectory: dist
+    baseDirectory: dist   # Check this folder matches your actual build output
     files:
       - "**/*"
   cache:
     paths:
-      - .npm/**/*
-      - node_modules/**/*
+      - node_modules/**/*   # This caches npm dependencies
+      - .npm/**/*          # This caches npm cache folder
