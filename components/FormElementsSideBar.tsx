@@ -38,11 +38,7 @@ function FormElementsSidebar() {
         <SidebarBtnElement formElement={FormElements.SeparatorField} />
         <SidebarBtnElement formElement={FormElements.SpacerField} />
         <SidebarBtnElement formElement={FormElements.ImageField} />
-<<<<<<< HEAD
 
-=======
-        <SidebarBtnElement formElement={FormElements.PageBreakField} />
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
         <Text
           fontSize={tokens.fontSizes.small}
           color={tokens.colors.font.secondary}

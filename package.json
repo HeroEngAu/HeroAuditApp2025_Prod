@@ -2,7 +2,7 @@
   "name": "amplify-vite-react-template",
   "version": "0.0.0",
   "private": true,
-  "description": "This repository provides a starter template for creating applications using React+Vite and AWS Amplify, emphasizing easy setup for authentication, API, and database capabilities.",
+  "description": "Starter template for React+Vite with AWS Amplify, focusing on easy setup for auth, API, and database.",
   "homepage": "https://github.com/HeroEngAu/HeroAuditApp2025#readme",
   "bugs": {
     "url": "https://github.com/HeroEngAu/HeroAuditApp2025/issues"
@@ -12,9 +12,11 @@
     "url": "git+https://github.com/HeroEngAu/HeroAuditApp2025.git"
   },
   "license": "ISC",
-  "author": "",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -55,7 +57,6 @@
     "next": "^15.3.1",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.8.16",
-    "node": "^20.19.2",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.20",
     "radix-ui": "^1.1.3",
