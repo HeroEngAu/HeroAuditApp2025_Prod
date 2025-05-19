@@ -1,9 +1,10 @@
 "use client";
 
 import { ElementsType, FormElement } from "../FormElements";
-import { Label } from "../ui/label";
-import { RiFilePaper2Line } from "react-icons/ri"; // Ícone diferente do Separator
-import clsx from "clsx";
+import { RiFilePaper2Line } from "react-icons/ri";
+import { DesignerComponent } from "./PageBreakFieldDesignerComponent";
+import { FormComponent } from "./PageBreakFieldFormComponent";
+import { PropertiesComponent } from "./PageBreakFieldPropertiesComponent";
 
 const type: ElementsType = "PageBreakField";
 
@@ -25,24 +26,5 @@ export const PageBreakFieldFormElement: FormElement = {
   validate: () => true,
 };
 
-function DesignerComponent() {
-  return (
-    <div className="flex flex-col gap-2 w-full">
-      <Label className="text-muted-foreground">Page Break (visual only)</Label>
-      <div className={pageBreakClass} />
-    </div>
-  );
-}
 
-function FormComponent() {
-  return <div className={pageBreakClass} />;
-}
 
-function PropertiesComponent() {
-  return <p>No properties for this element</p>;
-}
-
-const pageBreakClass = clsx(
-  "w-full border-t border-dashed border-gray-400 my-6",
-  "print:break-before-page"
-);
