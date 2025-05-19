@@ -23,7 +23,7 @@ export const CheckboxFieldFormElement: FormElement = {
     extraAttributes,
   }),
   designerBtnElement: {
-    icon: IoMdCheckbox,
+    icon: IoMdCheckbox, 
     label: "CheckBox Field",
   },
   designerComponent: DesignerComponent,
