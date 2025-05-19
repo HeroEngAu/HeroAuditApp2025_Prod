@@ -5,7 +5,13 @@ import outputs from "../../../../amplify_outputs.json"
 
 Amplify.configure(outputs)
 
-async function BuilderPage({ params }: { params: { id: string } }) {
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
+async function BuilderPage({ params }: Props) {
   const { id } = params;
 
   const formData = await GetFormById(id);
