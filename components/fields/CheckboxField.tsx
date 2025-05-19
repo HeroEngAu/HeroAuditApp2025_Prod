@@ -2,9 +2,9 @@
 
 import { ElementsType, FormElement, FormElementInstance } from "../FormElements";
 import { IoMdCheckbox } from "react-icons/io";
-import DesignerComponent from "./CheckboxField/DesignerComponent";
-import FormComponent from "./CheckboxField/FormComponent";
-import PropertiesComponent from "./CheckboxField/PropertiesComponent";
+import DesignerComponent from "./CheckboxFieldDesignerComponent";
+import FormComponent from "./CheckboxFieldFormComponent";
+import PropertiesComponent from "./CheckboxFieldPropertiesComponent";
 
 const type: ElementsType = "CheckboxField";
 
