@@ -21,7 +21,7 @@ export default function DesignerComponent({ elementInstance }: { elementInstance
     <div className="flex items-top space-x-2">
       <Checkbox id={id} />
       <div className="grid gap-1.5 leading-none">
-        <Label htmlFor={id}>
+        <Label htmlFor={id}>   
           {label}
           {required && "*"}   
         </Label>
