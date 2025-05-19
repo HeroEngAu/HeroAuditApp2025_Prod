@@ -1,9 +1,11 @@
+/// <reference types="react" />
+
 import * as React from "react";
 import { cn } from "../../lib/utils";
 
 // Factory to create table components with forwardRef
 const createTableComponent = <T extends HTMLElement>(
-  tag: keyof JSX.IntrinsicElements,
+  tag: keyof JSX.IntrinsicElements & string,
   baseClass: string,
 ) => {
   return React.forwardRef<T, React.HTMLAttributes<T>>(({ className, ...props }, ref) =>
@@ -14,6 +16,7 @@ const createTableComponent = <T extends HTMLElement>(
     }),
   );
 };
+
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (

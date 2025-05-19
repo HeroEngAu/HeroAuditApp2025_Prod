@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "module": "esnext",
+    "types": ["react", "node"],
     "target": "es5",
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -18,6 +19,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
+    "jsxImportSource": "react",
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

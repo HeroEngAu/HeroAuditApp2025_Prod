@@ -5,12 +5,12 @@ import outputs from "../../../../amplify_outputs.json";
 
 Amplify.configure(outputs);
 
-export default async function Page({
-  params,
-}: {
+type BuilderPageProps = {
   params: { id: string };
-}) {
-  const { id } = params;
+};
+
+export default async function BuilderPage({ params }: BuilderPageProps) {
+  const id = params.id;
 
   const formData = await GetFormById(id);
 
