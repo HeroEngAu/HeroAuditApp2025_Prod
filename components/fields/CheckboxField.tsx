@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  ElementsType,
-  FormElement,
   FormElementInstance,
   SubmitFunction,
 } from "../FormElements";
@@ -13,7 +11,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import useDesigner from "../hooks/useDesigner";
-import { IoMdCheckbox } from "react-icons/io";
 import {
   Form,
   FormControl,
@@ -26,8 +23,8 @@ import {
 import { Switch } from "../ui/switch";
 import { cn } from "../../lib/utils";
 import { Checkbox } from "../ui/checkbox";
+import { CheckboxFieldFormElement } from "./CheckboxFieldFormElement";
 
-const type: ElementsType = "CheckboxField";
 
 const extraAttributes = {
   label: "Checkbox field",
@@ -243,34 +240,3 @@ export function PropertiesComponent({
     </Form>
   );
 }
-
-export const CheckboxFieldFormElement: FormElement = {
-  type,
-  construct: (id: string) => ({
-    id,
-    type,
-    label: extraAttributes.label, // Add the required label property
-    extraAttributes,
-  }),
-  designerBtnElement: {
-    icon: IoMdCheckbox,
-    label: "CheckBox Field",
-  },
-  designerComponent: DesignerComponent,
-  formComponent: FormComponent,
-  propertiesComponent: PropertiesComponent,
-
-  validate: (
-    formElement: FormElementInstance,
-    currentValue: string,
-  ): boolean => {
-    const element = formElement as CustomInstance;
-    if (element.extraAttributes.required) {
-      return currentValue === "true";
-    }
-    return true;
-  },
-};
-
-
-
