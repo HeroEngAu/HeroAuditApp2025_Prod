@@ -6,7 +6,7 @@ import outputs from "../../../../amplify_outputs.json"
 Amplify.configure(outputs)
 
 async function BuilderPage({ params }: { params: { id: string } }) {
-  const { id } = await params;
+  const { id } = params;
 
   const formData = await GetFormById(id);
 

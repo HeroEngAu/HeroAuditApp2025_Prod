@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { MdTableChart } from "react-icons/md";
 import useDesigner from "../hooks/useDesigner";
-import * as XLSX from "xlsx";
+import { read, utils } from "xlsx";
 import {
   Table,
   TableBody,
@@ -548,44 +548,46 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
     fileInputRef.current?.click();
   }
   useEffect(() => {
-    const input = fileInputRef.current;
-    if (!input) return;
+  const input = fileInputRef.current;
+  if (!input) return;
 
-    input.onchange = async (e: Event) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+  input.onchange = async (e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
 
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const parsedData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 });
+    const data = await file.arrayBuffer();
+    const workbook = read(data);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const parsedData = utils.sheet_to_json<string[]>(worksheet, { header: 1 });
 
-      if (parsedData.length === 0) return;
+    if (parsedData.length === 0) return;
 
-      const headers = parsedData[0].map((val) => (val ? String(val) : ""));
-      const rows = parsedData.slice(1).map((row) =>
-        Array.from({ length: headers.length }, (_, i) => row[i] ? String(row[i]) : "")
-      );
+    const headers = parsedData[0].map((val) => (val ? String(val) : ""));
+    const rows = parsedData.slice(1).map((row) =>
+      Array.from({ length: headers.length }, (_, i) =>
+        row[i] ? String(row[i]) : ""
+      )
+    );
 
-      setColumnHeaders(headers);
-      setData(rows);
+    setColumnHeaders(headers);
+    setData(rows);
 
-      form.setValue("rows", rows.length);
-      form.setValue("columns", headers.length);
+    form.setValue("rows", rows.length);
+    form.setValue("columns", headers.length);
 
-      updateElement(element.id, {
-        ...element,
-        extraAttributes: {
-          ...element.extraAttributes,
-          rows: rows.length,
-          columns: headers.length,
-          data: rows,
-          columnHeaders: headers,
-        },
-      });
-    };
-  }, [form, element, updateElement]);
+    updateElement(element.id, {
+      ...element,
+      extraAttributes: {
+        ...element.extraAttributes,
+        rows: rows.length,
+        columns: headers.length,
+        data: rows,
+        columnHeaders: headers,
+      },
+    });
+  };
+}, [form, element, updateElement]);
 
   function deleteRow(rowIndex: number) {
     const newData = data.filter((_, i) => i !== rowIndex);
