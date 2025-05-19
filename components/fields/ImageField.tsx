@@ -18,13 +18,8 @@ import {
 } from "../ui/form";
 import { MdImage } from "react-icons/md";
 
-<<<<<<< HEAD
-import { Button } from "../ui/button"; // certifique-se de ter isso importado
-import { Upload } from "lucide-react"; // ícone opcional, pode ser trocado
-=======
 import { Button } from "../ui/button";
 import { Upload } from "lucide-react";
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 
 
 const type: ElementsType = "ImageField";
@@ -32,15 +27,6 @@ const type: ElementsType = "ImageField";
 const extraAttributes = {
   imageUrl: "",
   position: "center",
-<<<<<<< HEAD
-};
-
-const propertiesSchema = z.object({
-  imageUrl: z.string().url("Must be a valid URL").optional(),
-  position: z.enum(["left", "center", "right"]),
-});
-
-=======
   repeatOnPageBreak: false,
 };
 
@@ -52,7 +38,6 @@ const propertiesSchema = z.object({
 });
 
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 export const ImageFieldFormElement: FormElement = {
   type,
   construct: (id: string) => ({
@@ -69,10 +54,7 @@ export const ImageFieldFormElement: FormElement = {
   formComponent: FormComponent,
   propertiesComponent: PropertiesComponent,
   validate: () => true,
-<<<<<<< HEAD
-=======
   
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 };
 
 type CustomInstance = FormElementInstance & {
@@ -169,11 +151,6 @@ function PropertiesComponent({
     mode: "onBlur",
     defaultValues: {
       imageUrl: element.extraAttributes.imageUrl,
-<<<<<<< HEAD
-    },
-  });
-
-=======
       position: ["center", "left", "right"].includes(element.extraAttributes.position)
         ? (element.extraAttributes.position as "center" | "left" | "right")
         : "center",
@@ -182,26 +159,18 @@ function PropertiesComponent({
   });
 
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   useEffect(() => {
     form.reset(element.extraAttributes as propertiesFormSchemaType);
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-<<<<<<< HEAD
-    const { imageUrl, position } = values;
-=======
     const { imageUrl, position, repeatOnPageBreak } = values;
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
     updateElement(element.id, {
       ...element,
       extraAttributes: {
         imageUrl: imageUrl || "",
         position,
-<<<<<<< HEAD
-=======
         repeatOnPageBreak,
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
       },
     });
   }
@@ -285,8 +254,6 @@ function PropertiesComponent({
             </SelectContent>
           </Select>
         </div>
-<<<<<<< HEAD
-=======
         <div className="space-y-1">
           <Label className="flex items-center space-x-2">
             <input
@@ -303,7 +270,6 @@ function PropertiesComponent({
           </Label>
         </div>
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
       </form>
     </Form>
   );

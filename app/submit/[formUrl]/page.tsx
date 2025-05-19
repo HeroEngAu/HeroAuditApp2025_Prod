@@ -2,15 +2,11 @@ import { GetFormContentByUrl, ResumeTest } from "../../../actions/form";
 import { FormElementInstance } from "../../../components/FormElements";
 import FormSubmitComponent from "../../../components/FormSubmitComponent";
 import ResumeTestRenderer from "../../../components/ResumeTestRenderer";
-<<<<<<< HEAD
-
-=======
 import { Amplify } from "aws-amplify"
-import outputs from "../../../../amplify_outputs.json"
+import outputs from "../../../amplify_outputs.json"
 
 Amplify.configure(outputs)
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 interface Props {
   params: { formUrl: string };
   searchParams: { resume?: string; formtag2Id?: string };

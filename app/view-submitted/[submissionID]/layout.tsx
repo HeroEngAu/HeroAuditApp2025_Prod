@@ -3,13 +3,10 @@
 import Logo from "../../../components/Logo";
 import ThemeSwitcher from "../../../components/ThemeSwitcher";
 import { ReactNode } from "react";
-<<<<<<< HEAD
-=======
 import { Amplify } from "aws-amplify"
-import outputs from "../../../../amplify_outputs.json"
+import outputs from "../../../amplify_outputs.json"
 
 Amplify.configure(outputs)
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 
 function Layout({ children }: { children: ReactNode }) {
   return (

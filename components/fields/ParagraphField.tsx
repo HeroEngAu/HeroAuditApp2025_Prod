@@ -31,14 +31,9 @@ export const ParagprahFieldFormElement: FormElement = {
   construct: (id: string) => ({
     id,
     type,
-<<<<<<< HEAD
-    extraAttributes,
-    label: "Paragraph Field", // Add the required label property
-=======
     extraAttributes: { text: "<p>Text here</p>" },
     label: "Paragraph Field",
     height : 70,
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   }),
   designerBtnElement: {
     icon: BsTextParagraph,

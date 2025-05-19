@@ -6,7 +6,6 @@ import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { ReactNode, useEffect, useState, useRef } from 'react';
 import { Authenticator, Avatar, IconsProvider } from '@aws-amplify/ui-react';
 import { FiUser } from 'react-icons/fi';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
 import { fetchUserAttributes, signOut } from 'aws-amplify/auth';

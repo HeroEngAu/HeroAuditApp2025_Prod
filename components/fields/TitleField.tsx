@@ -42,12 +42,8 @@ export const TitleFieldFormElement: FormElement = {
     id,
     type,
     extraAttributes,
-<<<<<<< HEAD
-    label: "Title field", // Add the required label property
-=======
     label: "Title field", 
     height: 70,
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   }),
   designerBtnElement: {
     icon: LuHeading1,

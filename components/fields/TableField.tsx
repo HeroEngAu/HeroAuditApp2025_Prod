@@ -28,12 +28,8 @@ import { Divider } from "@aws-amplify/ui-react";
 import { Button } from "../ui/button";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-<<<<<<< HEAD
-
-=======
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 
 const type: ElementsType = "TableField";
 
@@ -114,11 +110,7 @@ function DesignerComponent({ elementInstance }: { elementInstance: FormElementIn
             {[...Array(columns)].map((_, col) => (
               <TableHead key={col}
                 style={{
-<<<<<<< HEAD
-                  maxWidth: "200px",
-=======
                   maxWidth: "auto",
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                   minWidth: "50px",
                   width: "auto",
                   whiteSpace: "normal",
@@ -135,11 +127,7 @@ function DesignerComponent({ elementInstance }: { elementInstance: FormElementIn
               {[...Array(columns)].map((_, col) => (
                 <TableCell key={col}
                   style={{
-<<<<<<< HEAD
-                    maxWidth: "200px",
-=======
                     maxWidth: "auto",
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                     minWidth: "50px",
                     width: "auto",
                     whiteSpace: "normal",
@@ -169,26 +157,17 @@ function FormComponent({
   elementInstance,
   defaultValue,
   readOnly,
-<<<<<<< HEAD
-=======
   updateElement,
   pdf,
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 }: {
   elementInstance: FormElementInstance;
   defaultValue?: any;
   isInvalid?: boolean;
   submitValue?: SubmitFunction;
   readOnly?: boolean;
-<<<<<<< HEAD
-}) {
-  const designer = useDesigner();
-
-=======
   updateElement?: (id: string, element: FormElementInstance) => void;
   pdf?: boolean;
 }) {
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   const element = elementInstance as CustomInstance;
   const { rows, columns, label, columnHeaders = [] } = element.extraAttributes;
   const initialData: string[][] = defaultValue || element.extraAttributes.data || [];
@@ -201,8 +180,6 @@ function FormComponent({
     )
   );
 
-<<<<<<< HEAD
-=======
   const updateData = (newData: string[][]) => {
     setEditableData(newData);
     if (!readOnly && updateElement) {
@@ -216,49 +193,10 @@ function FormComponent({
     }
   };
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   const handleCellChange = (row: number, col: number, value: string) => {
     const newData = [...editableData];
     if (!newData[row]) newData[row] = [];
     newData[row][col] = value;
-<<<<<<< HEAD
-    setEditableData(newData);
-    if (!readOnly) {
-      designer.updateElement(element.id, {
-        ...element,
-        extraAttributes: {
-          ...element.extraAttributes,
-          data: newData,
-        },
-      });
-    }
-  };
-
-  const handleCheckboxChange = (row: number, col: number, checked: boolean) => {
-    const newData = [...editableData];
-    if (!newData[row]) newData[row] = [];
-    newData[row][col] = checked ? "[checkbox:true]" : "[checkbox:false]";
-    setEditableData(newData);
-    if (!readOnly) {
-      designer.updateElement(element.id, {
-        ...element,
-        extraAttributes: {
-          ...element.extraAttributes,
-          data: newData,
-        },
-      });
-    }
-  };
-
-  return (
-    <div>
-      <p className="font-medium mb-2">{label}</p>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {Array.from({ length: columns }, (_, col) => (
-              <TableHead key={col}>{columnHeaders[col] || `Col ${col + 1}`}</TableHead>
-=======
     updateData(newData);
   };
 
@@ -351,7 +289,6 @@ function FormComponent({
           <TableRow>
             {Array.from({ length: columns }, (_, col) => (
               <TableHead key={col} style={{ minWidth: "50px" }}>{columnHeaders[col] || `Col ${col + 1}`}</TableHead>
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
             ))}
           </TableRow>
         </TableHeader>
@@ -361,19 +298,11 @@ function FormComponent({
               {Array.from({ length: columns }, (_, col) => {
                 const cellValue = editableData[row]?.[col] || "";
                 const isCheckbox = cellValue.startsWith("[checkbox");
-<<<<<<< HEAD
-                const checked = cellValue === "[checkbox:true]";
-=======
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                 const isSelect = cellValue.startsWith("[select");
                 const isNumber = cellValue.startsWith("[number");
                 const numberValue = isNumber ? cellValue.match(/^\[number:(.*?)\]$/)?.[1] ?? "" : "";
                 const isDate = cellValue.startsWith("[date:");
                 const dateValue = isDate ? cellValue.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
-<<<<<<< HEAD
-
-=======
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                 let isSelectValue = "";
                 let isSelectOptionsArray: string[] = [];
 
@@ -392,35 +321,6 @@ function FormComponent({
                     isSelectOptionsArray = [];
                   }
                 }
-<<<<<<< HEAD
-
-                let isSelectValueArray: string[] = [];
-                try {
-                  isSelectValueArray = isSelectValue ? JSON.parse(isSelectValue) : [];
-                } catch (error) {
-                  console.warn("Failed to parse isSelectValue:", isSelectValue);
-                  isSelectValueArray = [];
-                }
-
-
-                return (
-                  <TableCell key={col} className="justify-center items-center">
-                    {isCheckbox ? (
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 flex justify-center items-center"
-                        checked={checked}
-                        onChange={(e) => handleCheckboxChange(row, col, e.target.checked)}
-                        disabled={readOnly}
-                      />
-                    ) : isSelect ? (
-                      <select
-                        className="border rounded px-2 py-1"
-                        style={{ width: "100%" }}
-                        value={isSelectValue}
-                        onChange={(e) => {
-                          const newValue = `[select:"${e.target.value}":${JSON.stringify(isSelectOptionsArray)}]`;
-=======
                 return (
                   <TableCell key={col} className="justify-center items-center table-cell-wrap">
                     {isCheckbox ? (
@@ -465,56 +365,10 @@ function FormComponent({
                         value={isSelectValue}
                         onValueChange={(val) => {
                           const newValue = `[select:"${val}":${JSON.stringify(isSelectOptionsArray)}]`;
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                           handleCellChange(row, col, newValue);
                         }}
                         disabled={readOnly}
                       >
-<<<<<<< HEAD
-                        {isSelectOptionsArray.map((option: string, index: number) => (
-                          <option key={index} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    ) : isNumber ? (
-                      <input
-                        type="number"
-                        className="border rounded px-2 py-1"
-                        value={numberValue}
-                        onChange={(e) =>
-                          handleCellChange(row, col, `[number:${e.target.value}]`)
-                        }
-                        disabled={readOnly}
-                      />
-                    ) : isDate ? (
-                      <ReactDatePicker
-                        className="border rounded px-2 py-1"
-                        selected={dateValue ? new Date(dateValue) : null}
-                        onChange={(date: Date | null) => {
-                          if (date) {
-                            handleCellChange(row, col, `[date:${date.toISOString().split("T")[0]}]`);
-                          }
-                        }}
-                        disabled={readOnly}
-                        dateFormat="yyyy-MM-dd"
-                      />
-
-                    ) : !readOnly && editableCells[row]?.[col] ? (
-                      <Input
-                        value={cellValue}
-                        onChange={(e) => handleCellChange(row, col, e.target.value)}
-                      />
-                    ) : (
-                      // Fallback for readonly display
-                      <div>{cellValue}</div>
-                    )}
-                  </TableCell>
-
-
-
-
-=======
                         <SelectTrigger
                           className="border rounded px-2 py-1"
                           style={{
@@ -581,7 +435,6 @@ function FormComponent({
                       <div>{cellValue}</div>
                     )}
                   </TableCell>
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                 );
               })}
             </TableRow>
@@ -593,11 +446,6 @@ function FormComponent({
 }
 
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 
 function PropertiesComponent({ elementInstance }: { elementInstance: FormElementInstance }) {
@@ -739,8 +587,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
     };
   }, [form, element, updateElement]);
 
-<<<<<<< HEAD
-=======
   function deleteRow(rowIndex: number) {
     const newData = data.filter((_, i) => i !== rowIndex);
     form.setValue("rows", newData.length);
@@ -772,7 +618,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
     });
   }
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
   return (
     <Form {...form}>
       <form onBlur={form.handleSubmit(applyChanges)}
@@ -793,17 +638,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
         <FormField
           control={form.control}
           name="rows"
-<<<<<<< HEAD
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rows</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-=======
           render={({ field }) => {
             const [localValue, setLocalValue] = useState(field.value);
 
@@ -828,22 +662,10 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
               </FormItem>
             );
           }}
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
         />
         <FormField
           control={form.control}
           name="columns"
-<<<<<<< HEAD
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Columns</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-=======
           render={({ field }) => {
             const [localValue, setLocalValue] = useState(field.value);
 
@@ -868,7 +690,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
               </FormItem>
             );
           }}
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
         />
         <FormField
           control={form.control}
@@ -888,10 +709,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
         <div className="flex justify-between items-center">
           <div className="space-y-0.5">
             <FormLabel>Table Content</FormLabel>
-<<<<<<< HEAD
-            <FormDescription> Use <code>[checkbox]</code> as the cell value to display a checkbox.</FormDescription>
-          </div>
-=======
             <FormDescription>
               Use <code>[checkbox]</code> as the cell value to display a checkbox. <br />
               Use <code>[select:"Option1":["Option1","Option2"]]</code> to display a dropdown with options.<br />
@@ -902,7 +719,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
           </div>
 
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
           <Button type="button" onClick={handleImportClick}>
             Import Excel
           </Button>
@@ -918,12 +734,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
             <TableRow>
               {[...Array(watchColumns)].map((_, col) => (
                 <TableHead key={col}>
-<<<<<<< HEAD
-                  <Input
-                    value={columnHeaders[col] || ""}
-                    onChange={(e) => handleHeaderChange(col, e.target.value)}
-                  />
-=======
                   <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
                     ✕
                   </Button>
@@ -933,7 +743,6 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
                     onChange={(e) => handleHeaderChange(col, e.target.value)}
                   />
 
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
                 </TableHead>
               ))}
             </TableRow>
@@ -949,14 +758,11 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
                     />
                   </TableCell>
                 ))}
-<<<<<<< HEAD
-=======
                 <TableCell>
                   <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
                     ✕
                   </Button>
                 </TableCell>
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
               </TableRow>
             ))}
           </TableBody>
@@ -965,8 +771,3 @@ function PropertiesComponent({ elementInstance }: { elementInstance: FormElement
     </Form>
   );
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45

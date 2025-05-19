@@ -28,11 +28,6 @@ function PreviewDialogBtn() {
           <div className="max-w-[1500px] flex flex-col gap-4 flex-grow bg-background w-full h-full rounded-2xl p-8 overflow-y-auto">
             {elements.map((element) => {
               const FormComponent = FormElements[element.type].formComponent;
-<<<<<<< HEAD
-              
-=======
-
->>>>>>> 8c057302bc785c4f6ab2b350f523a8b4bf81cd45
               return (
                 <FormComponent key={element.id} elementInstance={element} />
               );
