@@ -3,34 +3,27 @@
 import {
   createContext,
   useState,
-  Dispatch,
-  SetStateAction,
-  ReactNode,
-  useContext,
+  type Dispatch,
+  type SetStateAction,
+  type ReactNode,
 } from "react";
-import { FormElementInstance } from "../FormElements";
+import { type FormElementInstance } from "../FormElements";
 
-type DesignerContextType = {
+export type DesignerContextType = {
   elements: FormElementInstance[];
   setElements: Dispatch<SetStateAction<FormElementInstance[]>>;
   addElement: (index: number, element: FormElementInstance) => void;
   removeElement: (id: string) => void;
   updateElement: (id: string, element: FormElementInstance) => void;
-
   selectedElement: FormElementInstance | null;
   setSelectedElement: Dispatch<SetStateAction<FormElementInstance | null>>;
 };
 
 export const DesignerContext = createContext<DesignerContextType | null>(null);
 
-export default function DesignerContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DesignerContextProvider({ children }: { children: ReactNode }) {
   const [elements, setElements] = useState<FormElementInstance[]>([]);
-  const [selectedElement, setSelectedElement] =
-    useState<FormElementInstance | null>(null);
+  const [selectedElement, setSelectedElement] = useState<FormElementInstance | null>(null);
 
   const addElement = (index: number, element: FormElementInstance) => {
     setElements((prev) => {
@@ -45,9 +38,7 @@ export default function DesignerContextProvider({
   };
 
   const updateElement = (id: string, updatedElement: FormElementInstance) => {
-    setElements((prev) =>
-      prev.map((el) => (el.id === id ? updatedElement : el)),
-    );
+    setElements((prev) => prev.map((el) => (el.id === id ? updatedElement : el)));
   };
 
   return (
@@ -66,14 +57,3 @@ export default function DesignerContextProvider({
     </DesignerContext.Provider>
   );
 }
-
-// Optional: helper hook for easier context usage
-export const useDesigner = (): DesignerContextType => {
-  const context = useContext(DesignerContext);
-  if (!context) {
-    throw new Error(
-      "useDesigner must be used within a DesignerContextProvider",
-    );
-  }
-  return context;
-};

@@ -31,6 +31,7 @@ function SaveFormBtn({ id }: { id: string }) {
         className: "bg-green-500 text-white",
       });
     } catch (error) {
+      console.error(error)
       toast({
         title: "Error",
         description: "Something went wrong",

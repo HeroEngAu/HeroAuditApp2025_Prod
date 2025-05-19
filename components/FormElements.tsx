@@ -63,7 +63,7 @@ export type FormElement = {
 export type FormElementInstance = {
   id: string;
   type: ElementsType;
-  extraAttributes?: Record<string, any>;
+  extraAttributes?: Record<string, unknown>;
   label: string;
   height?: number;
   widht?: number;

@@ -5,20 +5,20 @@ import { Button } from "./ui/button";
 
 function SidebarBtnElement({ formElement }: { formElement: FormElement }) {
   
-  if (!formElement || !formElement.designerBtnElement) {
-    console.error("SidebarBtnElement received an invalid formElement:", formElement);
-    return null;
-  }
-
-  const { label, icon: Icon } = formElement.designerBtnElement;
-
-  const draggable = useDraggable({
+    const draggable = useDraggable({
     id: `designer-btn-${formElement.type}`,
     data: {
       type: formElement.type,
       isDesignerBtnElement: true,
     },
   });
+
+  if (!formElement || !formElement.designerBtnElement) {
+    console.error("SidebarBtnElement received an invalid formElement:", formElement);
+    return null;
+  }
+
+  const { label, icon: Icon } = formElement.designerBtnElement;
 
   return (
     <Button

@@ -67,6 +67,7 @@ function ResumeTestRenderer({
       await submitFormAction(formData);
       setSubmitted(true);
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Something went wrong",
@@ -92,6 +93,7 @@ function ResumeTestRenderer({
         className: "bg-green-500 text-white",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Save failed",
         description: "Could not save your progress.",

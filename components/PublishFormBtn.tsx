@@ -40,6 +40,7 @@ function PublishFormBtn({ id }: { id: string }) {
         });
         router.refresh();
       } catch (error) {
+        console.error(error);
         toast({
           title: "Error",
           description: "Something went wrong",

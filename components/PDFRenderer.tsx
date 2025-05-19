@@ -2,9 +2,15 @@
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { useState } from 'react';
+import { FormElementInstance } from './FormElements';
 
+type FormDataType = {
+  elements: FormElementInstance[];
+  responses: Record<string, string | number | boolean | null>;
 // Function to render data on a PDF template
-async function renderFormToPdf(pdfUrl: string, formData: any) {
+};
+
+async function renderFormToPdf(pdfUrl: string, formData: FormDataType) {
   try {
     // Fetch the existing PDF template
     const existingPdfBytes = await fetch(pdfUrl).then((res) => res.arrayBuffer());
@@ -53,7 +59,7 @@ async function renderFormToPdf(pdfUrl: string, formData: any) {
   }
 }
 
-const PDFRenderer = ({ pdfUrl, formData }: { pdfUrl: string, formData: any }) => {
+const PDFRenderer = ({ pdfUrl, formData }: { pdfUrl: string, formData: FormDataType }) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {

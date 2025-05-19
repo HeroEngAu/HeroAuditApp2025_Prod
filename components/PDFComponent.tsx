@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { useRouter } from "next/navigation";
+import { FormElementInstance } from "./FormElements";
 
 
 const styles = StyleSheet.create({
@@ -14,7 +15,13 @@ const styles = StyleSheet.create({
 });
 
 
-const PDFTemplate = ({ elements, responses }: { elements: any[]; responses: Record<string, any> }) => (
+const PDFTemplate = ({
+  elements,
+  responses,
+}: {
+  elements: FormElementInstance[];
+  responses: Record<string, string | number | boolean | string[] | null>;
+}) => (
   <Document>
     <Page size="A4" style={styles.page}>
       {elements.map((element) => (
@@ -28,9 +35,10 @@ const PDFTemplate = ({ elements, responses }: { elements: any[]; responses: Reco
 );
 
 interface GeneratePdfClientProps {
-  elements: any[];
-  responses: Record<string, any>;
+  elements: FormElementInstance[];
+  responses: Record<string, string | number | boolean | string[] | null>;
 }
+
 
 export default function GeneratePdfClient({ elements, responses }: GeneratePdfClientProps) {
   const router = useRouter();
