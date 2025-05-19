@@ -1,12 +1,13 @@
 import { GetFormById } from "../../../../actions/form";
 import FormBuilder from "../../../../components/FormBuilder";
-import { Amplify } from "aws-amplify";
-import outputs from "../../../../amplify_outputs.json";
 
-Amplify.configure(outputs);
+type BuilderPageProps = {
+  params: {
+    id: string;
+  };
+};
 
-export default async function BuilderPage(props: { params: { id: string } }) {
-  const { params } = props;
+export default async function BuilderPage({ params }: BuilderPageProps) {
   const id = params.id;
 
   const formData = await GetFormById(id);
@@ -27,3 +28,4 @@ export default async function BuilderPage(props: { params: { id: string } }) {
     />
   );
 }
+
