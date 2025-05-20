@@ -60,10 +60,31 @@ export type FormElement = {
   validate: (formElement: FormElementInstance, currentValue: string) => boolean;
 };
 
+interface TextFieldExtraAttributes {
+  label?: string;
+  placeHolder?: string;
+  helperText?: string;
+  required?: boolean;
+  repeatOnPageBreak?: boolean;
+  position?: string;
+  imageUrl?: string;
+  text?: string;
+  options?: string[];
+  height?: number;
+  data?: string[][];
+  rows?: number;
+  columns?: number;
+  columnHeaders?: string[];
+  title?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  textAlign?: string;
+}
+
 export type FormElementInstance = {
   id: string;
   type: ElementsType;
-  extraAttributes?: Record<string, unknown>;
+  extraAttributes?: TextFieldExtraAttributes;
   label: string;
   height?: number;
   widht?: number;
