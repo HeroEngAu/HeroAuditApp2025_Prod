@@ -1,19 +1,15 @@
-import { GetFormById, GetFormWithSubmissionDetails } from "../../../../actions/form";
+import { GetFormById} from "../../../../actions/form";
 import FormLinkShare from "../../../../components/FormLinkShare";
 import VisitBtn from "../../../../components/VisitBtn";
-import ResumeTestBtn from "../../../../components/ResumeTestBtn";
 import { StatsCard } from "../../page";
 import { LuView } from "react-icons/lu";
 import { FaWpforms } from "react-icons/fa";
 import { HiCursorClick } from "react-icons/hi";
 import { TbArrowBounce } from "react-icons/tb";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
-import { formatDistance } from "date-fns/formatDistance";
-import { Button } from "../../../../components/ui/button";
-import { MdPreview } from "react-icons/md";
 //import EditFormBtn from "../../../../components/EditFormBtn";
 import { Amplify } from "aws-amplify"
 import outputs from "../../../../amplify_outputs.json"
+import { ProjectLogTable } from "../../../../components/ProjectLogTable";
 
 Amplify.configure(outputs)
 
@@ -112,91 +108,5 @@ async function FormDetailPage({
 }
 
 export default FormDetailPage;
-
-export async function ProjectLogTable({ id }: { id: string }) {
-  try {
-    const data = await GetFormWithSubmissionDetails(id);
-
-    if (!data) {
-      return <div>Error loading project log data.</div>;
-    }
-
-    const { submissions } = data;
-
-    return (
-      <div>
-        <h1 className="text-2xl font-bold my-4">Project Log</h1>
-        <div className="rounded-md border">
-          <Table className="min-w-full border-collapse">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center border p-2 uppercase">Equipment Name</TableHead>
-                <TableHead className="text-center border p-2 uppercase">Equipment Tag</TableHead>
-                <TableHead className="text-center border p-2 uppercase">Submitted At</TableHead>
-                <TableHead className="text-center border p-2 uppercase">View</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {submissions.length > 0 ? (
-                submissions.map((s, i) => {
-                  // Check if `tag` exists in the submission object
-                  if ("tag" in s) {
-                    const wasSubmitted = Array.isArray(s.contentTest)
-                      ? s.contentTest.includes(s.submissionId ?? "")
-                      : false;
-                    return (
-                      <TableRow key={i}>
-                        <TableCell className="border p-2">{s.equipmentName}</TableCell>
-                        <TableCell className="border p-2">{s.tag}</TableCell>
-                        <TableCell className="border p-2">
-                          {s.submittedAt
-                            ? formatDistance(new Date(s.submittedAt), new Date(), {
-                              addSuffix: true,
-                            })
-                            : "Not Submitted"}
-                        </TableCell>
-                        <TableCell className="border p-2 text-center">
-                          {wasSubmitted ? (
-                            <a href={`/view-submitted/${s.submissionId}`}>
-                              <Button variant="outline" className="gap-2">
-                                <MdPreview className="h-6 w-6" />
-                                View Form
-                              </Button>
-                            </a>
-                          ) : (
-                            <ResumeTestBtn formTag2Id={s.formtagId} />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  } else {
-                    // If there's an error property, show it in a row
-                    return (
-                      <TableRow key={i}>
-                        {/*<TableCell colSpan={4} className="text-center text-sm text-muted-foreground italic">
-                          {s.error}
-                        </TableCell>*/}
-                      </TableRow>
-                    );
-                  }
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    No submissions yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error in ProjectLogTable:", error);
-    return <div>Error loading data</div>;
-  }
-}
-
 
 
