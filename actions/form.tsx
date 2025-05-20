@@ -51,6 +51,65 @@ export async function GetClients() {
     throw error;
   }
 }
+// Cria um novo Client
+export async function CreateClient(clientName: string) {
+  try {
+    const { errors, data } = await client.models.Client.create({
+      ClientName: clientName,
+    });
+
+    if (errors) {
+      console.error("Error creating client:", errors);
+      throw new Error("Failed to create client.");
+    }
+
+    return data; // Retorna o client criado (objeto completo)
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}
+
+/*CreateClient("Test Client")
+  .then((result) => {
+    console.log("Client created:", result);
+  })
+  .catch((error) => {
+    console.error("Error creating client:", error);
+  });
+*/
+// Cria um novo Projectt vinculado a um Client existente
+export async function CreateProject(
+  projectID: string,
+  projectName: string,
+  clientID: string
+) {
+  try {
+    const { errors, data } = await client.models.Projectt.create({
+      projectID,
+      projectName,
+      ClientID: clientID, // chave estrangeira para o Client
+    });
+
+    if (errors) {
+      console.error("Error creating project:", errors);
+      throw new Error("Failed to create project.");
+    }
+
+    return data; // Retorna o projeto criado (objeto completo)
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}
+
+/*CreateProject("TestProjectID", "Test Project", "14c6b0c8-b4e7-4660-b44c-803fa090a0a1")
+  .then((result) => {
+    console.log("Project created:", result);
+  })
+  .catch((error) => {
+    console.error("Error creating project:", error);
+  });*/
 
 export async function GetProjects() {
   try {

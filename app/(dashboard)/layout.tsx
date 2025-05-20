@@ -21,19 +21,24 @@ function Layout({ children }: { children: ReactNode }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function loadAttributes() {
-      try {
-        const attrs = await fetchUserAttributes();
-        if (attrs.name) {
-          setUserName(attrs.name);
-        }
-      } catch (err) {
-        console.error('Failed to fetch user attributes:', err);
+useEffect(() => {
+  async function loadAttributes() {
+    try {
+      const attrs = await fetchUserAttributes();
+      if (attrs.name) setUserName(attrs.name);
+    } catch (err) {
+      if (typeof err === "object" && err !== null && "message" in err && typeof (err as any).message === "string" && (err as any).message.includes("NotAuthorizedException")) {
+        // redireciona para login ou force logout
+        console.log("Token inválido, redirecionando para login...");
+        // Exemplo: window.location.href = '/login';
+      } else {
+        console.error("Failed to fetch user attributes:", err);
       }
     }
-    loadAttributes();
-  }, []);
+  }
+  loadAttributes();
+}, []);
+
 
   // Close dropdown if clicked outside
   useEffect(() => {

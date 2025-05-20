@@ -1,15 +1,12 @@
 {
   "auth": {
-    "user_pool_id": "ap-southeast-2_KdPtv4xmq",
+    "user_pool_id": "ap-southeast-2_TPMJubdmc",
     "aws_region": "ap-southeast-2",
-    "user_pool_client_id": "7smqae434i0bo65020h76l5r49",
-    "identity_pool_id": "ap-southeast-2:0386548a-8642-4612-b3e7-0ad0c402351a",
+    "user_pool_client_id": "4fmprpnp430m0t1vdmgtd6fgbe",
+    "identity_pool_id": "ap-southeast-2:05c320b9-d9e9-49c8-9462-c652e3e3ace5",
     "mfa_methods": [],
     "standard_required_attributes": [
-      "email",
-      "phone_number",
-      "preferred_username",
-      "name"
+      "email"
     ],
     "username_attributes": [
       "email"
@@ -17,18 +14,7 @@
     "user_verification_types": [
       "email"
     ],
-    "groups": [
-      {
-        "ADMINS": {
-          "precedence": 0
-        }
-      },
-      {
-        "user": {
-          "precedence": 1
-        }
-      }
-    ],
+    "groups": [],
     "mfa_configuration": "NONE",
     "password_policy": {
       "min_length": 8,
@@ -40,9 +26,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://hkom745gnnbblj6un6opevo2je.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "url": "https://35lrtz2bznf5pgbblakrvyu7m4.appsync-api.ap-southeast-2.amazonaws.com/graphql",
     "aws_region": "ap-southeast-2",
-    "api_key": "da2-2cvw5674erblxng6jjb7z6q3ai",
+    "api_key": "da2-3zsbv774tbbstkii7fe6jooisi",
     "default_authorization_type": "API_KEY",
     "authorization_types": [
       "AMAZON_COGNITO_USER_POOLS",
@@ -694,29 +680,7 @@
         }
       },
       "enums": {},
-      "nonModels": {},
-      "mutations": {
-        "addUserToGroup": {
-          "name": "addUserToGroup",
-          "isArray": false,
-          "type": "AWSJSON",
-          "isRequired": false,
-          "arguments": {
-            "userId": {
-              "name": "userId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true
-            },
-            "groupName": {
-              "name": "groupName",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true
-            }
-          }
-        }
-      }
+      "nonModels": {}
     }
   },
   "version": "1.4"

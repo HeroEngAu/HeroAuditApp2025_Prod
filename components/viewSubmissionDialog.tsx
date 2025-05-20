@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogDescription, DialogTitle} from "./ui/dialog";
 import SubmissionRenderer from "../components/submissionRenderer";
+import type { FormElementInstance } from "./FormElements";
 
 interface ViewSubmissionClientProps {
-  elements: any[];
-  responses: Record<string, any>;
+  elements: FormElementInstance[]; // array de elementos do formulário
+  responses: Record<string, unknown>;       // objeto com chaves string e valores genéricos
   submissionID: string;
 }
+
 
 export default function ViewSubmissionClient({ submissionID, elements, responses }: ViewSubmissionClientProps) {
   const [open, setOpen] = useState(true);

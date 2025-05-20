@@ -8,7 +8,7 @@ type BuilderPageProps = {
 };
 
 export default async function BuilderPage({ params }: BuilderPageProps) {
-  const id = params.id;
+  const { id } = await params;
 
   const formData = await GetFormById(id);
 

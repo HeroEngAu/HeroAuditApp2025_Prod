@@ -8,7 +8,7 @@ import { GetFormNameFromSubmissionId } from "../actions/form";
 
 interface Props {
   elements: FormElementInstance[];
-  responses: { [key: string]: any };
+  responses: { [key: string]: unknown };
   submissionID: string;
 }
 
@@ -50,7 +50,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
     const pageGroups: FormElementInstance[][] = [];
     let currentGroup: FormElementInstance[] = [];
-    let repeatables: FormElementInstance[] = [];
+    const repeatables: FormElementInstance[] = [];
 
     let firstPage = true;
 
@@ -92,7 +92,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
       group.forEach((el) => {
         const FormComponent = FormElements[el.type].formComponent;
-        const value = responses[el.id];
+        const rawValue = responses[el.id];
+        const value = typeof rawValue === 'string' ? rawValue : undefined;
 
         const wrapper = document.createElement("div");
         const elementRoot = (
@@ -184,7 +185,9 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
             <div key={idx} className="pdf-page mb-8">
               {group.map((element) => {
                 const FormComponent = FormElements[element.type].formComponent;
-                const value = responses[element.id];
+                const rawValue = responses[element.id];
+                const value = typeof rawValue === 'string' ? rawValue : undefined;
+
                 return (
                   <div key={element.id}>
                     <FormComponent

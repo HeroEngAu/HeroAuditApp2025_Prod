@@ -38,6 +38,7 @@ function FormElementsSidebar() {
         <SidebarBtnElement formElement={FormElements.SeparatorField} />
         <SidebarBtnElement formElement={FormElements.SpacerField} />
         <SidebarBtnElement formElement={FormElements.ImageField} />
+        <SidebarBtnElement formElement={FormElements.PageBreakField}/>
 
         <Text
           fontSize={tokens.fontSizes.small}

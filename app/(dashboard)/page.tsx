@@ -9,7 +9,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { TbArrowBounce } from "react-icons/tb";
 import { Separator } from "../../components/ui/separator";
 import CreateFormDialog from "../../components/CreateFormDialog";
-import { Badge } from "../../components/ui/badge";
+import Badge from "../../components/ui/badge";
 import { formatDistance } from "date-fns/formatDistance";
 import { Button } from "../../components/ui/button";
 import Link from "next/link";

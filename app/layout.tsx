@@ -5,7 +5,7 @@ import "./globals.css"; // Tailwind globals or your own styles
 import { ReactNode } from "react";
 import { ThemeProvider as AmplifyThemeProvider, Theme, ColorMode } from "@aws-amplify/ui-react";
 import { Authenticator } from "@aws-amplify/ui-react";
-import DesignerContextProvider from "../components/context/DesignerContext";
+import DesignerContextProvider from "../components/context/DesignerContextProvider";
 import { ThemeProvider as NextThemeProvider } from "../components/providers/ThemeProvider";
 import { Toaster } from "../components/ui/toaster";
 //import type { Metadata } from "next";

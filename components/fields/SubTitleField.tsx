@@ -29,6 +29,7 @@ const SubTitleField: React.FC<SubTitleFieldProps> = ({
       errorMessage={errorMessage}
       isDisabled={isDisabled}
       onChange={onChange}
+      onBlur={onBlur}
       {...props}
     />
   );
