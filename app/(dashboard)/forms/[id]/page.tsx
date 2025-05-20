@@ -13,21 +13,17 @@ import { ProjectLogTable } from "../../../../components/ProjectLogTable";
 
 Amplify.configure(outputs)
 
-async function FormDetailPage({
-  params,
-}: {
-  params: {
-    id: string;
-  };
-}) {
+type Params = Promise<{ id: string }>;
+
+async function FormDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const form = await GetFormById(id);
-
-  const shareUrl = form?.form?.shareURL ?? '';
 
   if (!form) {
     throw new Error("form not found");
   }
+
+  const shareUrl = form?.form?.shareURL ?? '';
   const { visits, submissions } = form;
 
   let submissionRate = 0;

@@ -21,6 +21,7 @@ import { toast } from "./ui/use-toast";
 import Link from "next/link";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { type Schema } from '../amplify/data/resource';
+import PreviewPDFDialogBtn from "./PreviewPDFDialogBtn";
 
 type Form = Schema['Form']['type'];
 
@@ -124,7 +125,7 @@ function FormBuilder({ formID, form, projectName, clientName, formName}: { formI
                     </h2>
                     <div className="flex items-center gap-2">
                         <PreviewDialogBtn  />
-                       
+                       <PreviewPDFDialogBtn formName={formName} />
                         {!form.published && (
                             <>
                                 <SaveFormBtn id={formID}  />
