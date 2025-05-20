@@ -1,16 +1,16 @@
 import { GetFormById } from "../../../../actions/form";
 import FormBuilder from "../../../../components/FormBuilder";
 
-type BuilderPageProps = {
-  params: {
-    id: string;
-  };
+type BuilderPageParams = {
+  id: string;
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function BuilderPage({ params }: BuilderPageProps) {
-  const id = params.id;
+export default async function BuilderPage({
+  params,
+}: {
+  params: Promise<BuilderPageParams>;
+}) {
+  const { id } = await params;
 
   const formData = await GetFormById(id);
 
