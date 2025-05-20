@@ -21,14 +21,24 @@ function Layout({ children }: { children: ReactNode }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  type ErrorWithMessage = {
+  message: string;
+};
+
 useEffect(() => {
   async function loadAttributes() {
     try {
       const attrs = await fetchUserAttributes();
       if (attrs.name) setUserName(attrs.name);
     } catch (err) {
-      if (typeof err === "object" && err !== null && "message" in err && typeof (err as any).message === "string" && (err as any).message.includes("NotAuthorizedException")) {
-        // redireciona para login ou force logout
+      const e = err as Partial<ErrorWithMessage>;
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof e.message === "string" &&
+        e.message.includes("NotAuthorizedException")
+      ) {
         console.log("Token inválido, redirecionando para login...");
         // Exemplo: window.location.href = '/login';
       } else {
@@ -38,6 +48,7 @@ useEffect(() => {
   }
   loadAttributes();
 }, []);
+
 
 
   // Close dropdown if clicked outside

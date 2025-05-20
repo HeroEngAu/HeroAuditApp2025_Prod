@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
-
+import { ControllerRenderProps } from "react-hook-form";
 import useDesigner from "../hooks/useDesigner";
 import { read, utils } from "xlsx";
 import {
@@ -20,7 +20,6 @@ import {
 } from "../ui/table";
 import { Input } from "../ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Switch } from "../ui/switch";
 import { Divider } from "@aws-amplify/ui-react";
 import { Button } from "../ui/button";
 import "react-datepicker/dist/react-datepicker.css";
@@ -58,7 +57,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
       }
       setColumnHeaders(newHeaders);
     }
-  }, [element.extraAttributes.columns, element.extraAttributes.columnHeaders]);
+  }, [element.extraAttributes, form]);
 
   const watchRows = form.watch("rows");
   const watchColumns = form.watch("columns");
@@ -112,14 +111,13 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
   }
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { label, required } = values;
+    const { label } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
         label,
         rows: values.rows,
         columns: values.columns,
-        required,
         data,
         columnHeaders,
       },
@@ -202,134 +200,132 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
     });
   }
 
-function NumberInputField({ field, label }: { field: any; label: string }) {
-  const [localValue, setLocalValue] = React.useState(field.value);
+  type TableFieldFormData = {
+    label: string;
+    rows: number;
+    columns: number;
+  };
 
-  React.useEffect(() => {
-    setLocalValue(field.value);
-  }, [field.value]);
+  type NumberInputFieldProps = {
+    field: ControllerRenderProps<TableFieldFormData, "rows" | "columns">;
+    label: string;
+  };
 
-  return (
-    <FormItem>
-      <FormLabel>{label}</FormLabel>
-      <FormControl>
-        <Input
-          type="number"
-          value={localValue}
-          onChange={(e) => setLocalValue(Number(e.target.value))}
-          onBlur={() => {
-            if (!isNaN(localValue)) field.onChange(localValue);
-          }}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  );
-}
+  function NumberInputField({ field, label }: NumberInputFieldProps) {
+    const [localValue, setLocalValue] = React.useState(field.value);
+
+    React.useEffect(() => {
+      setLocalValue(field.value);
+    }, [field.value]);
+
     return (
-      <Form {...form}>
-        <form onBlur={form.handleSubmit(applyChanges)}
-          onSubmit={(e) => e.preventDefault()}
-          className="space-y-3">
-          <FormField
-            control={form.control}
-            name="label"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Label</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormDescription>Displayed above the table.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+      <FormItem>
+        <FormLabel>{label}</FormLabel>
+        <FormControl>
+          <Input
+            type="number"
+            value={localValue}
+            onChange={(e) => setLocalValue(Number(e.target.value))}
+            onBlur={() => {
+              if (!isNaN(localValue)) field.onChange(localValue);
+            }}
           />
-          <FormField
-            control={form.control}
-            name="rows"
-            render={({ field }) => <NumberInputField field={field} label="Rows" />}
-          />
-          <FormField
-            control={form.control}
-            name="columns"
-            render={({ field }) => <NumberInputField field={field} label="Columns" />}
-          />
-          <FormField
-            control={form.control}
-            name="required"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel>Required</FormLabel>
-                  <FormDescription>Marks the table field as required.</FormDescription>
-                </div>
-                <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Divider orientation="horizontal" size="small" color="gray" marginTop="1rem" marginBottom="1rem" />
-          <div className="flex justify-between items-center">
-            <div className="space-y-0.5">
-              <FormLabel>Table Content</FormLabel>
-              <FormDescription>
-                Use <code>[checkbox]</code> as the cell value to display a checkbox. <br />
-                Use <code>[select:"Option1":["Option1","Option2"]]</code> to display a dropdown with options.<br />
-                Use <code>[number:]</code> to display a number input field.<br />
-                Use <code>[date:]</code> to display a date picker.<br />
-                For a regular editable text field, leave the cell blank.
-              </FormDescription>
-            </div>
-
-
-            <Button type="button" onClick={handleImportClick}>
-              Import Excel
-            </Button>
-            <input
-              type="file"
-              accept=".xlsx, .xls"
-              style={{ display: "none" }}
-              ref={fileInputRef}
-            />
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {[...Array(watchColumns)].map((_, col) => (
-                  <TableHead key={col}>
-                    <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
-                      ✕
-                    </Button>
-                    <Input
-                      className="w-full"
-                      value={columnHeaders[col] || ""}
-                      onChange={(e) => handleHeaderChange(col, e.target.value)}
-                    />
-
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(watchRows)].map((_, row) => (
-                <TableRow key={row}>
-                  {[...Array(watchColumns)].map((_, col) => (
-                    <TableCell key={col}>
-                      <Input
-                        value={data?.[row]?.[col] || ""}
-                        onChange={(e) => handleCellChange(row, col, e.target.value)}
-                      />
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
-                      ✕
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </form>
-      </Form>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
     );
   }
+
+  return (
+    <Form {...form}>
+      <form onBlur={form.handleSubmit(applyChanges)}
+        onSubmit={(e) => e.preventDefault()}
+        className="space-y-3">
+        <FormField
+          control={form.control}
+          name="label"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Label</FormLabel>
+              <FormControl><Input {...field} /></FormControl>
+              <FormDescription>Displayed above the table.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="rows"
+          render={({ field }) => <NumberInputField field={field} label="Rows" />}
+        />
+        <FormField
+          control={form.control}
+          name="columns"
+          render={({ field }) => <NumberInputField field={field} label="Columns" />}
+        />
+        <Divider orientation="horizontal" size="small" color="gray" marginTop="1rem" marginBottom="1rem" />
+        <div className="flex justify-between items-center">
+          <div className="space-y-0.5">
+            <FormLabel>Table Content</FormLabel>
+            <FormDescription>
+              Use <code>[checkbox]</code> as the cell value to display a checkbox. <br />
+              Use <code>[select:"Option1":["Option1","Option2"]]</code> to display a dropdown with options.<br />
+              Use <code>[number:]</code> to display a number input field.<br />
+              Use <code>[date:]</code> to display a date picker.<br />
+              For a regular editable text field, leave the cell blank.
+            </FormDescription>
+          </div>
+
+
+          <Button type="button" onClick={handleImportClick}>
+            Import Excel
+          </Button>
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            style={{ display: "none" }}
+            ref={fileInputRef}
+          />
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {[...Array(watchColumns)].map((_, col) => (
+                <TableHead key={col}>
+                  <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
+                    ✕
+                  </Button>
+                  <Input
+                    className="w-full"
+                    value={columnHeaders[col] || ""}
+                    onChange={(e) => handleHeaderChange(col, e.target.value)}
+                  />
+
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(watchRows)].map((_, row) => (
+              <TableRow key={row}>
+                {[...Array(watchColumns)].map((_, col) => (
+                  <TableCell key={col}>
+                    <Input
+                      value={data?.[row]?.[col] || ""}
+                      onChange={(e) => handleCellChange(row, col, e.target.value)}
+                    />
+                  </TableCell>
+                ))}
+                <TableCell>
+                  <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
+                    ✕
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </form>
+    </Form>
+  );
+}
