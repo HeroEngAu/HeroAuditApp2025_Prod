@@ -26,7 +26,11 @@ const client = generateClient<Schema>();
 class UserNotFoundErr extends Error { }
 
 export async function GetClients() {
-  try {
+    try {
+    const { userId } = await getCurrentUser();
+    if (!userId) {
+      throw new UserNotFoundErr();
+    }
     const { errors, data } = await client.models.Client.list();
 
     if (errors) {
@@ -133,7 +137,11 @@ export async function GetProjects() {
 }
 
 export async function GetFormStats() {
-  try {
+    try {
+    const { userId } = await getCurrentUser();
+    if (!userId) {
+      throw new UserNotFoundErr();
+    }
     // Fetch all forms
     const { data: forms, errors } = await client.models.Form.list();
 
@@ -753,7 +761,11 @@ export async function GetFormsWithClient(ClientID: string) {
 }
 
 export async function GetFormsInformation() {
-  try {
+    try {
+    const { userId } = await getCurrentUser();
+    if (!userId) {
+      throw new UserNotFoundErr();
+    }
     const { errors: clientErrors, data: clientsData } =
       await client.models.Client.list();
 
@@ -817,7 +829,11 @@ export async function GetFormsInformation() {
 console.log('Form Info:', formsInfo);*/
 
 export async function GetProjectsFromClientName(ClientName: string) {
-  try {
+    try {
+    const { userId } = await getCurrentUser();
+    if (!userId) {
+      throw new UserNotFoundErr();
+    }
     const { errors, data: clientData } = await client.models.Client.list({
       filter: { ClientName: { eq: ClientName } },
     });
