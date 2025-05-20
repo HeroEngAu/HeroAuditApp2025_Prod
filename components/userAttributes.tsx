@@ -14,9 +14,11 @@ export default function useUserAttributes() {
         const getUserAttributes = async () => {
             try {
                 const fetched = await fetchUserAttributes();
+
                 const filtered = Object.fromEntries(
-                    Object.entries(fetched).filter(([_, v]) => v !== undefined)
+                    Object.entries(fetched).filter(([, value]) => value !== undefined)
                 );
+
                 setAttributes(filtered);
             } catch (err) {
                 setError(err as Error);
