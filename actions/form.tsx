@@ -70,14 +70,14 @@ export async function CreateClient(clientName: string) {
   }
 }
 
-/*CreateClient("Test Client")
+CreateClient("Test Client")
   .then((result) => {
     console.log("Client created:", result);
   })
   .catch((error) => {
     console.error("Error creating client:", error);
   });
-*/
+
 // Cria um novo Projectt vinculado a um Client existente
 export async function CreateProject(
   projectID: string,
@@ -103,13 +103,13 @@ export async function CreateProject(
   }
 }
 
-/*CreateProject("TestProjectID", "Test Project", "14c6b0c8-b4e7-4660-b44c-803fa090a0a1")
+CreateProject("TestProjectID", "Test Project", "14c6b0c8-b4e7-4660-b44c-803fa090a0a1")
   .then((result) => {
     console.log("Project created:", result);
   })
   .catch((error) => {
     console.error("Error creating project:", error);
-  });*/
+  });
 
 export async function GetProjects() {
   try {
@@ -889,6 +889,15 @@ export async function CreateForm(
     projID: projID,
   };
 }
+
+
+CreateForm("FormTest1", "Test Description", "Test Project (TestProjectID)")
+  .then((result) => {
+    console.log("Project created:", result);
+  })
+  .catch((error) => {
+    console.error("Error creating project:", error);
+  });
 
 
 export const runForm = async (
