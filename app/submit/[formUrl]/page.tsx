@@ -2,25 +2,23 @@ import { GetFormContentByUrl, ResumeTest } from "../../../actions/form";
 import { FormElementInstance } from "../../../components/FormElements";
 import FormSubmitComponent from "../../../components/FormSubmitComponent";
 import ResumeTestRenderer from "../../../components/ResumeTestRenderer";
-import { Amplify } from "aws-amplify"
-import outputs from "../../../amplify_outputs.json"
 
-Amplify.configure(outputs)
+type Params = Promise<{ formUrl: string }>;
+type SearchParams = Promise<{ resume?: string; formtag2Id?: string }>;
 
-interface Props {
-  params: { formUrl: string };
-  searchParams: { resume?: string; formtag2Id?: string };
-}
-
-export default async function SubmitPage({ params, searchParams }: Props) {
-
+export default async function SubmitPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { formUrl } = await params;
-  const { resume } = await searchParams;
+  const { resume, formtag2Id } = await searchParams;
 
-  const isResume = resume ;
+  const isResume = !!resume;
+
   if (isResume) {
-    const { formtag2Id } = await searchParams
-    
     if (!formtag2Id) {
       throw new Error("formTag2Id not found in searchParams.");
     }
@@ -29,18 +27,17 @@ export default async function SubmitPage({ params, searchParams }: Props) {
     if (!resumeData) {
       throw new Error("Erro to resume test.");
     }
-    
+
     const { elements, responses, formId } = resumeData;
 
     return (
       <ResumeTestRenderer
-      formtag2Id = {formtag2Id ?? ""}
-      formId={formId ?? ""}
+        formtag2Id={formtag2Id}
+        formId={formId ?? ""}
         elements={elements as FormElementInstance[]}
         responses={responses}
       />
     );
-
   }
 
   const form = await GetFormContentByUrl(formUrl);
