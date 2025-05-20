@@ -132,7 +132,7 @@ export function PropertiesComponent({
         <FormField
           control={form.control}
           name="textAlign"
-          render={({ }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Text Alignment</FormLabel>
               <FormControl>

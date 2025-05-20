@@ -1,16 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Controller, ControllerProps, FormProvider, FieldValues, Path} from "react-hook-form";
+import { Controller, ControllerProps, FormProvider, FieldValues, Path } from "react-hook-form";
 import { cn } from "../../lib/utils";
 import { Label } from "./label";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
-import {
-  FormFieldContext,
-  FormItemContext,
-  useFormField,
-} from "./useFormField"; // ajuste o caminho
+import { FormFieldContext, FormItemContext } from "./useFormField";
+import { useFormField } from "./useFormField"; // importe o hook para usar nos componentes
 
 const Form = FormProvider;
 
@@ -119,7 +116,6 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = "FormMessage";
 
 export {
-  useFormField,
   Form,
   FormItem,
   FormLabel,
