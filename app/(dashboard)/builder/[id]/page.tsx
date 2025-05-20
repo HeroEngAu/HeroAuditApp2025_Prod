@@ -7,6 +7,8 @@ type BuilderPageProps = {
   };
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function BuilderPage({ params }: BuilderPageProps) {
   const id = params.id;
 
@@ -28,4 +30,3 @@ export default async function BuilderPage({ params }: BuilderPageProps) {
     />
   );
 }
-
