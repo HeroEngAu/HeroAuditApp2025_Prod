@@ -20,12 +20,14 @@ export default function FormComponent({
   isInvalid,
   defaultValue,
   readOnly,
+  pdf,
 }: {
   elementInstance: FormElementInstance;
   submitValue?: SubmitFunction;
   isInvalid?: boolean;
   defaultValue?: string;
   readOnly?: boolean;
+  pdf?: boolean;
 }) {
   const element = elementInstance as CustomInstance;
   const [value, setValue] = useState<boolean>(defaultValue === "true");
@@ -37,6 +39,25 @@ export default function FormComponent({
 
   const { label, required, helperText } = element.extraAttributes;
   const id = `checkbox-${element.id}`;
+
+  if (pdf) {
+    return (
+      <div className="flex items-top space-x-2">
+        <Checkbox id={id} checked={value} disabled={readOnly} />
+        <div className="grid gap-1.5 leading-none">
+          <Label htmlFor={id} className={cn(error && "text-red-500")}>
+            {label}
+            {required && "*"}
+          </Label>
+          {helperText && (
+            <p className={cn("text-muted-foreground text-[0.8rem]", error && "text-red-500")}>
+              {helperText}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-top space-x-2">

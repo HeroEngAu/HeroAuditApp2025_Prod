@@ -40,7 +40,7 @@ export function FormComponent({
 
   const { label, required, helperText } = element.extraAttributes;
 
-    if (pdf) {
+    if (pdf || readOnly) {
     return (
       <div className="p-2 border rounded">
         <label className="block text-sm font-medium text-gray-700 mb-1">

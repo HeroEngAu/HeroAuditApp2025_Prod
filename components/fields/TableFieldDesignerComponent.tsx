@@ -31,7 +31,7 @@ export function DesignerComponent({ elementInstance }: { elementInstance: FormEl
         });
       }
     }
-  }, [rows, columns, data, element, updateElement]);
+  }, [rows, columns, data]);
 
   return (
     <div ref={containerRef}>

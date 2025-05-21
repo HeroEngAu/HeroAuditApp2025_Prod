@@ -76,8 +76,8 @@ export async function CreateClient(clientName: string) {
   })
   .catch((error) => {
     console.error("Error creating client:", error);
-  });
-*/
+  });*/
+
 // Cria um novo Projectt vinculado a um Client existente
 export async function CreateProject(
   projectID: string,
@@ -103,7 +103,7 @@ export async function CreateProject(
   }
 }
 
-/*CreateProject("TestProjectID", "Test Project", "14c6b0c8-b4e7-4660-b44c-803fa090a0a1")
+/*CreateProject("TestProjectID", "Test Project", "6c396914-52b6-43b0-90c8-67cd8d4109ff")
   .then((result) => {
     console.log("Project created:", result);
   })

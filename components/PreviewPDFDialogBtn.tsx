@@ -67,8 +67,8 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
                                 key={pageIndex}
                                 className="w-[1000px] bg-white p-8 border border-gray-300 relative"
                                 style={{
-                                    maxHeight: "1122px",
-                                    minHeight: "1122px",
+                                    maxHeight: "1250px",
+                                    minHeight: "1250px",
                                     paddingBottom: "40px",
                                 }}
                             >
@@ -79,7 +79,7 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
                                         <FormComponent
                                             key={element.id + "-page" + pageIndex}
                                             elementInstance={element}
-                                            readOnly={true}
+                                            pdf={true}
                                         />
                                     );
                                 })}

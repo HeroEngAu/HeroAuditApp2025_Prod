@@ -1,4 +1,4 @@
-import { GetFormById} from "../../../../actions/form";
+import { GetFormById, GetFormWithSubmissionDetails } from "../../../../actions/form";
 import FormLinkShare from "../../../../components/FormLinkShare";
 import VisitBtn from "../../../../components/VisitBtn";
 import { StatsCard } from "../../page";
@@ -24,15 +24,28 @@ async function FormDetailPage({ params }: { params: Params }) {
   }
 
   const shareUrl = form?.form?.shareURL ?? '';
-  const { visits, submissions } = form;
+  const { visits, submissions: submissionCount } = form;
 
   let submissionRate = 0;
 
   if ((visits ?? 0) > 0) {
-    submissionRate = ((submissions ?? 0) / (visits ?? 0)) * 100;
+    submissionRate = ((submissionCount ?? 0) / (visits ?? 0)) * 100;
   }
 
   const bounceRate = 100 - submissionRate;
+
+  const data = await GetFormWithSubmissionDetails(id);
+  const { submissions } = data ?? { submissions: [] };
+
+  // Mapeie os campos necessários
+  const slimSubmissions = submissions.map((s) => ({
+    equipmentName: s.equipmentName,
+    tag: s.tag,
+    submittedAt: s.submittedAt ?? undefined,
+    submissionId: s.submissionId ?? undefined,
+    formtagId: s.formtagId,
+    contentTest: s.contentTest,
+  }));
 
   return (
     <>
@@ -46,9 +59,9 @@ async function FormDetailPage({ params }: { params: Params }) {
         </div>
         <div className="flex justify-between container">
           <h3 className="text-2xl font-bold truncate">{form.projectName}</h3>
-        {/*<EditFormBtn id={id} />*/}
+          {/*<EditFormBtn id={id} />*/}
         </div>
-       <div className="flex justify-between container">
+        <div className="flex justify-between container">
           <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
         </div>
       </div>
@@ -72,7 +85,7 @@ async function FormDetailPage({ params }: { params: Params }) {
           title="Total submissions"
           icon={<FaWpforms className="text-yellow-600" />}
           helperText="All time form submissions"
-          value={(submissions ?? 0).toLocaleString() || ""}
+          value={(submissionCount ?? 0).toLocaleString() || ""}
           loading={false}
           className="shadow-md shadow-yellow-600"
         />
@@ -97,7 +110,9 @@ async function FormDetailPage({ params }: { params: Params }) {
       </div>
 
       <div className="container pt-10">
-        <ProjectLogTable id={form.form.id} />
+        <div className="container pt-10">
+          <ProjectLogTable submissions={slimSubmissions} />
+        </div>
       </div>
     </>
   );

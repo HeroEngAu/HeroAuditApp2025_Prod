@@ -8,7 +8,7 @@ import { GetFormNameFromSubmissionId } from "../actions/form";
 
 interface Props {
   elements: FormElementInstance[];
-  responses: { [key: string]: unknown };
+  responses: { [key: string]: any };
   submissionID: string;
 }
 
@@ -50,7 +50,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
     const pageGroups: FormElementInstance[][] = [];
     let currentGroup: FormElementInstance[] = [];
-    const repeatables: FormElementInstance[] = [];
+    let repeatables: FormElementInstance[] = [];
 
     let firstPage = true;
 
@@ -92,8 +92,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
       group.forEach((el) => {
         const FormComponent = FormElements[el.type].formComponent;
-        const rawValue = responses[el.id];
-        const value = typeof rawValue === 'string' ? rawValue : undefined;
+        const value = responses[el.id];
 
         const wrapper = document.createElement("div");
         const elementRoot = (
@@ -130,9 +129,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
       const ratio = Math.min(pdfWidth / imgWidthMM, 1);
       const adjustedWidth = imgWidthMM * ratio;
       const adjustedHeight = imgHeightMM * ratio;
-
       const imgData = canvas.toDataURL("image/png");
-
+      console.log("pdfheight", pdf.internal.pageSize.height);
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, "PNG", 0, 0, adjustedWidth, adjustedHeight);
       pdf.setFontSize(10);
@@ -185,9 +183,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
             <div key={idx} className="pdf-page mb-8">
               {group.map((element) => {
                 const FormComponent = FormElements[element.type].formComponent;
-                const rawValue = responses[element.id];
-                const value = typeof rawValue === 'string' ? rawValue : undefined;
-
+                const value = responses[element.id];
                 return (
                   <div key={element.id}>
                     <FormComponent
