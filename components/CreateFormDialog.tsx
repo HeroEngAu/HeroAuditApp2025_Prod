@@ -20,6 +20,7 @@ import {
   GetProjectsFromClientName,
   CreateForm,
 } from "../actions/form";
+import { useTheme } from "next-themes";
 
 interface CreateFormDialogProps {
   onFormCreated?: () => void; // <-- torna opcional
@@ -39,6 +40,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -105,9 +107,9 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
         projectID,
         client: selectedClient,
       }));
-      
+
       router.push(`/builder/${formId.formId}`);
-      
+
 
     } catch (err) {
       console.error("Error creating form:", err);
@@ -121,8 +123,15 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
     <View>
       <Card
         onClick={() => setIsOpen(true)} // Trigger the function when the card is clicked
-        className="h-[235px] cursor-pointer border-2 border-dashed p-4  flex flex-col justify-center items-center 
-    border-black transition-colors duration-300 ease-in-out hover:border-blue-400 hover:bg-blue-50"
+        className="
+        h-[235px] cursor-pointer border-2 border-dashed p-4 flex flex-col justify-center items-center
+        border-black transition-colors duration-300 ease-in-out
+        hover:border-blue-400
+        hover:bg-blue-50
+        dark:border-gray-300
+        dark:hover:border-blue-300
+        dark:hover:bg-gray-800
+        dark:hover:text-white "
       >
         <CardHeader className="flex flex-col justify-center items-center gap-2">
           <IoIosCreate className="text-4xl" />
@@ -142,12 +151,12 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
         >
           <View
             ref={dialogRef}
-            backgroundColor="white"
             padding="2rem"
             borderRadius="medium"
             width="90%"
             maxWidth="600px"
             boxShadow="0 4px 12px rgba(0,0,0,0.2)"
+            className={`${theme === "dark" ? "bg-neutral-900 text-white" : "bg-white text-black"}`}
           >
             <Flex
               direction="row"
@@ -173,32 +182,42 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
                 {success}
               </Alert>
             )}
-
-            <SelectField
-              label="Client"
+            <label className="block mb-1 text-sm font-medium">
+              Client
+            </label>
+            <select
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
-              placeholder="Select Client"
+              className={`w-full p-2 rounded border 
+              ${theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"}`}
             >
+              <option value="" disabled>
+                Select Client
+              </option>
               {clients.map((client, idx) => (
                 <option key={idx} value={client}>
                   {client}
                 </option>
               ))}
-            </SelectField>
-
-            <SelectField
-              label="Project Name"
+            </select>
+            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-gray-200">
+              Project Name
+            </label>
+            <select
               value={projID}
               onChange={(e) => setProjID(e.target.value)}
-              placeholder="Select Project"
+              className="w-full p-2 rounded border bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600"
             >
+              <option value="" disabled>
+                Select Project
+              </option>
               {projects.map((project, idx) => (
                 <option key={idx} value={project}>
                   {project}
                 </option>
               ))}
-            </SelectField>
+            </select>
+
 
             <TextField
               label="Form Name"

@@ -1,4 +1,3 @@
-// components/FormElements/DateField/FormComponent.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { Label } from "../ui/label";
@@ -6,10 +5,10 @@ import { Button } from "@aws-amplify/ui-react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
-import { Calendar } from "../ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { FormElementInstance, SubmitFunction } from "../FormElements";
 import { CustomInstance, DateFieldFormElement } from "./DateField";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export function FormComponent({
   elementInstance,
@@ -28,8 +27,8 @@ export function FormComponent({
 }) {
   const element = elementInstance as CustomInstance;
 
-  const [date, setDate] = useState<Date | undefined>(
-    defaultValue ? new Date(defaultValue) : undefined,
+  const [date, setDate] = useState<Date | null>(
+    defaultValue ? new Date(defaultValue) : null
   );
 
   const [error, setError] = useState(false);
@@ -40,62 +39,47 @@ export function FormComponent({
 
   const { label, required, helperText } = element.extraAttributes;
 
-    if (pdf || readOnly) {
+  if (pdf || readOnly) {
     return (
       <div className="p-2 border rounded">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {element.label}
         </label>
-        <p>{date ? format(date, "PPP") : "-"}</p>
+        <p>{date ? format(date, "dd/MM/yyyy") : "-"}</p>
       </div>
     );
   }
-    return (
+
+  return (
     <div className="flex flex-col gap-2 w-full">
       <Label className={cn(error && "text-red-500")}>
         {label}
         {required && "*"}
       </Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground",
-              error && "border-red-500",
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(date: Date | undefined) => {
-              setDate(date);
-
-              if (!submitValue) return;
-              const value: string = date?.toUTCString() || "";
-              const valid: boolean = DateFieldFormElement.validate(
-                element,
-                value,
-              );
-              setError(!valid);
-              submitValue(element.id, value);
-            }}
-            initialFocus
-            disabled={readOnly}
-          />
-        </PopoverContent>
-      </Popover>
+      <div className={cn("relative", error && "border border-red-500 rounded")}>
+        <ReactDatePicker
+          selected={date}
+          onChange={(date: Date | null) => {
+            setDate(date);
+            if (!submitValue) return;
+            const value: string = date?.toUTCString() || "";
+            const valid: boolean = DateFieldFormElement.validate(element, value);
+            setError(!valid);
+            submitValue(element.id, value);
+          }}
+          dateFormat="dd.MM.yyyy"
+          className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholderText="Pick a date"
+          calendarClassName="z-50"
+          disabled={readOnly}
+        />
+        <CalendarIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+      </div>
       {helperText && (
         <p
           className={cn(
             "text-muted-foreground text-[0.8rem]",
-            error && "text-red-500",
+            error && "text-red-500"
           )}
         >
           {helperText}

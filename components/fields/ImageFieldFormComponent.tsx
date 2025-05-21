@@ -29,7 +29,7 @@ export function FormComponent({
         src={imageUrl}
         alt="Uploaded"
         style={{
-          height: element.height ? `${element.height}px` : "auto",
+          height: element.height ? `${element.height + 20}px` : "auto",
           width: "auto",
           maxWidth: "100%",
           objectFit: "contain",

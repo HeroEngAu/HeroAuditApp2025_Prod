@@ -19,14 +19,27 @@ export function DesignerComponent({
     textAlign = "left",
   } = element.extraAttributes;
 
+  const isTransparent =
+    backgroundColor === "transparent" ||
+    backgroundColor === "rgba(0,0,0,0)" ||
+    backgroundColor === "#00000000";
+
+  const isBlackText =
+    textColor === "black" ||
+    textColor === "#000000" ||
+    textColor === "rgb(0, 0, 0)";
+
+  const fallbackBgClass = isTransparent ? "bg-white dark:bg-gray-900" : "";
+  const fallbackTextClass = isTransparent && isBlackText ? "text-black dark:text-white" : "";
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <Label className="text-muted-foreground">Title field</Label>
       <p
-        className="text-xl px-2 py-1 rounded"
+        className={`text-xl px-2 py-1 rounded ${fallbackBgClass} ${fallbackTextClass}`}
         style={{
-          backgroundColor: backgroundColor === "transparent" ? "transparent" : backgroundColor,
-          color: textColor,
+          backgroundColor: isTransparent ? undefined : backgroundColor,
+          color: isTransparent && isBlackText ? undefined : textColor,
           textAlign,
         }}
       >

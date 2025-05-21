@@ -33,7 +33,7 @@ export function DesignerComponent({ elementInstance }: { elementInstance: FormEl
     <div style={{ height: `${height}px` }}>
       <div
         ref={contentRef}
-        className="p-2 border rounded-md w-[900px] text-sm break-words whitespace-pre-wrap min-h-[60px]"
+        className="p-2 border rounded-md w-full text-sm break-words whitespace-pre-wrap min-h-[60px]"
         dangerouslySetInnerHTML={{ __html: element.extraAttributes.text }}
       />
     </div>

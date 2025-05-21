@@ -37,7 +37,6 @@ async function FormDetailPage({ params }: { params: Params }) {
   const data = await GetFormWithSubmissionDetails(id);
   const { submissions } = data ?? { submissions: [] };
 
-  // Mapeie os campos necessários
   const slimSubmissions = submissions.map((s) => ({
     equipmentName: s.equipmentName,
     tag: s.tag,

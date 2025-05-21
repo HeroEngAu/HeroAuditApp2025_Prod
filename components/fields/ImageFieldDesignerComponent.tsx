@@ -34,10 +34,10 @@ export function DesignerComponent({
         <img
           src={imageUrl}
           alt="Uploaded"
-          className={`block ${alignmentClass} rounded-md border shadow max-h-48 w-auto object-contain`}
+          className={`block ${alignmentClass} rounded-md border shadow w-auto object-contain`}
           style={{
             maxWidth: "100%",
-            height: "auto",
+            height: "auto" ,
           }}
         />
       ) : (

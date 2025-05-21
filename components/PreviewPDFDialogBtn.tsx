@@ -58,14 +58,14 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
                     This dialog contains the details of Preview Button.
                 </DialogDescription>
                 <div
-                    className="bg-accent flex flex-col items-center justify-start p-4 bg-[url(/paper.svg)] dark:bg-[url(/paper-dark.svg)] overflow-y-auto table-cell-wrap"
+                    className="bg-white flex flex-col items-center justify-start p-4 overflow-y-auto table-cell-wrap text-black"
                     style={{ flexGrow: 1 }}
                 >
                     <div className="flex flex-col items-center gap-8 w-full">
                         {pages.map((pageElements, pageIndex) => (
                             <div
                                 key={pageIndex}
-                                className="w-[1000px] bg-white p-8 border border-gray-300 relative"
+                                className="w-[1000px] bg-white p-8 border border-gray-300 relative text-black"
                                 style={{
                                     maxHeight: "1250px",
                                     minHeight: "1250px",
