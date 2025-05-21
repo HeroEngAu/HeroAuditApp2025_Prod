@@ -1,6 +1,6 @@
 import '../globals.css';
-import { GetFormStats, GetFormsInformation } from "../../actions/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
+import { GetFormStats } from "../../actions/form";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import { ReactNode, Suspense } from "react";
 import { LuView } from "react-icons/lu";
@@ -9,12 +9,12 @@ import { HiCursorClick } from "react-icons/hi";
 import { TbArrowBounce } from "react-icons/tb";
 import { Separator } from "../../components/ui/separator";
 import CreateFormDialog from "../../components/CreateFormDialog";
-import Badge from "../../components/ui/badge";
-import { formatDistance } from "date-fns/formatDistance";
-import { Button } from "../../components/ui/button";
-import Link from "next/link";
-import { BiRightArrowAlt } from "react-icons/bi";
-import { FaEdit } from "react-icons/fa";
+//import Badge from "../../components/ui/badge";
+//import { formatDistance } from "date-fns/formatDistance";
+//import { Button } from "../../components/ui/button";
+//import Link from "next/link";
+//import { BiRightArrowAlt } from "react-icons/bi";
+//import { FaEdit } from "react-icons/fa";
 import { Amplify } from "aws-amplify"
 import outputs from "../../amplify_outputs.json"
 //import SearchBar from "../../components/searchBar";
@@ -41,7 +41,7 @@ export default function Home() {
             <FormCardSkeleton key={el} />
           ))}
         >
-          <FormCards />
+          {/*}<FormCards />*/}
         </Suspense>
       </div>
     </div>
@@ -143,7 +143,7 @@ function FormCardSkeleton() {
   return <Skeleton className="border-2 border-primary-/20 h-[190px] w-full" />;
 }
 
-async function FormCards() {
+/*async function FormCards() {
   const formsInfo = await GetFormsInformation();
 
   const allForms = formsInfo.flatMap((entry) =>
@@ -162,9 +162,9 @@ async function FormCards() {
       ))}
     </>
   );
-}
+}*/
 
-type CustomForm = {
+/*type CustomForm = {
   id: string;
   name: string | null;
   description?: string | null;
@@ -176,10 +176,10 @@ type CustomForm = {
   createdAt?: string | null;
   visits?: number | null;
   submissions?: number | null;
-};
+};*/
 
 
-function FormCard({ form }: { form: CustomForm }) {
+/*function FormCard({ form }: { form: CustomForm }) {
 
   return (
     <Card>
@@ -233,4 +233,4 @@ function FormCard({ form }: { form: CustomForm }) {
       </CardFooter>
     </Card>
   );
-}
+}*/
