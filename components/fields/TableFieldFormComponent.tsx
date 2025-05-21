@@ -27,7 +27,7 @@ export function FormComponent({
   pdf,
 }: {
   elementInstance: FormElementInstance;
-  defaultValue?: any;
+  defaultValue?: unknown;
   isInvalid?: boolean;
   submitValue?: SubmitFunction;
   readOnly?: boolean;
@@ -36,8 +36,11 @@ export function FormComponent({
 }) {
   const element = elementInstance as CustomInstance;
   const { rows, columns, label, columnHeaders = [] } = element.extraAttributes;
-  const initialData: string[][] = defaultValue || element.extraAttributes.data || [];
-
+  const initialData: string[][] = Array.isArray(defaultValue)
+    ? (defaultValue as string[][])
+    : Array.isArray(element.extraAttributes.data)
+      ? element.extraAttributes.data
+      : [];
   const [editableData, setEditableData] = useState<string[][]>(initialData);
 
   const [editableCells] = useState(() =>
@@ -66,13 +69,20 @@ export function FormComponent({
     updateData(newData);
   };
 
-  const handleCheckboxChange = (row: number, col: number, state: "checked" | "unchecked" | "neutral") => {
+  type CheckboxState = "checked" | "unchecked" | "neutral";
+
+  const handleCheckboxChange = (row: number, col: number, state: CheckboxState) => {
     const newData = [...editableData];
     if (!newData[row]) newData[row] = [];
-    newData[row][col] =
-      state === "checked" ? "[checkbox:true]" :
-        state === "unchecked" ? "[checkbox:false]" :
-          "[checkbox:neutral]";
+
+    const checkboxValue =
+      state === "checked"
+        ? "[checkbox:true]"
+        : state === "unchecked"
+          ? "[checkbox:false]"
+          : "[checkbox:neutral]";
+
+    newData[row][col] = checkboxValue;
     updateData(newData);
   };
 
@@ -104,77 +114,81 @@ export function FormComponent({
     return cellValue || "-";
   };
 
-const minWidth = 1;  // largura mínima em px
-const maxWidth = 200; // largura máxima em px
+  const minWidth = 1;
+  const maxWidth = 200;
 
-if (pdf) {
-  return (
-    <div>
-      <p className="font-medium mb-2">{label}</p>
-      <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "14px" }}>
-        <thead>
-          <tr>
-            {Array.from({ length: columns }, (_, col) => (
-              <th
-                key={col}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "4px",
-                  backgroundColor: "#f0f0f0",
-                  minWidth: `${minWidth}px`,
-                  maxWidth: `${maxWidth}px`,
-                  wordBreak: "break-word",
-                }}
-              >
-                {columnHeaders[col] || `Col ${col + 1}`}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: rows }, (_, row) => (
-            <tr key={row}>
-              {Array.from({ length: columns }, (_, col) => {
-                const cellValue = editableData[row]?.[col] || "";
-                return (
-                  <td
-                    key={col}
-                    className="table-cell-wrap"
-                    style={{
-                      border: "1px solid #ccc",
-                      padding: "4px",
-                      minWidth: `${minWidth}px`,
-                      maxWidth: `${maxWidth}px`,
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {parseCell(cellValue)}
-                  </td>
-                );
-              })}
+  if (pdf) {
+    return (
+      <div>
+        <p className="font-medium mb-2">{label}</p>
+        <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "14px" }}>
+          <thead>
+            <tr>
+              {Array.from({ length: columns }, (_, col) => (
+                <th
+                  key={col}
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "4px",
+                    backgroundColor: "#f0f0f0",
+                    minWidth: `${minWidth}px`,
+                    maxWidth: `${maxWidth}px`,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {columnHeaders[col] || `Col ${col + 1}`}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+          </thead>
+          <tbody>
+            {Array.from({ length: rows }, (_, row) => (
+              <tr key={row}>
+                {Array.from({ length: columns }, (_, col) => {
+                  const cellValue = editableData[row]?.[col] || "";
+                  return (
+                    <td
+                      key={col}
+                      className="table-cell-wrap"
+                      style={{
+                        border: "1px solid #ccc",
+                        padding: "4px",
+                        minWidth: `${minWidth}px`,
+                        maxWidth: `${maxWidth}px`,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {parseCell(cellValue)}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   function parseLocalDate(dateStr: string) {
     const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day, 12, 0, 0);
   }
 
-  function DatePickerInput(props: any, ref: any) {
+  function DatePickerInput(
+    props: React.InputHTMLAttributes<HTMLInputElement>,
+    ref: React.Ref<HTMLInputElement>
+  ) {
     return <Input ref={ref} {...props} />;
   }
 
-  const CustomInput = React.forwardRef(DatePickerInput);
+  const CustomInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(DatePickerInput);
+
 
   return (
     <div>
       <p className="font-medium mb-2">{label}</p>
-      <Table  className="max-w-[100%]">
+      <Table className="max-w-[100%]">
         <TableHeader>
           <TableRow>
             {Array.from({ length: columns }, (_, col) => (
@@ -217,31 +231,37 @@ if (pdf) {
                       <div
                         onClick={() => {
                           if (readOnly) return;
-                          const nextState =
-                            cellValue === "[checkbox:true]"
-                              ? "unchecked"
-                              : cellValue === "[checkbox:false]"
-                                ? "neutral"
-                                : "checked";
-                          handleCheckboxChange(row, col, nextState as any);
+
+                          const getNextCheckboxState = (currentValue: string): CheckboxState => {
+                            switch (currentValue) {
+                              case "[checkbox:true]":
+                                return "unchecked";
+                              case "[checkbox:false]":
+                                return "neutral";
+                              default:
+                                return "checked";
+                            }
+                          };
+
+                          const nextState = getNextCheckboxState(cellValue);
+                          handleCheckboxChange(row, col, nextState);
                         }}
                         className={`flex justify-center items-center h-7 w-7 border rounded-sm
-                                text-sm leading-none select-none
-                                ${readOnly ? "cursor-default" : "cursor-pointer"}
-                                ${cellValue === "[checkbox:true]"
+                text-sm leading-none select-none
+                ${readOnly ? "cursor-default" : "cursor-pointer"}
+                ${cellValue === "[checkbox:true]"
                             ? "bg-green-500 text-white"
                             : cellValue === "[checkbox:false]"
                               ? "bg-gray-300 text-black"
                               : "bg-white text-gray-400 border-gray-500"
                           }`}
                         style={{
-                          fontFamily: 'Arial, sans-serif',
+                          fontFamily: "Arial, sans-serif",
                           lineHeight: "1",
                           fontSize: "1rem",
                           padding: "0",
-                          textAlign: 'center',
+                          textAlign: "center",
                         }}
-
                       >
                         {cellValue === "[checkbox:true]"
                           ? "✔"
@@ -249,7 +269,6 @@ if (pdf) {
                             ? "✖"
                             : ""}
                       </div>
-
                     ) : isSelect ? (
                       <Select
                         value={isSelectValue}
