@@ -45,18 +45,13 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
     console.log("tagid formsubmitcompontet", tagId);
     const storageKey = `visited-${formUrl}-${tagId}`;
     const alreadyVisited = sessionStorage.getItem(storageKey);
-  
+
     if (!alreadyVisited) {
       updateVisitCount(formUrl);
       sessionStorage.setItem(storageKey, "true");
     }
   }, [formUrl, tagId]);
-  
-useEffect(() => {
-  if (tagId && content.length > 0) {
-    saveProgress();
-  }
-}, [tagId, content]);
+
 
   const submitValue = useCallback((key: string, value: string) => {
     formValues.current[key] = value;
@@ -131,7 +126,12 @@ useEffect(() => {
       });
     }
   };
-
+  
+  useEffect(() => {
+    if (tagId && content.length > 0) {
+      saveProgress();
+    }
+  }, [tagId, content, saveProgress]);
 
   if (submitted) {
     return (

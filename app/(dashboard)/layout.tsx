@@ -8,7 +8,7 @@ import { Authenticator, Avatar, IconsProvider } from '@aws-amplify/ui-react';
 import { FiUser } from 'react-icons/fi';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
-import { fetchAuthSession, fetchUserAttributes, signOut } from 'aws-amplify/auth';
+import {fetchUserAttributes, signOut } from 'aws-amplify/auth';
 
 Amplify.configure(outputs);
 

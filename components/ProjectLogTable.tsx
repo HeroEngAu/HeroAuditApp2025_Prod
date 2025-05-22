@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFormSubmissionCascade } from "../actions/form"; // ajuste o caminho
 import { fetchAuthSession } from "aws-amplify/auth";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 
 type SubmissionEntry = {
   formID: string;
