@@ -58,27 +58,28 @@ export function PropertiesComponent({
     });
   }
 
-  // Coloque isso dentro do seu componente
-  useEffect(() => {
-    const imageUrl = element.extraAttributes?.imageUrl;
-    if (!imageUrl) return;
+const preserveOriginalSize = form.watch("preserveOriginalSize");
 
-    const img = new Image();
-    img.onload = () => {
-      const naturalHeight = img.naturalHeight;
-      const finalHeight = form.getValues("preserveOriginalSize") ? naturalHeight : 80;
+useEffect(() => {
+  const imageUrl = element.extraAttributes?.imageUrl;
+  if (!imageUrl) return;
 
-      updateElement(element.id, {
-        ...element,
-        height: finalHeight,
-        extraAttributes: {
-          ...element.extraAttributes,
-          preserveOriginalSize: form.getValues("preserveOriginalSize"),
-        },
-      });
-    };
-    img.src = imageUrl;
-  }, [form.watch("preserveOriginalSize")]); // <- reexecuta quando valor mudar
+  const img = new Image();
+  img.onload = () => {
+    const naturalHeight = img.naturalHeight;
+    const finalHeight = preserveOriginalSize ? naturalHeight : 80;
+
+    updateElement(element.id, {
+      ...element,
+      height: finalHeight,
+      extraAttributes: {
+        ...element.extraAttributes,
+        preserveOriginalSize,
+      },
+    });
+  };
+  img.src = imageUrl;
+}, [element, updateElement, preserveOriginalSize]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
