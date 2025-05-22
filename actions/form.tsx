@@ -330,25 +330,25 @@ export async function GetFormContentByUrl(formUrl: string) {
   }
 }
 
-  export async function updateVisitCount(formUrl: string) {
-    try {
-      const { data: forms } = await client.models.Form.list({
-        filter: { shareURL: { eq: `/submit/${formUrl}` } },
+export async function updateVisitCount(formUrl: string) {
+  try {
+    const { data: forms } = await client.models.Form.list({
+      filter: { shareURL: { eq: `/submit/${formUrl}` } },
+    });
+
+    if (forms && forms.length > 0) {
+      const form = forms[0];
+      const updatedVisits = (form.visits ?? 0) + 1;
+
+      await client.models.Form.update({
+        id: form.id,
+        visits: updatedVisits,
       });
-  
-      if (forms && forms.length > 0) {
-        const form = forms[0];
-        const updatedVisits = (form.visits ?? 0) + 1;
-  
-        await client.models.Form.update({
-          id: form.id,
-          visits: updatedVisits,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to update visit count:", error);
     }
+  } catch (error) {
+    console.error("Failed to update visit count:", error);
   }
+}
 
 export async function SubmitForm(formId: string, tagId: string, content: string) {
   const submission = {
@@ -393,7 +393,7 @@ export async function submitFormAction(formData: FormData) {
   const formtagId = formData.get("formtagID") as string;
   const rawResponses = formData.get("responses") as string;
   const rawFormContent = formData.get("formContent") as string;
-  
+
   let tagId = formData.get("tagId") as string;
 
   if (!tagId && formId && formtagId) {
@@ -442,6 +442,106 @@ export async function GetFormWithSubmissions(id: string) {
   } catch (error) {
     console.error("Error fetching form with submissions:", error);
     throw new Error("Failed to fetch form with submissions.");
+  }
+}
+
+
+export async function deleteFormSubmissionCascade(formSubmissionId: string) {
+  try {
+    console.log("Deleting form submission with ID:", formSubmissionId);
+    const formTag = await findFormTagBySubmissionId(formSubmissionId);
+
+    if (!formTag) {
+      throw new Error("No formTag2 found for this submissionId.");
+    }
+
+    const formTag2Id = formTag.id;
+    const tagID = formTag.tagID;
+
+    await deleteFormTag2(formTag2Id);
+
+    if (tagID) {
+      await deleteEquipmentTag2(tagID);
+    }
+
+    await deleteFormSubmission(formSubmissionId);
+
+    console.log("Cascade deletion completed.");
+  } catch (error) {
+    console.error("Cascade deletion failed:", error);
+    throw error;
+  }
+}
+
+export async function deleteForm(id: string) {
+  try {
+    const { errors } = await client.models.Form.delete({ id });
+    if (errors) {
+      console.error(errors);
+      throw new Error("Error deleting form.");
+    }
+  } catch (error) {
+    console.error("Error deleting form:", error);
+    throw new Error("Failed to delete form.");
+  }
+}
+
+export async function deleteFormSubmission(id: string) {
+  try {
+    const { errors } = await client.models.FormSubmissions.delete({ id });
+    if (errors) {
+      console.error(errors);
+      throw new Error("Error deleting form submission.");
+    }
+  } catch (error) {
+    console.error("Error deleting form submission:", error);
+    throw new Error("Failed to delete form submission.");
+  }
+}
+
+export async function deleteFormTag2(id: string) {
+  try {
+    const { errors } = await client.models.FormTag2.delete({ id });
+    if (errors) {
+      console.error(errors);
+      throw new Error("Error deleting formTag2.");
+    }
+  } catch (error) {
+    console.error("Error deleting formTag2:", error);
+    throw new Error("Failed to delete formTag2.");
+  }
+}
+
+export async function deleteEquipmentTag2(id: string) {
+  try {
+    const { errors } = await client.models.EquipmentTag2.delete({ id });
+    if (errors) {
+      console.error(errors);
+      throw new Error("Error deleting equipmentTag2.");
+    }
+  } catch (error) {
+    console.error("Error deleting equipmentTag2:", error);
+    throw new Error("Failed to delete equipmentTag2.");
+  }
+}
+
+export async function findFormTagBySubmissionId(submissionId: string) {
+  try {
+    const { data, errors } = await client.models.FormTag2.list({
+      filter: {
+        contentTest: { contains: submissionId },
+      },
+    });
+    console.log("FormTag2 Data:", data); // Debugging
+    if (errors) {
+      console.error(errors);
+      throw new Error("Error fetching FormTag2.");
+    }
+
+    return data?.[0];
+  } catch (error) {
+    console.error("Error finding FormTag2:", error);
+    throw new Error("Failed to find FormTag2.");
   }
 }
 
@@ -588,7 +688,7 @@ export async function ResumeTest(formTagId: string) {
 
     // Assuming formTag.contentTest holds the content in the correct format
     const contentTest = formTag.contentTest;
-    
+
     if (!contentTest) {
       console.error("No contentTest found in formTag.");
       return null;
@@ -852,7 +952,7 @@ export async function GetProjectsFromClientName(ClientName: string) {
 export async function CreateForm(
   name: string,
   description: string,
-  fullProjectName: string, 
+  fullProjectName: string,
 ) {
 
   const projectName = fullProjectName.split(" (")[0];
@@ -1122,7 +1222,7 @@ export async function SaveFormAfterTestAction(formData: FormData) {
   const formtagId = formData.get("formtagID") as string;
   const rawResponses = formData.get("responses") as string;
   const rawFormContent = formData.get("formContent") as string;
-  
+
   let tagId = formData.get("tagId") as string;
 
   if (!tagId && formId && formtagId) {
@@ -1253,7 +1353,7 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
 
     // Extract the formId from the FormSubmission
     const formId = formSubmission.formId;
-    
+
     if (!formId) {
       throw new Error("Form ID not found in submission.");
     }

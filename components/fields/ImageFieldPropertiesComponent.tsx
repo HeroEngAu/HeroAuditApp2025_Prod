@@ -4,7 +4,6 @@ import {
   FormElementInstance,
 } from "../FormElements";
 import { Label } from "../ui/label";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
@@ -14,11 +13,11 @@ import {
   Form,
   FormLabel,
 } from "../ui/form";
-
 import { Button } from "../ui/button";
 import { Upload } from "lucide-react";
 import { CustomInstance, propertiesSchema } from "./ImageField";
 import { z } from "zod";
+import { Input } from "../ui/input";
 
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 export function PropertiesComponent({
@@ -37,6 +36,7 @@ export function PropertiesComponent({
         ? (element.extraAttributes.position as "center" | "left" | "right")
         : "center",
       repeatOnPageBreak: element.extraAttributes.repeatOnPageBreak,
+      preserveOriginalSize: element.extraAttributes.preserveOriginalSize,
     },
   });
 
@@ -46,16 +46,39 @@ export function PropertiesComponent({
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { imageUrl, position, repeatOnPageBreak } = values;
+    const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
         imageUrl: imageUrl || "",
         position,
         repeatOnPageBreak,
+        preserveOriginalSize,
       },
     });
   }
+
+  // Coloque isso dentro do seu componente
+  useEffect(() => {
+    const imageUrl = element.extraAttributes?.imageUrl;
+    if (!imageUrl) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const naturalHeight = img.naturalHeight;
+      const finalHeight = form.getValues("preserveOriginalSize") ? naturalHeight : 80;
+
+      updateElement(element.id, {
+        ...element,
+        height: finalHeight,
+        extraAttributes: {
+          ...element.extraAttributes,
+          preserveOriginalSize: form.getValues("preserveOriginalSize"),
+        },
+      });
+    };
+    img.src = imageUrl;
+  }, [form.watch("preserveOriginalSize")]); // <- reexecuta quando valor mudar
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -69,21 +92,21 @@ export function PropertiesComponent({
       const img = new Image();
       img.onload = () => {
         const naturalHeight = img.naturalHeight;
-        const minHeight = 60;
-        const finalHeight = Math.max(naturalHeight, minHeight);
+        const preserveOriginalSize = form.getValues("preserveOriginalSize");
 
         updateElement(element.id, {
           ...element,
           extraAttributes: {
             ...element.extraAttributes,
             imageUrl: base64,
+            preserveOriginalSize,
           },
-          height: finalHeight,
+          height: preserveOriginalSize ? Math.max(naturalHeight, 200) : 200,
         });
       };
+
       img.src = base64;
     };
-
 
     reader.readAsDataURL(file);
   }
@@ -121,6 +144,46 @@ export function PropertiesComponent({
           />
         </div>
         <div className="space-y-1">
+          <FormLabel>Or paste image URL</FormLabel>
+          <Input
+            type="text"
+            placeholder="https://example.com/image.jpg"
+            className="w-full border rounded px-3 py-1"
+            defaultValue={form.getValues("imageUrl")}
+            onBlur={(e) => {
+              const url = e.target.value.trim();
+              if (!url) return;
+
+              const img = new Image();
+              img.crossOrigin = "anonymous"; // importante para carregar imagens externas
+
+              img.onload = () => {
+                const naturalHeight = img.naturalHeight;
+                const preserveOriginalSize = form.getValues("preserveOriginalSize");
+                
+                updateElement(element.id, {
+                  ...element,
+                  extraAttributes: {
+                    ...element.extraAttributes,
+                    imageUrl: url,
+                    preserveOriginalSize,
+                  },
+                  height: preserveOriginalSize ? Math.max(naturalHeight, 200) : 200,
+                });
+
+                form.setValue("imageUrl", url, { shouldDirty: true });
+              };
+
+              img.onerror = () => {
+                console.error("Could not load image from URL:", url);
+              };
+
+              img.src = url;
+            }}
+          />
+        </div>
+
+        <div className="space-y-1">
           <FormLabel>Image Position</FormLabel>
           <Select
             onValueChange={(value) => form.setValue("position", value as "left" | "center" | "right")}
@@ -149,6 +212,21 @@ export function PropertiesComponent({
               className="mr-2"
             />
             <span>Repeat on page break</span>
+          </Label>
+        </div>
+        <div className="space-y-1">
+          <Label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={form.watch("preserveOriginalSize")}
+              onChange={(e) =>
+                form.setValue("preserveOriginalSize", e.target.checked, {
+                  shouldDirty: true,
+                })
+              }
+              className="mr-2"
+            />
+            <span>Keep original image size</span>
           </Label>
         </div>
 

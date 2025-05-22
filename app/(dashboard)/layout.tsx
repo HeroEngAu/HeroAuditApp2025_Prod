@@ -8,7 +8,7 @@ import { Authenticator, Avatar, IconsProvider } from '@aws-amplify/ui-react';
 import { FiUser } from 'react-icons/fi';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
-import { fetchUserAttributes, signOut } from 'aws-amplify/auth';
+import { fetchAuthSession, fetchUserAttributes, signOut } from 'aws-amplify/auth';
 
 Amplify.configure(outputs);
 
@@ -29,6 +29,7 @@ useEffect(() => {
   async function loadAttributes() {
     try {
       const attrs = await fetchUserAttributes();
+
       if (attrs.name) setUserName(attrs.name);
     } catch (err) {
       const e = err as Partial<ErrorWithMessage>;

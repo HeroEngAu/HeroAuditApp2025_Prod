@@ -79,6 +79,7 @@ interface TextFieldExtraAttributes {
   backgroundColor?: string;
   textColor?: string;
   textAlign?: string;
+  preserveOriginalSize?: boolean;
 }
 
 export type FormElementInstance = {

@@ -6,10 +6,11 @@ import { LuView } from "react-icons/lu";
 import { FaWpforms } from "react-icons/fa";
 import { HiCursorClick } from "react-icons/hi";
 import { TbArrowBounce } from "react-icons/tb";
-//import EditFormBtn from "../../../../components/EditFormBtn";
 import { Amplify } from "aws-amplify"
 import outputs from "../../../../amplify_outputs.json"
 import { ProjectLogTable } from "../../../../components/ProjectLogTable";
+import EditFormBtn from "../../../../components/EditFormBtn";
+import DeleteFormBtn from "../../../../components/DeleteFormBtn";
 
 Amplify.configure(outputs)
 
@@ -38,6 +39,7 @@ async function FormDetailPage({ params }: { params: Params }) {
   const { submissions } = data ?? { submissions: [] };
 
   const slimSubmissions = submissions.map((s) => ({
+    formID: s.formId,
     equipmentName: s.equipmentName,
     tag: s.tag,
     submittedAt: s.submittedAt ?? undefined,
@@ -58,10 +60,11 @@ async function FormDetailPage({ params }: { params: Params }) {
         </div>
         <div className="flex justify-between container">
           <h3 className="text-2xl font-bold truncate">{form.projectName}</h3>
-          {/*<EditFormBtn id={id} />*/}
+          <EditFormBtn id={id} />
         </div>
         <div className="flex justify-between container">
           <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
+          <DeleteFormBtn id={id} />
         </div>
       </div>
 

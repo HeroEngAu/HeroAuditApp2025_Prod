@@ -85,7 +85,7 @@ function ResumeTestRenderer({
       formData.append("formtagID", formtag2Id);
       formData.append("responses", JSON.stringify(cleanData));
       formData.append("formContent", JSON.stringify(elements));
-     
+
       await SaveFormAfterTestAction(formData);
       toast({
         title: "Progress saved",
@@ -119,18 +119,26 @@ function ResumeTestRenderer({
         key={renderKey}
         className="flex flex-col gap-4 flex-grow bg-background w-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
       >
-        {elements.map((element) => {
-          const FormElement = FormElements[element.type].formComponent;
-          return (
-            <FormElement
-              key={element.id}
-              elementInstance={element}
-              submitValue={submitValue}
-              isInvalid={formErrors.current[element.id]}
-              defaultValue={formValues.current[element.id]}
-            />
-          );
-        })}
+{Array.isArray(elements) && elements.length > 0 ? (
+  elements.map((element) => {
+    const FormElement = FormElements[element.type].formComponent;
+    return (
+      <FormElement
+        key={element.id}
+        elementInstance={element}
+        submitValue={submitValue}
+        isInvalid={formErrors.current[element.id]}
+        defaultValue={formValues.current[element.id]}
+      />
+    );
+  })
+) : (
+  <div className="text-center text-muted-foreground">
+    No form elements to display.
+  </div>
+)}
+
+
 
         <div className="flex justify-center gap-4 mt-8">
           <Button onClick={() => startTransition(submitForm)} disabled={pending}>

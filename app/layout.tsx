@@ -15,7 +15,6 @@ import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css"; // Optional, if you're using Amplify tokens
 
-
 Amplify.configure(outputs);
 
 //import "../src/pages/Styles/styles.css"; // Your custom styles
@@ -28,32 +27,59 @@ const colorMode: ColorMode = "dark";
 
 // Optional Amplify UI Theme
 const theme: Theme = {
-  name: "my-dark-theme",
+  name: "custom-auth-theme",
   overrides: [
     {
-      colorMode: "dark",
+      colorMode: "dark", // or "light"
       tokens: {
         colors: {
-          font: {
-            primary: { value: "{colors.black.100}" },
-            secondary: { value: "{colors.black.90}" },
-            tertiary: { value: "{colors.black.80}" },
-          },
           background: {
-            primary: { value: "{colors.blue.10}" },
-            secondary: { value: "{colors.blue.20}" },
-            tertiary: { value: "{colors.blue.40}" },
+            primary: { value: "#ffffff" }, // main background
+            secondary: { value: "#1e293b" }, // card background
           },
-          border: {
-            primary: { value: "{colors.black.60}" },
-            secondary: { value: "{colors.black.40}" },
-            tertiary: { value: "{colors.black.20}" },
+          font: {
+            primary: { value: "#030303" }, // text color
           },
         },
+        components: {
+          button: {
+            primary: {
+              backgroundColor: { value: "#facc15" },
+              color: { value: "#000000" },
+            },
+          },
+          field: {
+            label: {
+              color: { value: "#030303" },
+            },
+          },
+        },
+
       },
     },
   ],
 };
+
+function CustomHeader() {
+  return (
+    <div className="flex justify-center mb-4">
+      <span style={{ color: '#facc15', fontWeight: 'bold', marginRight: '0rem', fontSize: '5em', }}>hero</span>
+      <span className="text-gray-500 font-semibold mr-1" style={{ position: 'relative', display: 'inline-block', fontSize: '5em' }}>
+        <span>au</span>
+        <sub style={{
+          position: 'absolute',
+          left: 110,
+          bottom: '0.4em',
+          fontSize: '0.6em',
+          color: '#6b7280'
+        }}>
+          app
+        </sub>
+        <span>dit</span>
+      </span>
+    </div>
+  );
+}
 
 /*export const metadata: Metadata = {
   title: "Fox Form Creator",
@@ -64,26 +90,25 @@ const theme: Theme = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="light" style={{ colorScheme: "light" }}>
-    <body className={inter.className}>
-      <NextTopLoader />
-
-      <AmplifyThemeProvider theme={theme} colorMode={colorMode}>
-        <DesignerContextProvider>
-
-          <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="h-screen flex items-center justify-center">
-
-              <Authenticator >
-
-                    {children}
-
-                    <Toaster />
-              </Authenticator>
-            </div>
-          </NextThemeProvider>
-        </DesignerContextProvider>
-      </AmplifyThemeProvider>
-    </body>
-    </html >
+      <body className={inter.className}>
+        <NextTopLoader />
+        <AmplifyThemeProvider theme={theme} colorMode={colorMode}>
+          <DesignerContextProvider>
+            <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <div className="h-screen flex items-center justify-center">
+                <Authenticator
+                  components={{
+                    Header: CustomHeader,
+                  }}
+                >
+                  {children}
+                  <Toaster />
+                </Authenticator>
+              </div>
+            </NextThemeProvider>
+          </DesignerContextProvider>
+        </AmplifyThemeProvider>
+      </body>
+    </html>
   );
 }

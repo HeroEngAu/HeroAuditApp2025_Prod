@@ -13,6 +13,7 @@ export function FormComponent({
   const element = elementInstance as CustomInstance;
   const imageUrl = element.extraAttributes.imageUrl;
   const position = element.extraAttributes.position || "center";
+  const preserveOriginalSize = element.extraAttributes.preserveOriginalSize;
 
   const justifyClass =
     position === "left"
@@ -29,7 +30,8 @@ export function FormComponent({
         src={imageUrl}
         alt="Uploaded"
         style={{
-          height: element.height ? `${element.height + 20}px` : "auto",
+          maxHeight: preserveOriginalSize ? "none" : "80px",
+          //height: element.height ? `${element.height}px` : "auto",
           width: "auto",
           maxWidth: "100%",
           objectFit: "contain",

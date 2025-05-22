@@ -12,7 +12,7 @@ export function DesignerComponent({
   elementInstance: FormElementInstance;
 }) {
   const element = elementInstance as CustomInstance;
-  const { imageUrl, position = "center" } = element.extraAttributes;
+  const { preserveOriginalSize, imageUrl, position = "center" } = element.extraAttributes;
 
   let alignmentClass = "";
   switch (position) {
@@ -37,7 +37,8 @@ export function DesignerComponent({
           className={`block ${alignmentClass} rounded-md border shadow w-auto object-contain`}
           style={{
             maxWidth: "100%",
-            height: "auto" ,
+            width: "auto",
+            maxHeight: preserveOriginalSize ? "none" : "80px",
           }}
         />
       ) : (

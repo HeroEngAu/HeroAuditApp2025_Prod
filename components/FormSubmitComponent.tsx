@@ -52,6 +52,11 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
     }
   }, [formUrl, tagId]);
   
+useEffect(() => {
+  if (tagId && content.length > 0) {
+    saveProgress();
+  }
+}, [tagId, content]);
 
   const submitValue = useCallback((key: string, value: string) => {
     formValues.current[key] = value;
