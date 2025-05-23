@@ -58,8 +58,6 @@ export function PropertiesComponent({
     });
   }
 
-const preserveOriginalSize = form.watch("preserveOriginalSize");
-
 useEffect(() => {
   const imageUrl = element.extraAttributes?.imageUrl;
   if (!imageUrl) return;
@@ -67,19 +65,22 @@ useEffect(() => {
   const img = new Image();
   img.onload = () => {
     const naturalHeight = img.naturalHeight;
-    const finalHeight = preserveOriginalSize ? naturalHeight : 80;
+    const preserveOriginalSize = form.getValues("preserveOriginalSize");
 
     updateElement(element.id, {
       ...element,
-      height: finalHeight,
+      height: preserveOriginalSize ? naturalHeight : 80,
       extraAttributes: {
         ...element.extraAttributes,
         preserveOriginalSize,
+        position: form.getValues("position"),
+        repeatOnPageBreak: form.getValues("repeatOnPageBreak"), // Preserve esse valor
       },
     });
   };
   img.src = imageUrl;
-}, [element, updateElement, preserveOriginalSize]);
+}, [element.extraAttributes.imageUrl, form, updateElement]);
+
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

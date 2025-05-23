@@ -26,21 +26,23 @@ export function DesignerComponent({
     default:
       alignmentClass = "mx-auto";
   }
-
+  
   return (
     <div className="flex flex-col gap-2 w-full items-start">
       <Label />
+      
       {imageUrl ? (
         <img
           src={imageUrl}
           alt="Uploaded"
-          className={`block ${alignmentClass} rounded-md border shadow w-auto object-contain`}
+          className={` ${alignmentClass} rounded-md border shadow w-auto object-contain`}
           style={{
             maxWidth: "100%",
             width: "auto",
             maxHeight: preserveOriginalSize ? "none" : "80px",
           }}
         />
+        
       ) : (
         <p className="text-sm text-muted-foreground italic">No image uploaded</p>
       )}
