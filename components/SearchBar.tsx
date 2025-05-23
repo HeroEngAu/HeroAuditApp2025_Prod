@@ -10,10 +10,11 @@ export default function SearchBar({ initialValue = "", placeholder = "Search..."
   const [value, setValue] = useState(initialValue);
   const debouncedSearch = useDebounce(value, 100);
 
-  useEffect(() => {
-    const query = debouncedSearch.trim();
-    router.push(query ? `?search=${encodeURIComponent(query)}` : "/");
-  }, [debouncedSearch]);
+useEffect(() => {
+  const query = debouncedSearch.trim();
+  router.push(query ? `?search=${encodeURIComponent(query)}` : "/");
+}, [debouncedSearch, router]);
+
 
   return (
     <div className="flex w-full md:w-auto items-center rounded-md border border-input shadow-sm px-2">

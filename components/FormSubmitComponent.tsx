@@ -93,39 +93,39 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       });
     }
   };
-  const saveProgress = async () => {
-    try {
-      const cleanData = JSON.parse(JSON.stringify(formValues.current));
-      if (!tagId) {
-        toast({
-          title: "Missing tag ID",
-          description: "Unable to save progress without tagId",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("formId", formUrl);
-      formData.append("tagId", tagId);
-      formData.append("responses", JSON.stringify(cleanData));
-      formData.append("formContent", JSON.stringify(content));
-
-      await SaveFormAfterTestAction(formData);
+const saveProgress = useCallback(async () => {
+  try {
+    const cleanData = JSON.parse(JSON.stringify(formValues.current));
+    if (!tagId) {
       toast({
-        title: "Progress saved",
-        description: "Your progress has been saved successfully.",
-        className: "bg-green-500 text-white",
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Save failed",
-        description: "Could not save your progress.",
+        title: "Missing tag ID",
+        description: "Unable to save progress without tagId",
         variant: "destructive",
       });
+      return;
     }
-  };
+
+    const formData = new FormData();
+    formData.append("formId", formUrl);
+    formData.append("tagId", tagId);
+    formData.append("responses", JSON.stringify(cleanData));
+    formData.append("formContent", JSON.stringify(content));
+
+    await SaveFormAfterTestAction(formData);
+    toast({
+      title: "Progress saved",
+      description: "Your progress has been saved successfully.",
+      className: "bg-green-500 text-white",
+    });
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "Save failed",
+      description: "Could not save your progress.",
+      variant: "destructive",
+    });
+  }
+}, [formUrl, tagId, content, toast, formValues]);
   
   useEffect(() => {
     if (tagId && content.length > 0) {

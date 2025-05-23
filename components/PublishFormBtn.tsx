@@ -29,7 +29,7 @@ function PublishFormBtn({ id }: { id: string }) {
     const formData = new FormData();
     formData.append("id", id);
     formData.append("content", JSON.stringify(elements));
-    formData.append("shareURL", `/forms/${id}`);
+    formData.append("shareURL", `/submit/${id}`);
     startTransition(async () => {
       try {
         await publishFormAction(formData);

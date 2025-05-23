@@ -75,26 +75,33 @@ function FormBuilder({ formID, form, projectName, clientName, formName }: { form
         );
     }
 
-    const shareUrl = `${window.location.origin}/forms/${formID}`;
-if (form.published && isAdmin !== true && isAdmin !== false) {
-    // enquanto ainda está carregando `isAdmin`, não renderiza nada
-    return null;
-}
+    //const shareUrl = `${window.location.origin}/submit/${formID}`;
+    const useURL = `${window.location.origin}/forms/${formID}`
+    if (form.published && isAdmin !== true && isAdmin !== false) {
+        return null;
+    }
     if (form.published && !isAdmin) {
         return (
             <div className="flex flex-col items-center justify-center h-full w-full">
                 <div className="max-w-md">
+                    <div className="space-y-4 text-center">
+                        <h2 className="text-3xl font-bold text-green-600 flex justify-center items-center gap-2">
+                            Form Published!
+                        </h2>
+                        <h2 className="text-2xl font-semibold">Share this form</h2>
+                        <h3 className="text-lg text-muted-foreground border-b pb-6">
+                            Anyone with the link can view and submit the form
+                        </h3>
+                    </div>
 
-                    <h2 className="text-2xl">Share this form</h2>
-                    <h3 className="text-xl text-muted-foreground border-b pb-10">
-                        Anyone with the link can view and submit the form
-                    </h3>
                     <div className="my-4 flex flex-col gap-2 items-center w-full border-b pb-4">
-                        <Input className="w-full" readOnly value={shareUrl} />
+
+                        <Input className="w-full" readOnly value={useURL} />
+
                         <Button
                             className="mt-2 w-full"
                             onClick={() => {
-                                navigator.clipboard.writeText(shareUrl);
+                                navigator.clipboard.writeText(useURL);
                                 toast({
                                     title: "Copied!",
                                     description: "Link copied to clipboard",
