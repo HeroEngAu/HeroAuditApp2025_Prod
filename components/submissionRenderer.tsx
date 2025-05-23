@@ -5,6 +5,8 @@ import html2canvas from "html2canvas";
 import { FormElementInstance, FormElements } from "./FormElements";
 import { Button } from "./ui/button";
 import { GetFormNameFromSubmissionId } from "../actions/form";
+import ReactDOMServer from "react-dom/server";
+
 
 interface Props {
   elements: FormElementInstance[];
@@ -106,9 +108,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
           />
         );
 
-        import("react-dom/client").then(({ createRoot }) => {
-          createRoot(wrapper).render(elementRoot);
-        });
+        wrapper.innerHTML = ReactDOMServer.renderToStaticMarkup(elementRoot);
+        tempContainer.appendChild(wrapper);
 
         tempContainer.appendChild(wrapper);
       });
@@ -146,7 +147,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
       document.body.removeChild(tempContainer);
     }
 
-    pdf.save("submission.pdf");
+    pdf.save(`${documentNumber}.pdf`);
+
   };
 
   return (

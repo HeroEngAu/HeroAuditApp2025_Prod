@@ -7,8 +7,8 @@ import SubmissionRenderer from "../components/submissionRenderer";
 import type { FormElementInstance } from "./FormElements";
 
 interface ViewSubmissionClientProps {
-  elements: FormElementInstance[]; // array de elementos do formulário
-  responses: Record<string, unknown>;       // objeto com chaves string e valores genéricos
+  elements: FormElementInstance[];
+  responses: Record<string, unknown>;     
   submissionID: string;
 }
 
