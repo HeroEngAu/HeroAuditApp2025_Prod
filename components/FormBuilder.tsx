@@ -75,7 +75,7 @@ function FormBuilder({ formID, form, projectName, clientName, formName }: { form
         );
     }
 
-    const shareUrl = `${window.location.origin}/submit/${formID}`;
+    const shareUrl = `${window.location.origin}/forms/${formID}`;
 if (form.published && isAdmin !== true && isAdmin !== false) {
     // enquanto ainda está carregando `isAdmin`, não renderiza nada
     return null;

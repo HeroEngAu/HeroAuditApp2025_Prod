@@ -17,6 +17,11 @@ interface Props {
 export default function SubmissionRenderer({ submissionID, elements, responses }: Props) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [formName, setFormName] = useState<string | null>(null); // Use state to store form name
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
 
   // Fetch form name when submissionID changes
   useEffect(() => {
@@ -110,8 +115,6 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
         wrapper.innerHTML = ReactDOMServer.renderToStaticMarkup(elementRoot);
         tempContainer.appendChild(wrapper);
-
-        tempContainer.appendChild(wrapper);
       });
 
       document.body.appendChild(tempContainer);
@@ -149,8 +152,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
     pdf.save(`${documentNumber}.pdf`);
 
-  };
-
+  };  
+if (!mounted) return null;
   return (
     <div className="flex flex-col items-center">
       <Button
@@ -164,7 +167,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         ref={contentRef}
         className="w-full flex flex-col gap-4 flex-grow bg-background h-full rounded-2xl p-8 pt-8 overflow-y-auto"
         style={{
-          visibility: "hidden",
+          display: mounted ? "block" : "none",
           maxHeight: "100vh",
           overflowY: "auto",
         }}
