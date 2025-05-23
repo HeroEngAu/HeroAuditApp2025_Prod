@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ResumeTest } from "../actions/form";
 import { Button } from "./ui/button";
 import { MdEdit } from "react-icons/md";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 type Props = {
   formTag2Id: string;
@@ -13,7 +14,26 @@ type Props = {
 export default function ResumeTestBtn({ formTag2Id }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [userGroup, setUserGroup] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUserGroup = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
+        if (Array.isArray(rawGroups) && typeof rawGroups[0] === "string") {
+          setUserGroup(rawGroups[0]);
+        } else {
+          setUserGroup(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user group:", error);
+        setUserGroup(null);
+      }
+    };
+    fetchUserGroup();
+  }, []);
+  
   const handleClick = async () => {
     setLoading(true);
 
@@ -35,9 +55,13 @@ export default function ResumeTestBtn({ formTag2Id }: Props) {
   };
 
   return (
-    <Button variant="default" className="gap-2" onClick={handleClick} disabled={loading}>
-        <MdEdit className="h-6 w-6" />
-      {loading ? "Loading..." : "Resume Test"}
-    </Button>
+    <>
+      {userGroup !== "viewer" && (
+        <Button variant="default" className="gap-2" onClick={handleClick} disabled={loading}>
+          <MdEdit className="h-6 w-6" />
+          {loading ? "Loading..." : "Resume Test"}
+        </Button>
+      )}
+    </>
   );
 }

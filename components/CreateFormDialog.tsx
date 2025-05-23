@@ -20,6 +20,7 @@ import {
   CreateForm,
 } from "../actions/form";
 import { useTheme } from "next-themes";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 interface CreateFormDialogProps {
   onFormCreated?: () => void; // <-- torna opcional
@@ -42,6 +43,26 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const { theme } = useTheme();
 
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  const [userGroup, setUserGroup] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserGroup = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
+        if (Array.isArray(rawGroups) && typeof rawGroups[0] === "string") {
+          setUserGroup(rawGroups[0]);
+        } else {
+          setUserGroup(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user group:", error);
+        setUserGroup(null);
+      }
+    };
+    fetchUserGroup();
+  }, []);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -120,6 +141,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
 
   return (
     <View>
+      {userGroup !== "viewer" && (
       <Card
         onClick={() => setIsOpen(true)} // Trigger the function when the card is clicked
         className="
@@ -137,6 +159,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
           <span className="text-xl font-bold">Create New Form</span>
         </CardHeader>
       </Card>
+      )}
       {isOpen && (
         <View
           position="fixed"

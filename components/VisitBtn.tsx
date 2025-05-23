@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { View, Heading, Text, Alert, Flex, TextField } from "@aws-amplify/ui-react";
 import { runForm } from "../actions/form";
 import { useRouter } from "next/navigation";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 function VisitBtn({ shareUrl }: { shareUrl: string }) {
   const [mounted, setMounted] = useState(false);
@@ -16,7 +17,25 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [userGroup, setUserGroup] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUserGroup = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
+        if (Array.isArray(rawGroups) && typeof rawGroups[0] === "string") {
+          setUserGroup(rawGroups[0]);
+        } else {
+          setUserGroup(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user group:", error);
+        setUserGroup(null);
+      }
+    };
+    fetchUserGroup();
+  }, []);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -47,13 +66,14 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
   };
   return (
     <>
+      {userGroup !== "viewer" && (
       <Button
         className="w-[200px]"
         onClick={() => setIsDialogOpen(true)}
       >
         Visit
       </Button>
-
+      )}
       {isDialogOpen && (
         <View
           position="fixed"
