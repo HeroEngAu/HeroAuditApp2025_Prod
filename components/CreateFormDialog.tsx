@@ -187,8 +187,11 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
             <select
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
-              className={`w-full p-2 rounded border 
-              ${theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"}`}
+              className={`
+              w-full p-2 rounded border 
+              ${theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"}
+              max-h-48 overflow-y-auto
+              `}
             >
               <option value="" disabled>
                 Select Client
@@ -205,7 +208,12 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
             <select
               value={projID}
               onChange={(e) => setProjID(e.target.value)}
-              className="w-full p-2 rounded border bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600"
+              className={`
+                w-full p-2 rounded border
+                bg-white text-black border-gray-300 
+                dark:bg-gray-800 dark:text-white dark:border-gray-600
+                max-h-48 overflow-y-auto
+              `}
             >
               <option value="" disabled>
                 Select Project
