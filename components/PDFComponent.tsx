@@ -11,6 +11,7 @@ interface Props {
   elements: FormElementInstance[][];
   responses: { [key: string]: unknown };
   formName: string;
+  userName?: string;
 }
 const styles = StyleSheet.create({
   page: {
@@ -331,13 +332,12 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName }: Props) {
+export default function PDFDocument({ elements, responses, formName, userName }: Props) {
   const repeatHeaderImage = elements
     .flat()
     .find(
       (el) => el.type === "ImageField" && el.extraAttributes?.repeatOnPageBreak === true
     );
-
   const headerSeparators = Array.from(
     new Map(
       elements
@@ -371,7 +371,6 @@ export default function PDFDocument({ elements, responses, formName }: Props) {
         <Page key={pageIndex} style={styles.page} wrap>
           {/* Header fixo */}
           <View fixed style={styles.header}>
-            <Text style={{ fontSize: 12, color: "grey" }}>{formName}</Text>
             {/* Imagem que repete no topo */}
             {repeatHeaderImage && (
               <Image src={headerImageUrl} style={imageStyle} />
@@ -385,11 +384,38 @@ export default function PDFDocument({ elements, responses, formName }: Props) {
           </View>
 
           {/* Footer com numeração */}
-          <Text
+          <View
             fixed
-            style={styles.footer}
-            render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
-          />
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              left: 20,
+              right: 20,
+            }}
+          >
+            {/* Linha horizontal */}
+            <View
+              style={{
+                height: 1,
+                backgroundColor: 'grey',
+                marginBottom: 4,
+              }}
+            />
+
+            {/* Rodapé com formName à esquerda e numeração à direita */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                fontSize: 10,
+                color: 'grey',
+              }}
+            >
+              <Text>{formName}</Text>
+              <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+            </View>
+          </View>
+
 
           {/* Conteúdo da página */}
 

@@ -27,7 +27,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
 
       <Separator className="my-6" />
 
-      {/* Title + SearchBar side by side */}
       <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
         <h2 className="text-4xl font-bold">Your forms</h2>
         <SearchBar initialValue={searchTerm} />

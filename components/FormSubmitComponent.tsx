@@ -125,7 +125,7 @@ const saveProgress = useCallback(async () => {
       variant: "destructive",
     });
   }
-}, [formUrl, tagId, content, toast, formValues]);
+}, [formUrl, tagId, content, formValues]);
   
   useEffect(() => {
     if (tagId && content.length > 0) {
