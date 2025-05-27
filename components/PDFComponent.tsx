@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     width: "100%",
-    maxHeight: 200,
+    //maxHeight: 200,
     objectFit: "contain",
   },
   footer: {
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#999",
     width: "100%",
+    marginTop: 5,
   },
   separatorText: {
     fontSize: 12,
@@ -93,13 +94,15 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
   switch (element.type) {
     case "ImageField": {
-      const imageUrl = typeof value === "string" ? value : element.extraAttributes?.imageUrl;
+      const imageUrl =
+        typeof value === "string" ? value : element.extraAttributes?.imageUrl;
 
       if (!imageUrl) return <Text>[Invalid image]</Text>;
 
-      const width = element.extraAttributes?.width ?? 200;
-      const height = element.extraAttributes?.height ?? 150;
+      const width = element.extraAttributes?.width;
+      const height = element.extraAttributes?.height ?? 200;
       const alignment = element.extraAttributes?.position ?? "left";
+      const preserveOriginalSize = element.extraAttributes?.preserveOriginalSize;
 
       let alignStyle = {};
       if (alignment === "center") {
@@ -110,12 +113,21 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         alignStyle = { alignSelf: "flex-start" };
       }
 
-      return (
-        <Image
-          src={imageUrl}
-          style={{ width, height, objectFit: "contain", ...alignStyle }}
-        />
-      );
+      const imageStyle = preserveOriginalSize
+        ? {
+          objectFit: "contain",
+          maxWidth: "100%", 
+          maxHeight: 500, 
+          ...alignStyle,
+        }
+        : {
+          objectFit: "contain",
+          width,
+          height,
+          ...alignStyle,
+        };
+
+      return <Image src={imageUrl} style={imageStyle} />;
     }
 
     case "TableField": {
@@ -362,6 +374,9 @@ export default function PDFDocument({ elements, responses, formName }: Props) {
 
   const headerImageUrl = repeatHeaderImage?.extraAttributes?.imageUrl;
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
+  const preserveOriginalSize = repeatHeaderImage?.extraAttributes?.preserveOriginalSize;
+  const height = repeatHeaderImage?.extraAttributes?.height ?? 80;
+  const width = repeatHeaderImage?.extraAttributes?.width;
   let alignStyle = {};
   if (headerImagePosition === "center") {
     alignStyle = { alignSelf: "center" };
@@ -372,9 +387,12 @@ export default function PDFDocument({ elements, responses, formName }: Props) {
   }
 
   const imageStyle = {
-    maxWidth: 200,
-    maxHeight: 150,
-
+    ...(preserveOriginalSize
+      ? {}
+      : {
+        height,
+        width,
+      }),
     ...alignStyle,
   };
 
