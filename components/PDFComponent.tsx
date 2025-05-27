@@ -174,24 +174,32 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       };
 
       // Get the column widths based on the content
-      const estimateColumnWidths = (tableData: string[][], columnCount: number): number[] => {
+      const estimateColumnWidths = (
+        tableData: string[][],
+        columnCount: number,
+        columnHeaders: string[] = []
+      ): number[] => {
         const maxCharPerColumn = Array(columnCount).fill(0);
 
-        tableData.forEach((row) => {
+        const allRows = [columnHeaders.slice(0, columnCount), ...tableData];
+
+        allRows.forEach((row) => {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
             const length = parsed.length;
-
-            let px = 6;
-            if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
-              px = 12;
+            const lengthWithMin = Math.max(length, parsed.length + 4); 
+            let px = 13;
+            if (/^[A-Z0-9]+$/.test(parsed)) {
+              px = 15;
+            } else if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+              px = 19;
             } else if (!isNaN(Number(parsed))) {
-              px = 7;
+              px = 14;
             }
 
             maxCharPerColumn[colIndex] = Math.max(
               maxCharPerColumn[colIndex],
-              length * px
+              lengthWithMin * px
             );
           });
         });
@@ -199,11 +207,12 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         const minWidth = 50;
         const maxWidth = 500;
 
-        return maxCharPerColumn.map((w) => Math.min(Math.max(w, minWidth), maxWidth));
+        return maxCharPerColumn.map((w) =>
+          Math.min(Math.max(w, minWidth), maxWidth)
+        );
       };
 
-
-      const columnWidths = estimateColumnWidths(tableData, columns);
+      const columnWidths = estimateColumnWidths(tableData, columns, columnHeaders);
 
       return (
         <View style={styles.table}>
@@ -214,10 +223,16 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 key={colIndex}
                 style={[
                   styles.tableCell,
-                  { backgroundColor: "#eee", width: columnWidths[colIndex] },
+                  {
+                    backgroundColor: "#eee",
+                    width: columnWidths[colIndex],
+                    flexShrink: 0,
+                  },
                 ]}
               >
-                <Text>{columnHeaders[colIndex] || `Col ${colIndex + 1}`}</Text>
+                <Text style={{ fontSize: 12 }}>
+                  {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
+                </Text>
               </View>
             ))}
           </View>
@@ -247,7 +262,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
     case "SeparatorField":
       return (
         <View style={styles.separator}>
-          <Text style={styles.separatorText}>                                                                                             </Text>
+          <Text style={styles.separatorText}>                                                                                             
+            
+          </Text>
         </View>
       );
     case "NumberField": {
