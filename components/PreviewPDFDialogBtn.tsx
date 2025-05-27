@@ -14,7 +14,7 @@ import { FormElementInstance } from "./FormElements";
 
 function PreviewPDFDialogBtn({ formName }: { formName: string }) {
   const { elements } = useDesigner();
-
+  const { setSelectedElement } = useDesigner();
   const documentNumber = formName || "Unknown Document Number";
 
   // Group of elements by PageBreakField
@@ -49,10 +49,13 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
       groups.push([...repeatables, ...current]);
     }
   }
-  
+
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger
+        asChild
+        onClick={() => setSelectedElement(null)} // ou false, dependendo de como você controla
+      >
         <Button variant="outline" className="gap-2">
           <MdPreview className="h-6 w-6" />
           Preview PDF
@@ -72,9 +75,9 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
           This dialog contains the details of Preview Button.
         </DialogDescription>
 
-          <PDFViewer width="100%" height="100%">
-            <PDFDocument elements={groups} responses={{}} formName={documentNumber}/>
-          </PDFViewer>
+        <PDFViewer width="100%" height="100%">
+          <PDFDocument elements={groups} responses={{}} formName={documentNumber} />
+        </PDFViewer>
       </DialogContent>
     </Dialog>
   );
