@@ -54,7 +54,7 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
     <Dialog>
       <DialogTrigger
         asChild
-        onClick={() => setSelectedElement(null)} // ou false, dependendo de como você controla
+        onClick={() => setSelectedElement(null)} 
       >
         <Button variant="outline" className="gap-2">
           <MdPreview className="h-6 w-6" />

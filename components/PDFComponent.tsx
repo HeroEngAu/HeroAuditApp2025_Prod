@@ -116,8 +116,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const imageStyle = preserveOriginalSize
         ? {
           objectFit: "contain",
-          maxWidth: "100%", 
-          maxHeight: 500, 
+          maxWidth: "100%",
+          maxHeight: 500,
           ...alignStyle,
         }
         : {
@@ -346,8 +346,31 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
+    case "TextAreaField": {
+      const cleanText =
+        typeof value === "string" ? value.trim() : "";
 
-    case "TextField":
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text style={{ fontSize: 12 }}>
+            {cleanText || "-"}
+          </Text>
+        </View>
+      );
+    }
+    case "TextField": {
+      const cleanText =
+        typeof value === "string" ? value.trim() : "";
+
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text style={{ fontSize: 12 }}>
+            {cleanText || "-"}
+          </Text>
+        </View>
+      );
+    }
+
     default:
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
