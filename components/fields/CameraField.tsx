@@ -24,7 +24,3 @@ export const CameraFieldFormElement: FormElement = {
   propertiesComponent: PropertiesComponent,
   validate: () => true,
 };
-
-
-
-

@@ -2,9 +2,12 @@ import { useRef, useState } from "react";
 import { MdPhotoCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 
+type CameraRef = {
+  takePhoto: () => string;
+};
 
 export function FormComponent() {
-  const cameraRef = useRef<any>(null);
+  const cameraRef = useRef<CameraRef | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
 

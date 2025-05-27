@@ -187,7 +187,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
             const length = parsed.length;
-            const lengthWithMin = Math.max(length, parsed.length + 4); 
+            const lengthWithMin = Math.max(length, parsed.length + 4);
             let px = 13;
             if (/^[A-Z0-9]+$/.test(parsed)) {
               px = 15;
@@ -262,8 +262,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
     case "SeparatorField":
       return (
         <View style={styles.separator}>
-          <Text style={styles.separatorText}>                                                                                             
-            
+          <Text style={styles.separatorText}>
+
           </Text>
         </View>
       );
@@ -387,6 +387,23 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
+
+case "CameraField": {
+  const imageUrl = typeof value === "string" ? value : element.extraAttributes?.imageUrl;
+  if (!imageUrl) return <Text>[No image]</Text>;
+
+  return (
+    <View style={{ marginBottom: 10 }}>
+      <Text style={{ marginBottom: 4 }}>{element.extraAttributes?.label}</Text>
+      <Image
+        src={imageUrl}
+        style={{ width: 200, height: 150, objectFit: "cover" }}
+      />
+    </View>
+  );
+}
+
+
 
     default:
       return (
