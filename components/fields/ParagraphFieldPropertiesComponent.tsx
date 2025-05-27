@@ -51,21 +51,21 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().toggleBold().run()}
-                        className={`px-4 py-2 ${editor.isActive("bold") ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("bold") ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         <strong>B</strong>
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().toggleItalic().run()}
-                        className={`px-4 py-2 ${editor.isActive("italic") ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("italic") ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         <em>I</em>
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().toggleUnderline().run()}
-                        className={`px-4 py-2 ${editor.isActive("underline") ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("underline") ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         <u>U</u>
                     </Button>
@@ -75,21 +75,21 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().setTextAlign("left").run()}
-                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "left" ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "left" ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         Left
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().setTextAlign("center").run()}
-                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "center" ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "center" ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         Center
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => editor.chain().focus().setTextAlign("right").run()}
-                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "right" ? "bg-blue-500 text-white" : "text-black"}`}
+                        className={`px-4 py-2 ${editor.isActive("textAlign") && editor.getAttributes("textAlign").textAlign === "right" ? "bg-blue-500 text-white" : "text-foreground dark:text-muted-foreground"}`}
                     >
                         Right
                     </Button>

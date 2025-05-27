@@ -1,66 +1,419 @@
-"use client";
-
-import { useEffect } from "react";
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { useRouter } from "next/navigation";
+// components/PDFDocument.tsx
+import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
 import { FormElementInstance } from "./FormElements";
 
-
-const styles = StyleSheet.create({
-  page: { padding: 30 },
-  section: { marginBottom: 10 },
-  label: { fontWeight: "bold", fontSize: 12 },
-  value: { fontSize: 12, marginBottom: 5 },
+Font.register({
+  family: 'DejaVuSans',
+  src: '/fonts/DejaVuSans.ttf',
 });
 
+interface Props {
+  elements: FormElementInstance[][];
+  responses: { [key: string]: unknown };
+  formName: string;
+}
+const styles = StyleSheet.create({
+  page: {
+    wrap: true,
+    paddingTop: 10,
+    paddingBottom: 40,
+    paddingHorizontal: 30,
+    fontSize: 12,
+  },
+  fieldContainer: {
+    marginBottom: 10,
+    breakInside: 'avoid',
+  },
+  fieldTitle: { fontWeight: "bold", marginBottom: 4 },
+  image: { width: 200, height: 150, marginTop: 5 },
+  table: { borderWidth: 1, borderColor: "#000", width: "100%" },
+  tableCell: {
+    borderWidth: 1,
+    borderColor: "#000",
+    padding: 4,
+    flexShrink: 0,
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  header: {
+    paddingBottom: 10,
+  },
+  headerImage: {
+    width: "100%",
+    maxHeight: 200,
+    objectFit: "contain",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    left: 30,
+    right: 30,
+    textAlign: "center",
+    fontSize: 10,
+    color: "grey",
+  },
+  separator: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#999",
+    width: "100%",
+  },
+  separatorText: {
+    fontSize: 12,
+    fontStyle: "italic",
+    color: "#666",
+  },
+});
 
-const PDFTemplate = ({
-  elements,
-  responses,
-}: {
-  elements: FormElementInstance[];
-  responses: Record<string, string | number | boolean | string[] | null>;
-}) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {elements.map((element) => (
-        <View style={styles.section} key={element.id}>
-          <Text style={styles.label}>{element.label || element.type}</Text>
-          <Text style={styles.value}>{responses[element.id] ?? "—"}</Text>
-        </View>
-      ))}
-    </Page>
-  </Document>
-);
+function stripHtml(html: string) {
+  // Remove tags HTML
+  const tmp = html.replace(/<\/?[^>]+(>|$)/g, "");
 
-interface GeneratePdfClientProps {
-  elements: FormElementInstance[];
-  responses: Record<string, string | number | boolean | string[] | null>;
+  // Decodifica entidades HTML
+  const txt = document.createElement("textarea");
+  txt.innerHTML = tmp;
+  return txt.value;
 }
 
+function renderFieldValue(element: FormElementInstance, value: unknown) {
 
-export default function GeneratePdfClient({ elements, responses }: GeneratePdfClientProps) {
-  const router = useRouter();
+  switch (element.type) {
+    case "ImageField": {
+      const imageUrl = typeof value === "string" ? value : element.extraAttributes?.imageUrl;
 
-  useEffect(() => {
-    
-  }, []);
+      if (!imageUrl) return <Text>[Invalid image]</Text>;
 
-  const handleClose = () => router.back();
+      const width = element.extraAttributes?.width ?? 200;
+      const height = element.extraAttributes?.height ?? 150;
+      const alignment = element.extraAttributes?.position ?? "left";
+
+      let alignStyle = {};
+      if (alignment === "center") {
+        alignStyle = { alignSelf: "center" };
+      } else if (alignment === "right") {
+        alignStyle = { alignSelf: "flex-end" };
+      } else {
+        alignStyle = { alignSelf: "flex-start" };
+      }
+
+      return (
+        <Image
+          src={imageUrl}
+          style={{ width, height, objectFit: "contain", ...alignStyle }}
+        />
+      );
+    }
+
+    case "TableField": {
+      const tableData = value || element.extraAttributes?.data;
+      if (!tableData || !Array.isArray(tableData)) return <Text>[Invalid table]</Text>;
+
+      const rows = tableData.length;
+      const columns = Math.max(...tableData.map((row: string[]) => row.length));
+      const columnHeaders = element.extraAttributes?.columnHeaders || [];
+
+      const parseCell = (cellValue: string): string => {
+        const trimmed = cellValue?.trim() || "";
+
+        if (trimmed.startsWith("[checkbox")) {
+          if (trimmed === "[checkbox:true]") return "✔";
+          if (trimmed === "[checkbox:false]") return "✖";
+          return "☐";
+        }
+
+        if (trimmed.startsWith("[select")) {
+          const match = trimmed.match(/^\[select:"(.*?)":/);
+          return match?.[1] || "-";
+        }
+
+        if (trimmed.startsWith("[number:")) {
+          return trimmed.match(/^\[number:(.*?)\]$/)?.[1] || "-";
+        }
+
+        if (trimmed.startsWith("[date:")) {
+          const isoDate = trimmed.match(/^\[date:(.*?)\]$/)?.[1];
+          if (!isoDate) return "-";
+
+          const dateObj = new Date(isoDate);
+          if (isNaN(dateObj.getTime())) return "-";
+
+          const day = String(dateObj.getDate()).padStart(2, "0");
+          const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const year = dateObj.getFullYear();
+
+          return `${day}.${month}.${year}`;
+        }
+
+        return trimmed || "-";
+      };
+
+      // Estimar largura das colunas com base no conteúdo
+      const estimateColumnWidths = (tableData: string[][], columnCount: number): number[] => {
+        const maxCharPerColumn = Array(columnCount).fill(0);
+
+        tableData.forEach((row) => {
+          row.forEach((cell, colIndex) => {
+            const parsed = parseCell(cell);
+            const length = parsed.length;
+
+            let px = 6;
+            if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+              px = 12; // datas são mais largas
+            } else if (!isNaN(Number(parsed))) {
+              px = 7; // números médios
+            }
+
+            maxCharPerColumn[colIndex] = Math.max(
+              maxCharPerColumn[colIndex],
+              length * px
+            );
+          });
+        });
+
+        const minWidth = 100;
+        const maxWidth = 500;
+
+        return maxCharPerColumn.map((w) => Math.min(Math.max(w, minWidth), maxWidth));
+      };
+
+
+      const columnWidths = estimateColumnWidths(tableData, columns);
+
+      return (
+        <View style={styles.table}>
+          {/* Header */}
+          <View style={styles.tableRow}>
+            {Array.from({ length: columns }).map((_, colIndex) => (
+              <View
+                key={colIndex}
+                style={[
+                  styles.tableCell,
+                  { backgroundColor: "#eee", width: columnWidths[colIndex] },
+                ]}
+              >
+                <Text>{columnHeaders[colIndex] || `Col ${colIndex + 1}`}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Body */}
+          {Array.from({ length: rows }).map((_, rowIndex) => (
+            <View key={rowIndex} style={styles.tableRow}>
+              {Array.from({ length: columns }).map((_, colIndex) => {
+                const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
+                return (
+                  <View
+                    key={colIndex}
+                    style={[
+                      styles.tableCell,
+                      { width: columnWidths[colIndex] },
+                    ]}
+                  >
+                    <Text style={{ fontFamily: 'DejaVuSans' }} >{cellText}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      );
+    }
+    case "SeparatorField":
+      return (
+        <View style={styles.separator}>
+          <Text style={styles.separatorText}>                                                                                             </Text>
+        </View>
+      );
+    case "NumberField": {
+      const { required } = element.extraAttributes ?? {};
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 4 }}>
+            {required ? "*" : ""}
+          </Text>
+          <Text style={{ fontSize: 12, minHeight: 20 }}>
+            {value !== undefined && value !== null && value !== "" ? String(value) : "-"}
+          </Text>
+        </View>
+      );
+    }
+    case "CheckboxField": {
+      const checked = Boolean(value);
+      const label = element.extraAttributes?.label ?? "";
+
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ fontSize: 12, marginRight: 8, fontFamily: 'DejaVuSans' }}>
+            {checked ? "☑" : "☐"}
+          </Text>
+          <Text style={{ fontSize: 12, fontFamily: 'DejaVuSans' }}>
+            {label}
+          </Text>
+        </View>
+      );
+    }
+
+    case "TitleField": {
+      const {
+        title,
+        backgroundColor = "#ffffff",
+        textColor = "#000000",
+        textAlign = "left",
+      } = element.extraAttributes ?? {};
+
+      const isTransparent = backgroundColor === "transparent";
+
+      return (
+        <View
+          style={{
+            padding: 8,
+            backgroundColor: isTransparent ? undefined : backgroundColor,
+            borderRadius: 4,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              textAlign: textAlign as "left" | "center" | "right",
+              color: textColor,
+            }}
+          >
+            {title || "-"}
+          </Text>
+        </View>
+      );
+    }
+    case "ParagraphField": {
+      const { text } = element.extraAttributes ?? {};
+      const paragraphValue = typeof text === "string" ? text.trim() : "";
+      const cleanText = stripHtml(paragraphValue);
+
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text style={{ fontSize: 12 }}>
+            {cleanText || "-"}
+          </Text>
+        </View>
+      );
+    }
+    case "DateField": {
+      let dateOnly = "";
+      if (
+        value &&
+        (typeof value === "string" ||
+          typeof value === "number" ||
+          value instanceof Date)
+      ) {
+        const dateObj = new Date(value);
+        if (!isNaN(dateObj.getTime())) {
+          dateOnly = dateObj.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+        }
+      }
+
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text>{dateOnly}</Text>
+        </View>
+      );
+    }
+
+    case "TextField":
+    default:
+      return (
+        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+          <Text>{String(value)}</Text>
+        </View>
+      );
+  }
+}
+
+export default function PDFDocument({ elements, responses, formName }: Props) {
+  const repeatHeaderImage = elements
+    .flat()
+    .find(
+      (el) => el.type === "ImageField" && el.extraAttributes?.repeatOnPageBreak === true
+    );
+
+  const headerSeparators = Array.from(
+    new Map(
+      elements
+        .flat()
+        .filter(el => el.type === "SeparatorField" && el.extraAttributes?.repeatOnPageBreak)
+        .map(el => [el.id, el]) // usa o id como chave
+    ).values()
+  );
+
+  const headerImageUrl = repeatHeaderImage?.extraAttributes?.imageUrl;
+  const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
+  let alignStyle = {};
+  if (headerImagePosition === "center") {
+    alignStyle = { alignSelf: "center" };
+  } else if (headerImagePosition === "right") {
+    alignStyle = { alignSelf: "flex-end" };
+  } else {
+    alignStyle = { alignSelf: "flex-start" };
+  }
+
+  const imageStyle = {
+    maxWidth: 200,
+    maxHeight: 150,
+
+    ...alignStyle,
+  };
 
   return (
-    <Dialog open onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="w-screen h-screen max-h-screen max-w-full flex flex-col p-4 gap-4">
-        <h1 className="text-xl font-bold">Export PDF</h1>
-        <PDFDownloadLink
-          document={<PDFTemplate elements={elements} responses={responses} />}
-          fileName="form-response.pdf"
-          className="bg-blue-500 text-white px-4 py-2 rounded w-fit"
-        >
-          {({ loading }) => (loading ? "Generating PDF..." : "Download PDF")}
-        </PDFDownloadLink>
-      </DialogContent>
-    </Dialog>
+    <Document>
+      {elements.map((group, pageIndex) => (
+        <Page key={pageIndex} style={styles.page} wrap>
+          {/* Header fixo */}
+          <View fixed style={styles.header}>
+            <Text style={{ fontSize: 12, color: "grey" }}>{formName}</Text>
+            {/* Imagem que repete no topo */}
+            {repeatHeaderImage && (
+              <Image src={headerImageUrl} style={imageStyle} />
+            )}
+            {/* Separators que repetem no topo */}
+            {headerSeparators.map((separator, index) => (
+              <View key={`header-separator-${separator.id}-${index}`}>
+                {renderFieldValue(separator, responses[separator.id])}
+              </View>
+            ))}
+          </View>
+
+          {/* Footer com numeração */}
+          <Text
+            fixed
+            style={styles.footer}
+            render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+          />
+
+          {/* Conteúdo da página */}
+
+          {group.map((element) => {
+            const value = responses[element.id];
+            if (
+              (repeatHeaderImage && element.id === repeatHeaderImage.id) ||
+              (element.type === "SeparatorField" && element.extraAttributes?.repeatOnPageBreak === true)
+            )
+
+              return null;
+
+            return (
+              <View key={element.id} style={styles.fieldContainer}>
+                {element.type !== "SeparatorField" && element.type !== "CheckboxField" && (
+                  <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
+                )}
+                {renderFieldValue(element, value)}
+              </View>
+            );
+          })}
+        </Page>
+      ))}
+    </Document>
+
   );
 }

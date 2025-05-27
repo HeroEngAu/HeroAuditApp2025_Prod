@@ -12,6 +12,7 @@ import { FaEdit } from "react-icons/fa";
 import { Button } from "../components/ui/button";
 import { GetFormsInformation } from "../actions/form";
 import { fetchAuthSession } from "aws-amplify/auth";
+import Loading from "../app/(dashboard)/forms/[id]/loading";
 
 type CustomForm = {
     id: string;
@@ -137,7 +138,7 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
 
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading />;
 
     const filteredForms = formsInfo.flatMap(entry =>
         entry.forms

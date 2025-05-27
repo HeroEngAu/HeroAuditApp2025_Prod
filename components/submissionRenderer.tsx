@@ -1,12 +1,10 @@
-"use client";
-import { useRef, useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { FormElementInstance, FormElements } from "./FormElements";
+import { useEffect, useState } from "react";
+import { FormElementInstance } from "./FormElements";
 import { Button } from "./ui/button";
 import { GetFormNameFromSubmissionId } from "../actions/form";
-import ReactDOMServer from "react-dom/server";
-
+import PDFDocument from "./PDFComponent";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { FormElements } from "./FormElements";
 
 interface Props {
   elements: FormElementInstance[];
@@ -15,183 +13,80 @@ interface Props {
 }
 
 export default function SubmissionRenderer({ submissionID, elements, responses }: Props) {
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [formName, setFormName] = useState<string | null>(null); // Use state to store form name
-const [mounted, setMounted] = useState(false);
+  const [formName, setFormName] = useState<string>("Loading...");
+  const [pageGroups, setPageGroups] = useState<FormElementInstance[][]>([]);
 
-useEffect(() => {
-  setMounted(true);
-}, []);
-
-  // Fetch form name when submissionID changes
   useEffect(() => {
     const fetchFormName = async () => {
       try {
         const result = await GetFormNameFromSubmissionId(submissionID);
-        setFormName(result.formName); // Store form name in state
-      } catch (error) {
-        console.error("Error fetching form name:", error);
+        setFormName(result.formName || "Untitled Form");
+      } catch {
+        setFormName("Unknown");
       }
     };
-
     fetchFormName();
-  }, [submissionID]); // Only fetch when submissionID changes
+  }, [submissionID]);
 
-  // Handle page load to make content visible
   useEffect(() => {
-    const handlePageLoad = () => {
-      if (contentRef.current) {
-        contentRef.current.style.visibility = "visible";
-        contentRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    };
-    window.addEventListener("load", handlePageLoad);
-    return () => {
-      window.removeEventListener("load", handlePageLoad);
-    };
-  }, []);
-
-  // Generate PDF with formName included
-  const generatePDF = async () => {
-    if (!contentRef.current || !formName) return; // Ensure formName is available
-
-    const pageGroups: FormElementInstance[][] = [];
-    let currentGroup: FormElementInstance[] = [];
+    const groups: FormElementInstance[][] = [];
+    let current: FormElementInstance[] = [];
     const repeatables: FormElementInstance[] = [];
 
     let firstPage = true;
 
     elements.forEach((el) => {
       if (el.type === "PageBreakField") {
-        if (currentGroup.length > 0) {
-          pageGroups.push(firstPage ? [...currentGroup] : [...repeatables, ...currentGroup]);
+        if (current.length > 0) {
+          groups.push(firstPage ? [...current] : [...repeatables, ...current]);
           firstPage = false;
         }
-        currentGroup = [];
+        current = [];
       } else {
-        if (el.extraAttributes?.repeatOnPageBreak) {
-          repeatables.push(el);
-        }
-        currentGroup.push(el);
+        if (el.extraAttributes?.repeatOnPageBreak) repeatables.push(el);
+        current.push(el);
       }
     });
 
-    if (currentGroup.length > 0) {
-      pageGroups.push(firstPage ? [...currentGroup] : [...repeatables, ...currentGroup]);
+    if (current.length > 0) {
+      groups.push(firstPage ? [...current] : [...repeatables, ...current]);
     }
 
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
+    setPageGroups(groups);
+  }, [elements]);
 
-    let currentPage = 1;
-
-    const documentNumber = formName || "Unknown Document Number"; // Use formName here
-
-    for (let i = 0; i < pageGroups.length; i++) {
-      const group = pageGroups[i];
-      const tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.top = "0";
-      tempContainer.style.width = "1000px";
-      tempContainer.style.padding = "2rem";
-      tempContainer.style.backgroundColor = "white";
-
-      group.forEach((el) => {
-        const FormComponent = FormElements[el.type].formComponent;
-        const rawValue = responses[el.id];
-        const value = typeof rawValue === 'string' ? rawValue : undefined;
-
-        const wrapper = document.createElement("div");
-        const elementRoot = (
-          <FormComponent
-            elementInstance={el}
-            defaultValue={value}
-            isInvalid={false}
-            submitValue={() => { }}
-            pdf={true}
-          />
-        );
-
-        wrapper.innerHTML = ReactDOMServer.renderToStaticMarkup(elementRoot);
-        tempContainer.appendChild(wrapper);
-      });
-
-      document.body.appendChild(tempContainer);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        logging: true,
-        allowTaint: true,
-        removeContainer: true,
-        ignoreElements: (el) => el.tagName === "BUTTON",
-      });
-
-      const imgHeightMM = canvas.height * 0.264583;
-      const imgWidthMM = canvas.width * 0.264583;
-      const ratio = Math.min(pdfWidth / imgWidthMM, 1);
-      const adjustedWidth = imgWidthMM * ratio;
-      const adjustedHeight = imgHeightMM * ratio;
-
-      const imgData = canvas.toDataURL("image/png");
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, 0, adjustedWidth, adjustedHeight);
-      pdf.setFontSize(10);
-      pdf.text(`${documentNumber}`, 10, 10);
-      const pageNumberText = `Page ${currentPage} of ${pageGroups.length}`;
-      pdf.setFontSize(10);
-      pdf.text(pageNumberText, pdfWidth / 2 - pdf.getStringUnitWidth(pageNumberText) * pdf.internal.scaleFactor / 2, pdf.internal.pageSize.height - 10);
-
-      currentPage++;
-
-      document.body.removeChild(tempContainer);
-    }
-
-    pdf.save(`${documentNumber}.pdf`);
-
-  };  
-if (!mounted) return null;
   return (
     <div className="flex flex-col items-center">
-      <Button
-        onClick={generatePDF}
-        className="fixed top-4 left-4 z-50 mb-4 px-4 py-2 rounded"
+      <PDFDownloadLink
+        document={
+          <PDFDocument
+            elements={pageGroups}
+            responses={responses}
+            formName={formName}
+          />
+        }
+        fileName={`${formName}.pdf`}
       >
-        Export as PDF
-      </Button>
+        {({ loading }) => (
+          <Button className="fixed top-4 left-4 z-50">
+            {loading ? "Preparing PDF..." : "Export as PDF"}
+          </Button>
+        )}
+      </PDFDownloadLink>
 
-      <div
-        ref={contentRef}
-        className="w-full flex flex-col gap-4 flex-grow bg-background h-full rounded-2xl p-8 pt-8 overflow-y-auto"
-        style={{
-          display: mounted ? "block" : "none",
-          maxHeight: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        {(() => {
-          const pageGroups: FormElementInstance[][] = [];
-          let currentGroup: FormElementInstance[] = [];
-
-          elements.forEach((el) => {
-            if (el.type === "PageBreakField") {
-              if (currentGroup.length > 0) pageGroups.push(currentGroup);
-              currentGroup = [];
-            } else {
-              currentGroup.push(el);
-            }
-          });
-          if (currentGroup.length > 0) pageGroups.push(currentGroup);
-
-          return pageGroups.map((group, idx) => (
-            <div key={idx} className="pdf-page mb-8">
-              {group.map((element) => {
+      {/* Conteúdo renderizado normalmente na tela */}
+      <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ maxHeight: '100vh' }}>
+        {pageGroups.map((group, idx) => (
+          <div key={idx} className="pdf-page mb-8">
+            {group
+              .filter(el => {
+                const shouldRepeat = el.extraAttributes?.repeatOnPageBreak === true;
+                return idx === 0 || !shouldRepeat;
+              })
+              .map((element) => {
                 const FormComponent = FormElements[element.type].formComponent;
                 const rawValue = responses[element.id];
-                const value = typeof rawValue === 'string' ? rawValue : undefined;
+                const value = typeof rawValue === "string" ? rawValue : undefined;
 
                 return (
                   <div key={element.id}>
@@ -205,9 +100,8 @@ if (!mounted) return null;
                   </div>
                 );
               })}
-            </div>
-          ));
-        })()}
+          </div>
+        ))}
       </div>
     </div>
   );
