@@ -11,19 +11,13 @@ import {
 import { PDFViewer } from "@react-pdf/renderer";
 import PDFDocument from "./PDFComponent";
 import { FormElementInstance } from "./FormElements";
-import useUserAttributes from './userAttributes';
 
 function PreviewPDFDialogBtn({ formName }: { formName: string }) {
   const { elements } = useDesigner();
-  const { attributes, loading, error } = useUserAttributes();
 
   const documentNumber = formName || "Unknown Document Number";
-  const userName = attributes?.name || "User";
 
-  if (loading) return <div>Loading user info...</div>;
-  if (error) return <div>Error loading user info</div>;
-
-  // Agrupamento dos elementos por páginas, respeitando PageBreakField e repeatOnPageBreak
+  // Group of elements by PageBreakField
   const groups: FormElementInstance[][] = [];
   const repeatables: FormElementInstance[] = [];
   let current: FormElementInstance[] = [];
@@ -55,9 +49,7 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
       groups.push([...repeatables, ...current]);
     }
   }
-  console.log("userName:", userName);
   
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -81,7 +73,7 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
         </DialogDescription>
 
           <PDFViewer width="100%" height="100%">
-            <PDFDocument elements={groups} responses={{}} formName={documentNumber} userName={userName}/>
+            <PDFDocument elements={groups} responses={{}} formName={documentNumber}/>
           </PDFViewer>
       </DialogContent>
     </Dialog>

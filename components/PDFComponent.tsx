@@ -11,7 +11,6 @@ interface Props {
   elements: FormElementInstance[][];
   responses: { [key: string]: unknown };
   formName: string;
-  userName?: string;
 }
 const styles = StyleSheet.create({
   page: {
@@ -63,14 +62,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: "italic",
     color: "#666",
+  }, footerContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+  },
+  footerLine: {
+    height: 1,
+    backgroundColor: 'grey',
+    marginBottom: 4,
+  },
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    fontSize: 10,
+    color: 'grey',
   },
 });
 
 function stripHtml(html: string) {
-  // Remove tags HTML
   const tmp = html.replace(/<\/?[^>]+(>|$)/g, "");
 
-  // Decodifica entidades HTML
   const txt = document.createElement("textarea");
   txt.innerHTML = tmp;
   return txt.value;
@@ -148,7 +161,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         return trimmed || "-";
       };
 
-      // Estimar largura das colunas com base no conteúdo
+      // Get the column widths based on the content
       const estimateColumnWidths = (tableData: string[][], columnCount: number): number[] => {
         const maxCharPerColumn = Array(columnCount).fill(0);
 
@@ -159,9 +172,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
             let px = 6;
             if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
-              px = 12; // datas são mais largas
+              px = 12;
             } else if (!isNaN(Number(parsed))) {
-              px = 7; // números médios
+              px = 7;
             }
 
             maxCharPerColumn[colIndex] = Math.max(
@@ -332,7 +345,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName, userName }: Props) {
+export default function PDFDocument({ elements, responses, formName }: Props) {
   const repeatHeaderImage = elements
     .flat()
     .find(
@@ -343,7 +356,7 @@ export default function PDFDocument({ elements, responses, formName, userName }:
       elements
         .flat()
         .filter(el => el.type === "SeparatorField" && el.extraAttributes?.repeatOnPageBreak)
-        .map(el => [el.id, el]) // usa o id como chave
+        .map(el => [el.id, el])
     ).values()
   );
 
@@ -369,13 +382,16 @@ export default function PDFDocument({ elements, responses, formName, userName }:
     <Document>
       {elements.map((group, pageIndex) => (
         <Page key={pageIndex} style={styles.page} wrap>
-          {/* Header fixo */}
+
+          {/* Header */}
           <View fixed style={styles.header}>
-            {/* Imagem que repete no topo */}
+
+            {/* Repeated images */}
             {repeatHeaderImage && (
               <Image src={headerImageUrl} style={imageStyle} />
             )}
-            {/* Separators que repetem no topo */}
+
+            {/* Repeated separators */}
             {headerSeparators.map((separator, index) => (
               <View key={`header-separator-${separator.id}-${index}`}>
                 {renderFieldValue(separator, responses[separator.id])}
@@ -383,42 +399,16 @@ export default function PDFDocument({ elements, responses, formName, userName }:
             ))}
           </View>
 
-          {/* Footer com numeração */}
-          <View
-            fixed
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              left: 20,
-              right: 20,
-            }}
-          >
-            {/* Linha horizontal */}
-            <View
-              style={{
-                height: 1,
-                backgroundColor: 'grey',
-                marginBottom: 4,
-              }}
-            />
-
-            {/* Rodapé com formName à esquerda e numeração à direita */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                fontSize: 10,
-                color: 'grey',
-              }}
-            >
+          {/* Footer */}
+          <View fixed style={styles.footerContainer}>
+            <View style={styles.footerLine} />
+            <View style={styles.footerContent}>
               <Text>{formName}</Text>
               <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
             </View>
           </View>
 
-
-          {/* Conteúdo da página */}
-
+          {/* Page Content */}
           {group.map((element) => {
             const value = responses[element.id];
             if (

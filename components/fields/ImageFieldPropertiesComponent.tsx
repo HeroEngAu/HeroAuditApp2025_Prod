@@ -74,12 +74,13 @@ useEffect(() => {
         ...element.extraAttributes,
         preserveOriginalSize,
         position: form.getValues("position"),
-        repeatOnPageBreak: form.getValues("repeatOnPageBreak"), // Preserve esse valor
+        repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
       },
     });
   };
   img.src = imageUrl;
-}, [element.extraAttributes.imageUrl, form, updateElement]);
+}, [element, form, updateElement]);
+
 
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {

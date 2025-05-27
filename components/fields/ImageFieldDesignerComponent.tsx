@@ -5,6 +5,7 @@ import {
 } from "../FormElements";
 import { Label } from "../ui/label";
 import { CustomInstance } from "./ImageField";
+import Image from 'next/image';
 
 export function DesignerComponent({
   elementInstance,
@@ -26,23 +27,26 @@ export function DesignerComponent({
     default:
       alignmentClass = "mx-auto";
   }
-  
+
   return (
     <div className="flex flex-col gap-2 w-full items-start">
       <Label />
-      
+
       {imageUrl ? (
-        <img
+        <Image
           src={imageUrl}
           alt="Uploaded"
-          className={` ${alignmentClass} rounded-md border shadow w-auto object-contain`}
+          className={`${alignmentClass} rounded-md border shadow w-auto object-contain`}
+          width={0}
+          height={0}
+          sizes="100vw"
           style={{
-            maxWidth: "100%",
-            width: "auto",
-            maxHeight: preserveOriginalSize ? "none" : "80px",
+            maxWidth: '100%',
+            width: 'auto',
+            maxHeight: preserveOriginalSize ? 'none' : '80px',
           }}
         />
-        
+
       ) : (
         <p className="text-sm text-muted-foreground italic">No image uploaded</p>
       )}
