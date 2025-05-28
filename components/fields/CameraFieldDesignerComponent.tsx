@@ -1,5 +1,6 @@
 import { MdPhotoCamera } from "react-icons/md";
 import { FormElementInstance } from "../FormElements";
+import { CustomInstance } from "./CameraField"
 
 type Props = {
   elementInstance: FormElementInstance;
@@ -10,7 +11,7 @@ export function DesignerComponent({ elementInstance }: Props) {
     typeof elementInstance.extraAttributes === "object" &&
     elementInstance.extraAttributes !== null &&
     "label" in elementInstance.extraAttributes
-      ? (elementInstance.extraAttributes as any).label
+      ? (elementInstance.extraAttributes as CustomInstance).label
       : "";
 
   return (
