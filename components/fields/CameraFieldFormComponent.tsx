@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { MdPhotoCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { FormElementInstance, SubmitFunction } from "../FormElements";
+import React from "react";
 
 type Props = {
     elementInstance: FormElementInstance;
@@ -20,6 +21,9 @@ type CameraFieldInstance = FormElementInstance & {
     extraAttributes?: CameraFieldExtraAttributes;
 };
 
+type ReactCameraProRef = {
+  takePhoto: () => string;
+};
 
 function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -49,7 +53,7 @@ export function FormComponent({
     readOnly = false,
 }: Props) {
     const cameraElement = elementInstance as CameraFieldInstance;
-    const cameraRef = useRef<any>(null);
+    const cameraRef = React.useRef<ReactCameraProRef | null>(null);
     const [cameraOpen, setCameraOpen] = useState(false);
     const [photo, setPhoto] = useState<string | null>(
         defaultValue || cameraElement.extraAttributes?.content || null
@@ -60,7 +64,7 @@ export function FormComponent({
     const takePhoto = async () => {
         if (!cameraRef.current) return;
 
-        const rawImage = cameraRef.current.takePhoto();
+        const rawImage = cameraRef.current?.takePhoto();
         try {
             const compressed = await resizeAndCompressImage(rawImage);
             setPhoto(compressed);
