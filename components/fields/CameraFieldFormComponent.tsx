@@ -22,7 +22,7 @@ type CameraFieldInstance = FormElementInstance & {
 };
 
 type ReactCameraProRef = {
-  takePhoto: () => string;
+    takePhoto: () => string;
 };
 
 function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string> {
@@ -55,6 +55,7 @@ export function FormComponent({
     const cameraElement = elementInstance as CameraFieldInstance;
     const cameraRef = React.useRef<ReactCameraProRef | null>(null);
     const [cameraOpen, setCameraOpen] = useState(false);
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
     const [photo, setPhoto] = useState<string | null>(
         defaultValue || cameraElement.extraAttributes?.content || null
     );
@@ -108,6 +109,7 @@ export function FormComponent({
                     <div className="w-[320px] h-[240px] rounded overflow-hidden border">
                         <ReactCameraPro
                             ref={cameraRef}
+                            facingMode={facingMode}
                             errorMessages={{
                                 noCameraAccessible: undefined,
                                 permissionDenied: undefined,
@@ -129,6 +131,15 @@ export function FormComponent({
                         >
                             Cancel
                         </button>
+                        <button
+                            onClick={() =>
+                                setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'))
+                            }
+                            className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600"
+                        >
+                            Switch Camera
+                        </button>
+
                     </div>
                 </div>
             )}
