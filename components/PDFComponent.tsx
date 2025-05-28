@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 40,
     paddingHorizontal: 30,
-    fontSize: 12,
+    fontSize: 10,
   },
   fieldContainer: {
     marginBottom: 10,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   separatorText: {
-    fontSize: 12,
+    fontSize: 10,
     fontStyle: "italic",
     color: "#666",
   }, footerContainer: {
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   footerLine: {
     height: 1,
     backgroundColor: 'grey',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   footerContent: {
     flexDirection: 'row',
@@ -230,7 +230,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   },
                 ]}
               >
-                <Text style={{ fontSize: 12 }}>
+                <Text style={{ fontSize: 10 }}>
                   {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
                 </Text>
               </View>
@@ -239,7 +239,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
           {/* Body */}
           {Array.from({ length: rows }).map((_, rowIndex) => (
-            <View key={rowIndex} style={styles.tableRow}>
+            <View key={rowIndex} style={styles.tableRow} wrap={false}>
               {Array.from({ length: columns }).map((_, colIndex) => {
                 const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                 return (
@@ -271,10 +271,10 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const { required } = element.extraAttributes ?? {};
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 4 }}>
+          <Text style={{ fontSize: 10, fontWeight: "bold", marginBottom: 4 }}>
             {required ? "*" : ""}
           </Text>
-          <Text style={{ fontSize: 12, minHeight: 20 }}>
+          <Text style={{ fontSize: 10, minHeight: 20 }}>
             {value !== undefined && value !== null && value !== "" ? String(value) : "-"}
           </Text>
         </View>
@@ -286,10 +286,10 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }}>
-          <Text style={{ fontSize: 12, marginRight: 8, fontFamily: 'DejaVuSans' }}>
+          <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
             {checked ? "☑" : "☐"}
           </Text>
-          <Text style={{ fontSize: 12, fontFamily: 'DejaVuSans' }}>
+          <Text style={{ fontSize: 10, fontFamily: 'DejaVuSans' }}>
             {label}
           </Text>
         </View>
@@ -316,7 +316,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 14,
               textAlign: textAlign as "left" | "center" | "right",
               color: textColor,
             }}
@@ -333,7 +333,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 12 }}>
+          <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
         </View>
@@ -369,7 +369,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 12 }}>
+          <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
         </View>
@@ -381,7 +381,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 12 }}>
+          <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
         </View>

@@ -111,7 +111,7 @@ export function FormComponent({
                         <ReactCameraPro
                             ref={cameraRef}
                             facingMode={facingMode}
-                            aspectRatio="cover"
+                            aspectRatio={16/9}
                             errorMessages={{
                                 noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
                                 permissionDenied: 'Permission denied. Please refresh and give camera permission.',
