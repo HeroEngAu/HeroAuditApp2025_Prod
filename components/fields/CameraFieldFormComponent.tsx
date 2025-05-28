@@ -38,7 +38,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string>
             if (!ctx) return reject("Canvas context error");
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // 70% quality
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.9);
             resolve(compressedBase64);
         };
         img.onerror = reject;
