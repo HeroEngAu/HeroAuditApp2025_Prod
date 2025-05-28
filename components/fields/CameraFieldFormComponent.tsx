@@ -6,22 +6,21 @@ type CameraRef = {
   takePhoto: () => string;
 };
 
-interface Props {
-  readOnly?: boolean;
+type CameraFieldProps = {
+  value?: string;
   defaultValue?: string;
-  onChange?: (value: string) => void;
-}
+  onChange?: (val: string) => void;
+  readOnly?: boolean;
+};
 
-export function FormComponent({ readOnly = false, defaultValue, onChange }: Props) {
+export function FormComponent({ value, defaultValue, onChange, readOnly }: CameraFieldProps) {
   const cameraRef = useRef<CameraRef | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(value || defaultValue || null);
 
   useEffect(() => {
-    if (defaultValue) {
-      setPhoto(defaultValue);
-    }
-  }, [defaultValue]);
+    if (value !== undefined) setPhoto(value);
+  }, [value]);
 
   const openCamera = () => setCameraOpen(true);
   const closeCamera = () => setCameraOpen(false);
@@ -30,11 +29,10 @@ export function FormComponent({ readOnly = false, defaultValue, onChange }: Prop
     if (!cameraRef.current) return;
     const image = cameraRef.current.takePhoto();
     setPhoto(image);
-    onChange?.(image);
     closeCamera();
+    onChange?.(image);
   };
 
-  // 🔒 Read-only mode
   if (readOnly) {
     return (
       <div className="flex flex-col items-center gap-2">
@@ -50,7 +48,6 @@ export function FormComponent({ readOnly = false, defaultValue, onChange }: Prop
     );
   }
 
-  // ✍️ Interactive mode
   return (
     <div className="flex flex-col items-center gap-4">
       {!cameraOpen && (
