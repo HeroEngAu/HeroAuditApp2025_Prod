@@ -8,17 +8,21 @@ import { ElementsType, FormElement, FormElementInstance } from "../FormElements"
 
 export const extraAttributes = {
   content: "", // store base64 image here
+  label: "",
 };
 
 const type: ElementsType = "CameraField";
-//Not working properly because it's necessary to upload the image to a server
+
 export const CameraFieldFormElement: FormElement = {
   type,
   construct: (id: string) => ({
     id,
     type,
     label: "Camera Field",
-    extraAttributes,
+    extraAttributes: {
+      content: "", // base64 image
+      label: "",   // now properly initialized as empty string
+    },
   }),
   designerBtnElement: {
     icon: MdPhotoCamera,

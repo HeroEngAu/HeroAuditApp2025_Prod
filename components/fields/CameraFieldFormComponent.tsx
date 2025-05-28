@@ -111,7 +111,7 @@ export function FormComponent({
                         <ReactCameraPro
                             ref={cameraRef}
                             facingMode={facingMode}
-                            aspectRatio={4 / 3}
+                            aspectRatio={16 / 9}
                             errorMessages={{
                                 noCameraAccessible: undefined,
                                 permissionDenied: undefined,
