@@ -389,7 +389,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
     }
 
 case "CameraField": {
-  const imageUrl = typeof value === "string" ? value : element.extraAttributes?.imageUrl;
+  const imageUrl = typeof value === "string" ? value : element.extraAttributes?.content;
   if (!imageUrl) return <Text>[No image]</Text>;
 
   return (
@@ -397,13 +397,11 @@ case "CameraField": {
       <Text style={{ marginBottom: 4 }}>{element.extraAttributes?.label}</Text>
       <Image
         src={imageUrl}
-        style={{ width: 200, height: 150, objectFit: "cover" }}
+        style={{ width: 500, height: "auto", objectFit: "cover", alignSelf: "center" }}
       />
     </View>
   );
 }
-
-
 
     default:
       return (

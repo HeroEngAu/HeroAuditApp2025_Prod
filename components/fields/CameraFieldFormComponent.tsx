@@ -3,6 +3,7 @@ import { MdPhotoCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { FormElementInstance, SubmitFunction } from "../FormElements";
 import React from "react";
+import { Button } from "../ui/button";
 
 type Props = {
     elementInstance: FormElementInstance;
@@ -38,7 +39,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string>
             if (!ctx) return reject("Canvas context error");
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.9);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 1);
             resolve(compressedBase64);
         };
         img.onerror = reject;
@@ -97,7 +98,7 @@ export function FormComponent({
                 <button
                     type="button"
                     onClick={openCamera}
-                    className="flex items-center gap-2 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                    className="flex items-center gap-2 px-3 py-2 rounded border border-gray-400 text-gray-700 cursor-default select-none"
                 >
                     <MdPhotoCamera size={20} />
                     Open Camera
@@ -119,26 +120,26 @@ export function FormComponent({
                         />
                     </div>
                     <div className="flex gap-2">
-                        <button
+                        <Button
                             onClick={takePhoto}
                             className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
                         >
                             Take Photo
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={closeCamera}
                             className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() =>
-                                setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'))
+                                setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'))
                             }
                             className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600"
                         >
                             Switch Camera
-                        </button>
+                        </Button>
 
                     </div>
                 </div>
