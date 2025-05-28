@@ -111,12 +111,13 @@ export function FormComponent({
                         <ReactCameraPro
                             ref={cameraRef}
                             facingMode={facingMode}
-                            aspectRatio={16 / 9}
+                            aspectRatio="cover"
                             errorMessages={{
-                                noCameraAccessible: undefined,
-                                permissionDenied: undefined,
-                                switchCamera: undefined,
-                                canvas: undefined,
+                                noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
+                                permissionDenied: 'Permission denied. Please refresh and give camera permission.',
+                                switchCamera:
+                                    'It is not possible to switch camera to different one because there is only one video device accessible.',
+                                canvas: 'Canvas is not supported.',
                             }}
                         />
                     </div>
