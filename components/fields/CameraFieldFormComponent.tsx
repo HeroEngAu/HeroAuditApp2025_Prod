@@ -26,7 +26,7 @@ type ReactCameraProRef = {
     takePhoto: () => string;
 };
 
-function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string> {
+function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
@@ -39,7 +39,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 600): Promise<string>
             if (!ctx) return reject("Canvas context error");
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 1);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
             resolve(compressedBase64);
         };
         img.onerror = reject;
@@ -56,7 +56,7 @@ export function FormComponent({
     const cameraElement = elementInstance as CameraFieldInstance;
     const cameraRef = React.useRef<ReactCameraProRef | null>(null);
     const [cameraOpen, setCameraOpen] = useState(false);
-    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [photo, setPhoto] = useState<string | null>(
         defaultValue || cameraElement.extraAttributes?.content || null
     );
@@ -69,13 +69,26 @@ export function FormComponent({
         const rawImage = cameraRef.current?.takePhoto();
         try {
             const compressed = await resizeAndCompressImage(rawImage);
+
+            const getBase64Size = (base64: string) => {
+                const stringLength = base64.length - 'data:image/jpeg;base64,'.length;
+                const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+                return sizeInBytes;
+            };
+
+            const sizeInBytes = getBase64Size(compressed);
+            const maxSizeInBytes = 1024 * 1024; // 1MB
+
+            if (sizeInBytes > maxSizeInBytes) {
+                alert("The image is too big to be submitted. Try to get one with less details.");
+                return;
+            }
             setPhoto(compressed);
 
             cameraElement.extraAttributes = {
                 ...cameraElement.extraAttributes,
                 content: compressed,
             };
-
             submitValue?.(compressed, cameraElement.id);
             closeCamera();
         } catch (err) {
@@ -91,7 +104,6 @@ export function FormComponent({
             </div>
         );
     }
-
 
     return (
         <div className="flex flex-col items-center gap-4">
@@ -110,6 +122,7 @@ export function FormComponent({
                 <div className="flex flex-col items-center gap-2">
                     <div className="w-[320px] aspect-[16/9] rounded overflow-hidden border">
                         <ReactCameraPro
+                            key={facingMode}
                             ref={cameraRef}
                             facingMode={facingMode}
                             aspectRatio={16 / 9}
