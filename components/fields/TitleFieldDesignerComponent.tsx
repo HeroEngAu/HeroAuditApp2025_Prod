@@ -3,7 +3,7 @@
 import {
   FormElementInstance,
 } from "../FormElements";
-import { Label } from "../ui/label";
+
 import { CustomInstance } from "./TitleField";
 
 export function DesignerComponent({
@@ -34,7 +34,7 @@ export function DesignerComponent({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <Label className="text-muted-foreground">Title field</Label>
+      
       <p
         className={`text-xl px-2 py-1 rounded ${fallbackBgClass} ${fallbackTextClass}`}
         style={{

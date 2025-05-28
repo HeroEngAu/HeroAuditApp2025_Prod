@@ -107,10 +107,11 @@ export function FormComponent({
 
             {cameraOpen && (
                 <div className="flex flex-col items-center gap-2">
-                    <div className="w-[320px] h-[240px] rounded overflow-hidden border">
+                    <div className="rounded overflow-hidden border">
                         <ReactCameraPro
                             ref={cameraRef}
                             facingMode={facingMode}
+                            aspectRatio={4 / 3}
                             errorMessages={{
                                 noCameraAccessible: undefined,
                                 permissionDenied: undefined,

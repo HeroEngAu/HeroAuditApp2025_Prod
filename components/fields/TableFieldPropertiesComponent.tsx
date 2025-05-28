@@ -247,7 +247,9 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
           render={({ field }) => (
             <FormItem>
               <FormLabel>Label</FormLabel>
-              <FormControl><Input {...field} /></FormControl>
+              <FormControl>
+                <Input {...field} placeholder="Enter a label (optional)" />
+              </FormControl>
               <FormDescription>Displayed above the table.</FormDescription>
               <FormMessage />
             </FormItem>

@@ -16,7 +16,7 @@ const type: ElementsType = "TableField";
 const extraAttributes = {
   rows: 2,
   columns: 2,
-  label: "Table Field",
+  label: "",
   required: false,
   data: [["", ""], ["", ""]],
   columnHeaders: ["Col 1", "Col 2"],
@@ -25,7 +25,7 @@ const extraAttributes = {
 export const propertiesSchema = z.object({
   rows: z.number().min(1).max(500),
   columns: z.number().min(1).max(10),
-  label: z.string().min(1).max(50),
+  label: z.string().min(0).max(50),
   required: z.boolean().optional(),
   data: z.array(z.array(z.string())).optional(),
   columnHeaders: z.array(z.string()).optional(),
