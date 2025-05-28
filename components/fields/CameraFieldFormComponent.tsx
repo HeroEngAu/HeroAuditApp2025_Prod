@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { MdPhotoCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { FormElementInstance, SubmitFunction } from "../FormElements";
