@@ -108,6 +108,8 @@ export function FormComponent({
     return (
         <div className="flex flex-col items-center gap-4">
             {!cameraOpen && (
+                <>
+                <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
                 <button
                     type="button"
                     onClick={openCamera}
@@ -115,12 +117,12 @@ export function FormComponent({
                 >
                     <MdPhotoCamera size={20} />
                     Open Camera
-                </button>
+                </button></>
             )}
 
             {cameraOpen && (
                 <div className="flex flex-col items-center gap-2">
-                    <div className="w-[320px] aspect-[16/9] rounded overflow-hidden border">
+                    <div className="w-[500px] aspect-[16/9] rounded overflow-hidden border">
                         <ReactCameraPro
                             key={facingMode}
                             ref={cameraRef}
@@ -163,6 +165,9 @@ export function FormComponent({
 
             {photo && !readOnly && (
                 <div className="flex flex-col items-center">
+                    {cameraElement.label && (
+                        <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
+                    )}
                     <p className="mb-2">Photo preview:</p>
                     <img src={photo} alt="Captured" className="max-w-xs rounded border" />
                 </div>
