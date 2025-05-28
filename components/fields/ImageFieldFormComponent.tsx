@@ -4,7 +4,6 @@ import {
   FormElementInstance,
 } from "../FormElements";
 import { CustomInstance } from "./ImageField";
-import Image from 'next/image';
 
 export function FormComponent({
   elementInstance,
@@ -27,7 +26,7 @@ export function FormComponent({
 
   return (
     <div className={`w-full flex ${justifyClass}`}>
-      <Image
+      <img
         src={imageUrl}
         alt="Uploaded"
         width={0}

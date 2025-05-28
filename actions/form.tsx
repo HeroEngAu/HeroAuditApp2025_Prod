@@ -374,7 +374,10 @@ export async function SubmitForm(formId: string, tagId: string, content: string)
   });
 
   const { data: formTags } = await client.models.FormTag2.list({
-    filter: { tagID: { eq: tagId } },
+    filter: {
+      tagID: { eq: tagId },
+      formID: { eq: formId },
+    },
   });
 
   if (!formTags.length) throw new Error("FormTag2 not found");

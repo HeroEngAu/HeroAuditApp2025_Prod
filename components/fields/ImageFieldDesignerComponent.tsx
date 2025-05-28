@@ -5,7 +5,6 @@ import {
 } from "../FormElements";
 import { Label } from "../ui/label";
 import { CustomInstance } from "./ImageField";
-import Image from 'next/image';
 
 export function DesignerComponent({
   elementInstance,
@@ -33,7 +32,7 @@ export function DesignerComponent({
       <Label />
 
       {imageUrl ? (
-        <Image
+        <img
           src={imageUrl}
           alt="Uploaded"
           className={`${alignmentClass} rounded-md border shadow w-auto object-contain`}

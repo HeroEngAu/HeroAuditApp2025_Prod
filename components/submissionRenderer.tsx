@@ -74,7 +74,6 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         )}
       </PDFDownloadLink>
 
-      {/* Conteúdo renderizado normalmente na tela */}
       <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ maxHeight: '100vh' }}>
         {pageGroups.map((group, idx) => (
           <div key={idx} className="pdf-page mb-8">
