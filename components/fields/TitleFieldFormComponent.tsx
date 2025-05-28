@@ -1,6 +1,5 @@
 "use client";
 
-import { Label } from "@aws-amplify/ui-react";
 import { FormElementInstance } from "../FormElements";
 import { CustomInstance } from "./TitleField";
 
@@ -36,7 +35,6 @@ export function FormComponent({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <Label className="text-muted-foreground">Title field</Label>
       <p
         className={`text-xl px-2 py-1 rounded ${fallbackBgClass} ${fallbackTextClass}`}
         style={{

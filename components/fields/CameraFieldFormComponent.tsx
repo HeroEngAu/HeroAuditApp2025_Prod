@@ -85,12 +85,13 @@ export function FormComponent({
 
     if (readOnly && photo) {
         return (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center py-4">
                 <p className="mb-2">Captured photo:</p>
                 <img src={photo} alt="Captured" className="max-w-xs rounded border" />
             </div>
         );
     }
+
 
     return (
         <div className="flex flex-col items-center gap-4">
@@ -107,11 +108,11 @@ export function FormComponent({
 
             {cameraOpen && (
                 <div className="flex flex-col items-center gap-2">
-                    <div className="rounded overflow-hidden border">
+                    <div className="w-[320px] aspect-[16/9] rounded overflow-hidden border">
                         <ReactCameraPro
                             ref={cameraRef}
                             facingMode={facingMode}
-                            aspectRatio={16/9}
+                            aspectRatio={16 / 9}
                             errorMessages={{
                                 noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
                                 permissionDenied: 'Permission denied. Please refresh and give camera permission.',
