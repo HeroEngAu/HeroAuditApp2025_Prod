@@ -82,6 +82,7 @@ interface TextFieldExtraAttributes {
   textAlign?: string;
   preserveOriginalSize?: boolean;
   width?: number;
+  content?:string;
 }
 
 export type FormElementInstance = {
