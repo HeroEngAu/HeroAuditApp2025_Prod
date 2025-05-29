@@ -57,35 +57,43 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
   }, [elements]);
 
   return (
-<div className="flex flex-col items-center">
-    {/* Top Bar */}
-    <div className="fixed top-0 h-20 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 border-b bg-white shadow-sm">
-      <PDFDownloadLink
-        document={
-          <PDFDocument
-            elements={pageGroups}
-            responses={responses}
-            formName={formName}
-          />
-        }
-        fileName={`${formName}.pdf`}
-      >
-        {({ loading }) => (
-          <Button size="sm" className="h-8 px-3">
-            {loading ? "Preparing PDF..." : "Export as PDF"}
-          </Button>
-        )}
-      </PDFDownloadLink>
+    <div className="flex flex-col items-center w-full h-full">
+      {/* Top Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-4 py-4 border-b bg-white shadow-sm flex-shrink-0 w-full">
 
-      <button
-        className="flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
-        onClick={() => window.history.back()}
-      >
-        <Cross2Icon className="w-6 h-8" />
-      </button>
-    </div>
 
-      <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ paddingTop: "74px", maxHeight: "100vh" }}>
+        <div className="flex gap-2 items-start">
+          <PDFDownloadLink
+            document={
+              <PDFDocument
+                elements={pageGroups}
+                responses={responses}
+                formName={formName}
+              />
+            }
+            fileName={`${formName}.pdf`}
+          >
+            {({ loading }) => (
+              <Button size="sm" className="h-8 px-3 mt-1">
+                {loading ? "Preparing..." : "Export as PDF"}
+              </Button>
+            )}
+          </PDFDownloadLink>
+
+          <button
+            onClick={() => window.history.back()}
+            className="mt-1 flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <Cross2Icon className="w-4 h-4" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-[88px] overflow-y-auto"
+        style={{ maxHeight: "100vh" }}
+      >
         {pageGroups.map((group, idx) => (
           <div key={idx} className="pdf-page mb-8">
             {group
