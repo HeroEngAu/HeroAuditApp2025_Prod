@@ -7,7 +7,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { submitFormAction, SaveFormAfterTestAction, updateVisitCount } from "../actions/form";
-import useUserAttributes from "./userAttributes"; 
+import useUserAttributes from "./userAttributes";
 
 function FormSubmitComponent({ formUrl, content }: { content: FormElementInstance[]; formUrl: string }) {
   const formValues = useRef<{ [key: string]: string }>({});
@@ -19,8 +19,9 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
 
-  const validateForm: () => boolean = useCallback(() => {
-     if (!userId) return false;
+  const validateForm = useCallback(() => {
+    if (!userId) return false;
+
     for (const field of content) {
       const actualValue = formValues.current[field.id] || "";
       const valid = FormElements[field.type].validate(field, actualValue);
@@ -30,12 +31,12 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       }
     }
 
-    if (Object.keys(formErrors.current).length > 0) {
-      return false;
-    }
-
-    return true;
+    return Object.keys(formErrors.current).length === 0;
   }, [content, userId]);
+  
+  const submitValue = useCallback((key: string, value: string) => {
+    formValues.current[key] = value;
+  }, []);
 
   useEffect(() => {
     const storedTagId = localStorage.getItem("tagId");
@@ -55,11 +56,6 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       sessionStorage.setItem(storageKey, "true");
     }
   }, [formUrl, tagId]);
-
-
-  const submitValue = useCallback((key: string, value: string) => {
-    formValues.current[key] = value;
-  }, []);
 
   const submitForm = async () => {
     formErrors.current = {};
@@ -98,40 +94,40 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       });
     }
   };
-const saveProgress = useCallback(async () => {
-  try {
-    const cleanData = JSON.parse(JSON.stringify(formValues.current));
-    if (!tagId) {
+  const saveProgress = useCallback(async () => {
+    try {
+      const cleanData = JSON.parse(JSON.stringify(formValues.current));
+      if (!tagId) {
+        toast({
+          title: "Missing tag ID",
+          description: "Unable to save progress without tagId",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("formId", formUrl);
+      formData.append("tagId", tagId);
+      formData.append("responses", JSON.stringify(cleanData));
+      formData.append("formContent", JSON.stringify(content));
+
+      await SaveFormAfterTestAction(formData);
       toast({
-        title: "Missing tag ID",
-        description: "Unable to save progress without tagId",
+        title: "Progress saved",
+        description: "Your progress has been saved successfully.",
+        className: "bg-green-500 text-white",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Save failed",
+        description: "Could not save your progress.",
         variant: "destructive",
       });
-      return;
     }
+  }, [formUrl, tagId, content, formValues]);
 
-    const formData = new FormData();
-    formData.append("formId", formUrl);
-    formData.append("tagId", tagId);
-    formData.append("responses", JSON.stringify(cleanData));
-    formData.append("formContent", JSON.stringify(content));
-
-    await SaveFormAfterTestAction(formData);
-    toast({
-      title: "Progress saved",
-      description: "Your progress has been saved successfully.",
-      className: "bg-green-500 text-white",
-    });
-  } catch (error) {
-    console.error(error);
-    toast({
-      title: "Save failed",
-      description: "Could not save your progress.",
-      variant: "destructive",
-    });
-  }
-}, [formUrl, tagId, content, formValues]);
-  
   useEffect(() => {
     if (tagId && content.length > 0) {
       saveProgress();

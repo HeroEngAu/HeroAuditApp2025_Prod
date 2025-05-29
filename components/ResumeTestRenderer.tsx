@@ -7,7 +7,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { SaveFormAfterTestAction, submitFormAction } from "../actions/form";
-import useUserAttributes from "./userAttributes"; 
+import useUserAttributes from "./userAttributes";
 
 function ResumeTestRenderer({
   formId,
@@ -27,9 +27,10 @@ function ResumeTestRenderer({
   const [pending, startTransition] = useTransition();
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
-  if (!userId) return;
-  const validateForm: () => boolean = useCallback(() => {
+  
+  const validateForm = useCallback(() => {
     if (!userId) return false;
+
     for (const field of elements) {
       const actualValue = formValues.current[field.id] || "";
       const valid = FormElements[field.type].validate(field, actualValue);
@@ -124,24 +125,24 @@ function ResumeTestRenderer({
         key={renderKey}
         className="flex flex-col gap-4 flex-grow bg-background w-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
       >
-{Array.isArray(elements) && elements.length > 0 ? (
-  elements.map((element) => {
-    const FormElement = FormElements[element.type].formComponent;
-    return (
-      <FormElement
-        key={element.id}
-        elementInstance={element}
-        submitValue={submitValue}
-        isInvalid={formErrors.current[element.id]}
-        defaultValue={formValues.current[element.id]}
-      />
-    );
-  })
-) : (
-  <div className="text-center text-muted-foreground">
-    No form elements to display.
-  </div>
-)}
+        {Array.isArray(elements) && elements.length > 0 ? (
+          elements.map((element) => {
+            const FormElement = FormElements[element.type].formComponent;
+            return (
+              <FormElement
+                key={element.id}
+                elementInstance={element}
+                submitValue={submitValue}
+                isInvalid={formErrors.current[element.id]}
+                defaultValue={formValues.current[element.id]}
+              />
+            );
+          })
+        ) : (
+          <div className="text-center text-muted-foreground">
+            No form elements to display.
+          </div>
+        )}
 
 
 
