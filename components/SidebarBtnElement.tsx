@@ -31,7 +31,7 @@ function SidebarBtnElement({ formElement }: { formElement: FormElement }) {
       {...draggable.attributes}
     >
       <Icon className="w-5 h-5" />
-      <Text className="text-sm">{label}</Text>
+      <Text className="text-sm text-gray-900 dark:text-white">{label}</Text>
     </Button>
   );
 }

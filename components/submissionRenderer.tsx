@@ -68,7 +68,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         fileName={`${formName}.pdf`}
       >
         {({ loading }) => (
-          <Button className="fixed top-4 left-4 z-50">
+          <Button className="fixed top-10 left-4 z-50">
             {loading ? "Preparing PDF..." : "Export as PDF"}
           </Button>
         )}
