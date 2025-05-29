@@ -59,10 +59,9 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
   return (
     <div className="flex flex-col items-center w-full h-full">
       {/* Top Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-start justify-between px-4 py-4 border-b bg-white shadow-sm flex-shrink-0 w-full">
-
-
-        <div className="flex gap-2 items-start">
+      <div className="fixed h-24 top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 border-b bg-white shadow-sm w-full">
+        {/* Left: Export Button */}
+        <div className="self-end">
           <PDFDownloadLink
             document={
               <PDFDocument
@@ -74,26 +73,23 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
             fileName={`${formName}.pdf`}
           >
             {({ loading }) => (
-              <Button size="sm" className="h-8 px-3 mt-1">
+              <Button size="sm" className="h-8 px-3 ">
                 {loading ? "Preparing..." : "Export as PDF"}
               </Button>
             )}
           </PDFDownloadLink>
-
-          <button
-            onClick={() => window.history.back()}
-            className="mt-1 flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <Cross2Icon className="w-4 h-4" />
-            <span className="sr-only">Close</span>
-          </button>
         </div>
-      </div>
 
-      <div
-        className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-[88px] overflow-y-auto"
-        style={{ maxHeight: "100vh" }}
-      >
+        {/* Right: Close Button */}
+        <button
+          onClick={() => window.history.back()}
+          className="self-end flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <Cross2Icon className="w-4 h-4" />
+          <span className="sr-only">Close</span>
+        </button>
+      </div>
+      <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ paddingTop: "94px", maxHeight: "100vh" }}>
         {pageGroups.map((group, idx) => (
           <div key={idx} className="pdf-page mb-8">
             {group
