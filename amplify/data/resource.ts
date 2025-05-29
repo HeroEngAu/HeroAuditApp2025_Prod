@@ -37,8 +37,6 @@ const schema = a.schema({
       client: a.belongsTo("Client", "ClientID"),
       //one to many - project has many forms
       forms: a.hasMany("Form", "projID"),
-      //one to many - project has many equipmentTAGs
-      // equipmentTAGs: a.hasMany('EquipmentTag', 'ProjectID')
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
@@ -72,7 +70,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
- 
+
 });
 
 // Used for code completion / highlighting when making requests from frontend

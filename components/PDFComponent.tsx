@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
   fieldTitle: { fontWeight: "bold", marginBottom: 4 },
   image: { width: 200, height: 150, marginTop: 5 },
-  table: { borderWidth: 1, borderColor: "#000", width: "100%" },
+  table: { borderColor: "#000", width: "100%" },
   tableCell: {
     borderWidth: 1,
     borderColor: "#000",
@@ -230,7 +230,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   },
                 ]}
               >
-                <Text style={{ fontSize: 10 }}>
+                <Text style={{ fontSize: 10, textAlign: "center"}}>
                   {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
                 </Text>
               </View>
@@ -242,6 +242,16 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
             <View key={rowIndex} style={styles.tableRow} wrap={false}>
               {Array.from({ length: columns }).map((_, colIndex) => {
                 const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
+                const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                const isCenteredCell =
+                  ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(rawCellValue.trim()) ||
+                  rawCellValue.trim().startsWith("[select") ||
+                  rawCellValue.trim().startsWith("[number:") ||
+                  rawCellValue.trim().startsWith("[date:") ||
+                  !isNaN(Number(rawCellValue.trim()))||
+                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
+                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
+                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawCellValue.trim());
                 return (
                   <View
                     key={colIndex}
@@ -250,7 +260,18 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       { width: columnWidths[colIndex] },
                     ]}
                   >
-                    <Text style={{ fontFamily: 'DejaVuSans' }} >{cellText}</Text>
+                    <Text
+                      style={{
+                        fontFamily: 'DejaVuSans',
+                        textAlign: "justify",
+                        ...(isCenteredCell && {
+                          textAlign: "center",
+                          textAlignVertical: "center",
+                        }),
+                      }}
+                    >
+                      {cellText}
+                    </Text>
                   </View>
                 );
               })}
@@ -388,20 +409,20 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       );
     }
 
-case "CameraField": {
-  const imageUrl = typeof value === "string" ? value : element.extraAttributes?.content;
-  if (!imageUrl) return <Text>[No image]</Text>;
+    case "CameraField": {
+      const imageUrl = typeof value === "string" ? value : element.extraAttributes?.content;
+      if (!imageUrl) return <Text>[No image]</Text>;
 
-  return (
-    <View style={{ marginBottom: 10 }}>
-      <Text style={{ marginBottom: 4 }}>{element.extraAttributes?.label}</Text>
-      <Image
-        src={imageUrl}
-        style={{ width: 500, height: "auto", objectFit: "cover", alignSelf: "center" }}
-      />
-    </View>
-  );
-}
+      return (
+        <View style={{ marginBottom: 10 }}>
+          <Text style={{ marginBottom: 4 }}>{element.extraAttributes?.label}</Text>
+          <Image
+            src={imageUrl}
+            style={{ width: 500, height: "auto", objectFit: "cover", alignSelf: "center" }}
+          />
+        </View>
+      );
+    }
 
     default:
       return (
