@@ -455,7 +455,7 @@ export async function GetFormWithSubmissions(id: string) {
 
 export async function deleteFormSubmissionCascade(formSubmissionId: string) {
   try {
-    console.log("Deleting form submission with ID:", formSubmissionId);
+    //console.log("Deleting form submission with ID:", formSubmissionId);
     const formTag = await findFormTagBySubmissionId(formSubmissionId);
 
     if (!formTag) {
@@ -473,7 +473,7 @@ export async function deleteFormSubmissionCascade(formSubmissionId: string) {
 
     await deleteFormSubmission(formSubmissionId);
 
-    console.log("Cascade deletion completed.");
+    //console.log("Cascade deletion completed.");
   } catch (error) {
     console.error("Cascade deletion failed:", error);
     throw error;
@@ -539,7 +539,7 @@ export async function findFormTagBySubmissionId(submissionId: string) {
         contentTest: { contains: submissionId },
       },
     });
-    console.log("FormTag2 Data:", data); // Debugging
+    //console.log("FormTag2 Data:", data); // Debugging
     if (errors) {
       console.error(errors);
       throw new Error("Error fetching FormTag2.");
@@ -675,7 +675,7 @@ export async function getMatchingFormSubmissions(submissionId: string) {
       console.error("Error fetching form submissions:", errors);
       return null;
     }
-    console.log("Form Submitted:", formSubmitted); // Debugging
+    //console.log("Form Submitted:", formSubmitted); // Debugging
     // Return the first matching FormTag2 ID or null if no match found
     return formSubmitted.length > 0 ? formSubmitted[0].id : null;
   } catch (error) {
@@ -764,7 +764,7 @@ export async function GetEquipmentTagsForForm(id: string) {
     }
 
     if (!equipmentTags || equipmentTags.length === 0) {
-      console.log("No equipment tags found.");
+      //console.log("No equipment tags found.");
       return { form, equipmentTags: [] };
     }
 
@@ -830,7 +830,7 @@ export async function GetFormsWithClient(ClientID: string) {
       await client.models.Projectt.list({
         filter: { ClientID: { eq: ClientID } },
       });
-    console.log("Projects Found:", projects);
+    //console.log("Projects Found:", projects);
     if (projectErrors || !projects || projects.length === 0) {
       console.error(projectErrors || "No projects found for this client.");
       throw new Error("No projects found for this client.");
@@ -842,8 +842,9 @@ export async function GetFormsWithClient(ClientID: string) {
         const { data: projectForms } = await client.models.Form.list({
           filter: { projID: { eq: project.projectID } },
         });
-        console.log("Project ID:", project.projectID);
-        console.log(`Forms for Project ${project.projectName}:`, projectForms);
+        
+        //console.log("Project ID:", project.projectID);
+        //console.log(`Forms for Project ${project.projectName}:`, projectForms);
 
         return projectForms.map((form) => ({
           ...form,

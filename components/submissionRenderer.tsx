@@ -5,6 +5,7 @@ import { GetFormNameFromSubmissionId } from "../actions/form";
 import PDFDocument from "./PDFComponent";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { FormElements } from "./FormElements";
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 interface Props {
   elements: FormElementInstance[];
@@ -56,7 +57,9 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
   }, [elements]);
 
   return (
-    <div className="flex flex-col items-center">
+<div className="flex flex-col items-center">
+    {/* Top Bar */}
+    <div className="fixed top-0 h-20 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 border-b bg-white shadow-sm">
       <PDFDownloadLink
         document={
           <PDFDocument
@@ -68,13 +71,21 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         fileName={`${formName}.pdf`}
       >
         {({ loading }) => (
-          <Button className="fixed top-10 left-4 z-50">
+          <Button size="sm" className="h-8 px-3">
             {loading ? "Preparing PDF..." : "Export as PDF"}
           </Button>
         )}
       </PDFDownloadLink>
 
-      <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ maxHeight: '100vh' }}>
+      <button
+        className="flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+        onClick={() => window.history.back()}
+      >
+        <Cross2Icon className="w-6 h-8" />
+      </button>
+    </div>
+
+      <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ paddingTop: "74px", maxHeight: "100vh" }}>
         {pageGroups.map((group, idx) => (
           <div key={idx} className="pdf-page mb-8">
             {group
