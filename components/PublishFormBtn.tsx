@@ -19,14 +19,19 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
+import useUserAttributes from "./userAttributes"; 
 
 function PublishFormBtn({ id }: { id: string }) {
   const { elements } = useDesigner();
   const [loading, startTransition] = useTransition();
   const router = useRouter();
-
+  const { attributes } = useUserAttributes();
+  const userId = attributes?.sub;
+  //console.log("userId", userId)
+  if (!userId) return;
   function handlePublish() {
     const formData = new FormData();
+    formData.append("userId", userId ?? "");
     formData.append("id", id);
     formData.append("content", JSON.stringify(elements));
     formData.append("shareURL", `/submit/${id}`);

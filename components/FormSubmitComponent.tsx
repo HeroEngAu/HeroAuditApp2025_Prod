@@ -7,6 +7,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { submitFormAction, SaveFormAfterTestAction, updateVisitCount } from "../actions/form";
+import useUserAttributes from "./userAttributes"; 
 
 function FormSubmitComponent({ formUrl, content }: { content: FormElementInstance[]; formUrl: string }) {
   const formValues = useRef<{ [key: string]: string }>({});
@@ -15,9 +16,11 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const [tagId, setTagId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
-
+  const { attributes } = useUserAttributes();
+  const userId = attributes?.sub;
 
   const validateForm: () => boolean = useCallback(() => {
+     if (!userId) return false;
     for (const field of content) {
       const actualValue = formValues.current[field.id] || "";
       const valid = FormElements[field.type].validate(field, actualValue);
@@ -32,7 +35,8 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
     }
 
     return true;
-  }, [content]);
+  }, [content, userId]);
+
   useEffect(() => {
     const storedTagId = localStorage.getItem("tagId");
     if (storedTagId) {
@@ -74,6 +78,7 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       const cleanData = JSON.parse(JSON.stringify(formValues.current));
 
       const formData = new FormData();
+      formData.append("userId", userId ?? "");
       formData.append("formId", formUrl);
       formData.append("responses", JSON.stringify(cleanData)); // valores preenchidos
       formData.append("formContent", JSON.stringify(content)); // estrutura do formulário

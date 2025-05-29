@@ -279,13 +279,14 @@ export async function saveFormAction(formData: FormData) {
 }
 
 
-export async function PublishForm(id: string, content: string, shareURL: string) {
+export async function PublishForm(userId: string, id: string, content: string, shareURL: string) {
   try {
 
     const form = {
       id: id,
       content: content,
       shareURL: shareURL,
+      userId: userId,
       published: true,
     };
 
@@ -304,11 +305,12 @@ export async function PublishForm(id: string, content: string, shareURL: string)
 }
 
 export async function publishFormAction(formData: FormData) {
+  const userId = formData.get("userId") as string;
   const id = formData.get("id") as string;
   const content = formData.get("content") as string;
   const shareURL = formData.get("shareURL") as string;
 
-  await PublishForm(id, content, shareURL);
+  await PublishForm(userId, id, content, shareURL);
 }
 
 export async function GetFormContentByUrl(formUrl: string) {
@@ -350,8 +352,9 @@ export async function updateVisitCount(formUrl: string) {
   }
 }
 
-export async function SubmitForm(formId: string, tagId: string, content: string) {
+export async function SubmitForm(userId: string, formId: string, tagId: string, content: string) {
   const submission = {
+    userId,
     formId,
     content,
     createdAt: new Date().toISOString(),
@@ -392,6 +395,7 @@ export async function SubmitForm(formId: string, tagId: string, content: string)
 
 
 export async function submitFormAction(formData: FormData) {
+  const userId = formData.get("userId") as string;
   const formId = formData.get("formId") as string;
   const formtagId = formData.get("formtagID") as string;
   const rawResponses = formData.get("responses") as string;
@@ -414,7 +418,7 @@ export async function submitFormAction(formData: FormData) {
   };
 
   const jsonContent = JSON.stringify(submission);
-  await SubmitForm(formId, tagId, jsonContent);
+  await SubmitForm(userId, formId, tagId, jsonContent);
 }
 
 

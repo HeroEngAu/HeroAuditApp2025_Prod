@@ -68,6 +68,7 @@ const schema = a.schema({
       createdAt: a.datetime(),
       content: a.string(),
       form: a.belongsTo("Form", "formId"),
+      userId: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 

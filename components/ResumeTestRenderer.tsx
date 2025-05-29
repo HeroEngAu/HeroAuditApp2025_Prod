@@ -7,6 +7,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { SaveFormAfterTestAction, submitFormAction } from "../actions/form";
+import useUserAttributes from "./userAttributes"; 
 
 function ResumeTestRenderer({
   formId,
@@ -24,8 +25,11 @@ function ResumeTestRenderer({
   const [renderKey, setRenderKey] = useState(new Date().getTime());
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
-
+  const { attributes } = useUserAttributes();
+  const userId = attributes?.sub;
+  if (!userId) return;
   const validateForm: () => boolean = useCallback(() => {
+    if (!userId) return false;
     for (const field of elements) {
       const actualValue = formValues.current[field.id] || "";
       const valid = FormElements[field.type].validate(field, actualValue);
@@ -36,7 +40,7 @@ function ResumeTestRenderer({
     }
 
     return Object.keys(formErrors.current).length === 0;
-  }, [elements]);
+  }, [elements, userId]);
 
   const submitValue = useCallback((key: string, value: string) => {
     formValues.current[key] = value;
@@ -59,6 +63,7 @@ function ResumeTestRenderer({
       const cleanData = JSON.parse(JSON.stringify(formValues.current));
 
       const formData = new FormData();
+      formData.append("userId", userId ?? "");
       formData.append("formId", formId);
       formData.append("formtagID", formtag2Id);
       formData.append("responses", JSON.stringify(cleanData));
