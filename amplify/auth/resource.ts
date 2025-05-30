@@ -1,9 +1,18 @@
 import { defineAuth } from "@aws-amplify/backend";
+import { postConfirmation } from "./post-confirmation/resource"
 
 export const auth = defineAuth({
   loginWith: {
     email: true,
   },
+  groups: ["user"],
+    triggers: {
+    postConfirmation,
+  },
+  access: (allow) => [
+    allow.resource(postConfirmation).to(["addUserToGroup"]),
+  ],
+  
   userAttributes: {
 
     // Maps to Cognito standard attribute 'name'
@@ -29,6 +38,6 @@ export const auth = defineAuth({
       mutable: true,
       required: true,
     },
-
   },
+
 });
