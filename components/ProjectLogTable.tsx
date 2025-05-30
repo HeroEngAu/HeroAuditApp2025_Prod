@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { deleteFormSubmissionCascade } from "../actions/form"; // ajuste o caminho
 import { fetchAuthSession } from "aws-amplify/auth";
 import { FaTrash } from "react-icons/fa";
+import { Accordion } from "@aws-amplify/ui-react";
 
 type SubmissionEntry = {
   formID: string;
@@ -48,7 +49,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
     try {
       await deleteFormSubmissionCascade(formId);
 
-      router.refresh(); 
+      router.refresh();
     } catch (error) {
       console.error("Failed to delete form", error);
     }
@@ -77,6 +78,22 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
 
                 return (
                   <TableRow key={i}>
+                                  <Accordion.Container>
+                <Accordion.Item value="item1">
+                  <Accordion.Trigger>
+                    Check out this themed Accordion
+                    <Accordion.Icon />
+                  </Accordion.Trigger>
+                  <Accordion.Content>Pretty cool!</Accordion.Content>
+                </Accordion.Item>
+                <Accordion.Item value="item2">
+                  <Accordion.Trigger>
+                    It is very customizable
+                    <Accordion.Icon />
+                  </Accordion.Trigger>
+                  <Accordion.Content>I love it.</Accordion.Content>
+                </Accordion.Item>
+              </Accordion.Container>
                     <TableCell className="border p-2">{s.equipmentName}</TableCell>
                     <TableCell className="border p-2">{s.tag}</TableCell>
                     <TableCell className="border p-2">

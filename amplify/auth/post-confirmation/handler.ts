@@ -1,4 +1,4 @@
-import type { PostConfirmationTriggerHandler } from 'aws-lambda';
+/*import type { PostConfirmationTriggerHandler } from 'aws-lambda';
 import {
   CognitoIdentityProviderClient,
   AdminAddUserToGroupCommand
@@ -17,4 +17,4 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
   const response = await client.send(command);
   console.log('processed', response.$metadata.requestId);
   return event;
-};
+};*/
