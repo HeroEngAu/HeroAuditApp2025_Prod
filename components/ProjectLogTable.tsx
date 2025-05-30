@@ -1,6 +1,5 @@
 'use client'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Button } from "./ui/button";
 import { formatDistance } from "date-fns";
 import { MdPreview } from "react-icons/md";
@@ -97,6 +96,11 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                 </Accordion.Trigger>
                 <Accordion.Content>
                   <div className="p-4 bg-muted rounded-md space-y-4">
+                    <div className="text-sm">
+                      <p><strong>Form ID:</strong> {s.formID}</p>
+                      <p><strong>Submission ID:</strong> {s.submissionId ?? "N/A"}</p>
+                      <p><strong>Test Contents:</strong> {JSON.stringify(s.contentTest)}</p>
+                    </div>
                     <div className="flex gap-4 justify-between flex-wrap">
                       {wasSubmitted ? (
                         <a href={`/view-submitted/${s.submissionId}`}>
@@ -120,12 +124,6 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                           Delete
                         </Button>
                       )}
-                    </div>
-
-                    <div className="text-sm">
-                      <p><strong>Form ID:</strong> {s.formID}</p>
-                      <p><strong>Submission ID:</strong> {s.submissionId ?? "N/A"}</p>
-                      <p><strong>Test Contents:</strong> {JSON.stringify(s.contentTest)}</p>
                     </div>
                   </div>
                 </Accordion.Content>
