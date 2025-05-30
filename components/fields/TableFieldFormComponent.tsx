@@ -340,7 +340,7 @@ export function FormComponent({
                         row={row}
                         col={col}
                         handleCellChange={handleCellChange}
-                        readOnly={readOnly ?? false}
+                        readOnly={readOnly ?? true}
                       />
 
                     ) : cellValue.startsWith("[image:") ? (

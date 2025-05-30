@@ -230,7 +230,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   },
                 ]}
               >
-                <Text style={{ fontSize: 10, textAlign: "center"}}>
+                <Text style={{ fontSize: 10, textAlign: "center" }}>
                   {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
                 </Text>
               </View>
@@ -243,12 +243,14 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
               {Array.from({ length: columns }).map((_, colIndex) => {
                 const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                 const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                const isImage = rawCellValue.trim().startsWith("[image:");
+                const imageBase64 = rawCellValue.trim().match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
                 const isCenteredCell =
                   ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(rawCellValue.trim()) ||
                   rawCellValue.trim().startsWith("[select") ||
                   rawCellValue.trim().startsWith("[number:") ||
                   rawCellValue.trim().startsWith("[date:") ||
-                  !isNaN(Number(rawCellValue.trim()))||
+                  !isNaN(Number(rawCellValue.trim())) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawCellValue.trim());
@@ -260,18 +262,30 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       { width: columnWidths[colIndex] },
                     ]}
                   >
-                    <Text
-                      style={{
-                        fontFamily: 'DejaVuSans',
-                        textAlign: "justify",
-                        ...(isCenteredCell && {
-                          textAlign: "center",
-                          textAlignVertical: "center",
-                        }),
-                      }}
-                    >
-                      {cellText}
-                    </Text>
+                    {isImage && imageBase64 ? (
+                      <Image
+                        src={imageBase64}
+                        style={{
+                          //width: columnWidths[colIndex] - 10,
+                          height: 60,
+                          objectFit: "contain",
+                          marginVertical: 2,
+                        }}
+                      />
+                    ) : (
+                      <Text
+                        style={{
+                          fontFamily: 'DejaVuSans',
+                          textAlign: "justify",
+                          ...(isCenteredCell && {
+                            textAlign: "center",
+                            textAlignVertical: "center",
+                          }),
+                        }}
+                      >
+                        {cellText}
+                      </Text>
+                    )}
                   </View>
                 );
               })}

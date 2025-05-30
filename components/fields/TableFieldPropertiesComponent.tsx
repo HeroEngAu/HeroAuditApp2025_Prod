@@ -274,6 +274,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
               Use <code>[select:"Option1":["Option1","Option2"]]</code> to display a dropdown with options.<br />
               Use <code>[number:]</code> to display a number input field.<br />
               Use <code>[date:]</code> to display a date picker.<br />
+              Use <code>[camera]</code> to open the camera and make register of the process performed.<br />
               For a regular editable text field, leave the cell blank.
             </FormDescription>
           </div>
