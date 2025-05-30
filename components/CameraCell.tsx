@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { MdCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { Button } from "./ui/button";
+import React from "react";
 
 type Props = {
     row: number;
@@ -31,10 +32,14 @@ function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string>
     });
 }
 
+type ReactCameraProRef = {
+    takePhoto: () => string;
+};
+
 export function CameraCell({ row, col, handleCellChange, readOnly }: Props) {
     const [open, setOpen] = useState(false);
     const [photo, setPhoto] = useState<string | null>(null);
-    const cameraRef = useRef<any>(null);
+    const cameraRef = React.useRef<ReactCameraProRef | null>(null);
     const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
 
     const takePhoto = async () => {
