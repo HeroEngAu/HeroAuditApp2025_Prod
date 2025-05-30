@@ -18,7 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import React, { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { CustomInstance } from "./TableField";
-import { MdCamera } from "react-icons/md";
+import { CameraCell } from "../CameraCell"
 
 export function FormComponent({
   elementInstance,
@@ -336,42 +336,26 @@ export function FormComponent({
                         customInput={<CustomInput />}
                       />
                     ) : cellValue === "[camera]" ? (
-                      <div className="flex justify-center items-center">
-                        <label className="cursor-pointer flex flex-col items-center">
-                          <MdCamera/>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            style={{ display: "none" }}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
+                      <CameraCell
+                        row={row}
+                        col={col}
+                        handleCellChange={handleCellChange}
+                        readOnly={readOnly ?? false}
+                      />
 
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const base64 = reader.result?.toString() || "";
-                                handleCellChange(row, col, `[image:${base64}]`);
-                              };
-                              reader.readAsDataURL(file);
-                            }}
-                            disabled={readOnly}
-                          />
-                        </label>
-                      </div>
-                      ) : cellValue.startsWith("[image:") ? (
-                        <img
-                          src={cellValue.replace("[image:", "").replace("]", "")}
-                          alt="Captured"
-                          className="max-w-[100px] max-h-[100px] object-contain border rounded"
-                        />
-                      ) : !readOnly && editableCells[row][col] ? (
-                        <Input
-                          value={cellValue}
-                          className={"table-cell-wrap"}
-                          onChange={(e) => handleCellChange(row, col, e.target.value)}
-                        />
-                      ) : (
+                    ) : cellValue.startsWith("[image:") ? (
+                      <img
+                        src={cellValue.replace("[image:", "").replace("]", "")}
+                        alt="Captured"
+                        className="max-w-[100px] max-h-[100px] object-contain border rounded"
+                      />
+                    ) : !readOnly && editableCells[row][col] ? (
+                      <Input
+                        value={cellValue}
+                        className={"table-cell-wrap"}
+                        onChange={(e) => handleCellChange(row, col, e.target.value)}
+                      />
+                    ) : (
                       <div>{cellValue}</div>
                     )}
                   </TableCell>
