@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { MdCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { Button } from "./ui/button";
