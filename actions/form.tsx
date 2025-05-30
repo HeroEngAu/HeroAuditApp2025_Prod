@@ -1384,3 +1384,21 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
     throw error;
   }
 }
+
+export async function GetFormsContent(FormSubmissionsId: string) {
+  console.log("Submission ID used in query:", FormSubmissionsId);
+
+  if (!FormSubmissionsId || FormSubmissionsId.trim() === "") {
+    console.error("FormSubmissionsId is missing or empty.");
+    throw new Error("Invalid FormSubmissionsId.");
+  }
+
+  const { data, errors } = await client.models.FormSubmissions.get({ id: FormSubmissionsId });
+
+  if (errors || !data) {
+    console.error("Error fetching form submission or submission not found:", errors);
+    throw new Error("Form submission not found.");
+  }
+
+  return data.content;
+}

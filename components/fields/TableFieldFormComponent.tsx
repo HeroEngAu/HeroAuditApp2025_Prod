@@ -115,6 +115,35 @@ export function FormComponent({
     return cellValue || "-";
   };
 
+  function ImageCell({ src }: { src: string }) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <>
+        <button onClick={() => setIsOpen(true)}>
+          <img
+            src={src}
+            alt="Captured"
+            className="max-w-[50px] max-h-[50px] object-contain border rounded hover:ring-2 hover:ring-blue-500 transition"
+          />
+        </button>
+
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+            onClick={() => setIsOpen(false)}
+          >
+            <img
+              src={src}
+              alt="Full"
+              className="max-w-[100%] max-h-[100%] object-contain rounded shadow-lg"
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
   const minWidth = 1;
   const maxWidth = 200;
 
@@ -344,10 +373,7 @@ export function FormComponent({
                       />
 
                     ) : cellValue.startsWith("[image:") ? (
-                      <img
-                        src={cellValue.replace("[image:", "").replace("]", "")}
-                        alt="Captured"
-                        className="max-w-[100px] max-h-[100px] object-contain border rounded"
+                      <ImageCell src={cellValue.replace("[image:", "").replace("]", "")} 
                       />
                     ) : !readOnly && editableCells[row][col] ? (
                       <Input
