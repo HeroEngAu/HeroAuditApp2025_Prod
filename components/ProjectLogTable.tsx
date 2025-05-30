@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { deleteFormSubmissionCascade } from "../actions/form"; // ajuste o caminho
 import { fetchAuthSession } from "aws-amplify/auth";
 import { FaTrash } from "react-icons/fa";
+import { Accordion } from "@aws-amplify/ui-react";
 
 type SubmissionEntry = {
   formID: string;
@@ -48,7 +49,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
     try {
       await deleteFormSubmissionCascade(formId);
 
-      router.refresh(); 
+      router.refresh();
     } catch (error) {
       console.error("Failed to delete form", error);
     }
@@ -57,36 +58,46 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
   return (
     <div>
       <h1 className="text-2xl font-bold my-4">Project Log</h1>
-      <div className="rounded-md border">
-        <Table className="min-w-full border-collapse">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-center border p-2 uppercase">Equipment Name</TableHead>
-              <TableHead className="text-center border p-2 uppercase">Equipment Tag</TableHead>
-              <TableHead className="text-center border p-2 uppercase">Submitted At</TableHead>
-              <TableHead className="text-center border p-2 uppercase">View</TableHead>
-              {isAdmin && <TableHead className="text-center border p-2 uppercase">Delete</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {submissions.length > 0 ? (
-              submissions.map((s, i) => {
-                const wasSubmitted = Array.isArray(s.contentTest)
-                  ? s.contentTest.includes(s.submissionId ?? "")
-                  : false;
 
-                return (
-                  <TableRow key={i}>
-                    <TableCell className="border p-2">{s.equipmentName}</TableCell>
-                    <TableCell className="border p-2">{s.tag}</TableCell>
-                    <TableCell className="border p-2">
+      {/* Cabeçalho (Header) */}
+      <div className="flex w-full bg-muted font-semibold border-y">
+        <div className="flex-1 p-2 text-center uppercase border">Equipment Name</div>
+        <div className="flex-1 p-2 text-center uppercase border">Equipment Tag</div>
+        <div className="flex-1 p-2 text-center uppercase border">Submitted At</div>
+        <div className="w-9 p-2 text-center uppercase border"></div>
+
+      </div>
+
+
+      {/* Accordion */}
+      <Accordion.Container>
+        {submissions.length > 0 ? (
+          submissions.map((s, i) => {
+            const wasSubmitted = Array.isArray(s.contentTest)
+              ? s.contentTest.includes(s.submissionId ?? "")
+              : false;
+
+            return (
+              <Accordion.Item key={i} value={`item-${i}`}>
+                <Accordion.Trigger>
+                  <div className="flex w-full items-center">
+                    <div className="flex-1 p-2 border">{s.equipmentName}</div>
+                    <div className="flex-1 p-2 border">{s.tag}</div>
+                    <div className="flex-1 p-2 border">
                       {s.submittedAt
                         ? formatDistance(new Date(s.submittedAt), new Date(), {
                           addSuffix: true,
                         })
                         : "Not Submitted"}
-                    </TableCell>
-                    <TableCell className="border p-2 text-center">
+                    </div>
+                    <div className="w-8 p-2 border text-center">
+                      <Accordion.Icon />
+                    </div>
+                  </div>
+                </Accordion.Trigger>
+                <Accordion.Content>
+                  <div className="p-4 bg-muted rounded-md space-y-4">
+                    <div className="flex gap-4 justify-between flex-wrap">
                       {wasSubmitted ? (
                         <a href={`/view-submitted/${s.submissionId}`}>
                           <Button variant="outline" className="gap-2">
@@ -97,9 +108,8 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                       ) : (
                         <ResumeTestBtn formTag2Id={s.formtagId} />
                       )}
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell className="border p-2 text-center">
+
+                      {isAdmin && (
                         <Button
                           variant="destructive"
                           className="gap-2"
@@ -109,21 +119,24 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                           <FaTrash />
                           Delete
                         </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No submissions yet
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                      )}
+                    </div>
+
+                    <div className="text-sm">
+                      <p><strong>Form ID:</strong> {s.formID}</p>
+                      <p><strong>Submission ID:</strong> {s.submissionId ?? "N/A"}</p>
+                      <p><strong>Test Contents:</strong> {JSON.stringify(s.contentTest)}</p>
+                    </div>
+                  </div>
+                </Accordion.Content>
+              </Accordion.Item>
+            );
+          })
+        ) : (
+          <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
+        )}
+      </Accordion.Container>
     </div>
   );
+
 }
