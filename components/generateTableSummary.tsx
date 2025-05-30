@@ -72,6 +72,7 @@ export function SubmissionSummary({ submissionId }: { submissionId: string }) {
           }
         }
       } catch (err) {
+        console.error("Error fetching content:", err);
         setError("Failed to fetch content");
       }
     };
