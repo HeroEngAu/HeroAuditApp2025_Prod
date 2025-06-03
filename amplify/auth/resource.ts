@@ -17,6 +17,7 @@ export const auth = defineAuth({
       mutable: true,
       required: true,
     },
+
     // Maps to Cognito standard attribute 'locale'
     locale: {
       mutable: true,
@@ -39,6 +40,13 @@ export const auth = defineAuth({
     preferredUsername: {
       mutable: true,
       required: true,
+    },
+
+    "custom:Company": {
+      dataType: "String",
+      mutable: true,
+      maxLen: 50,
+      minLen: 1,
     },
   
   },
