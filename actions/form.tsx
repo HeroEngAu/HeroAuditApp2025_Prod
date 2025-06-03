@@ -132,7 +132,7 @@ export async function GetProjects() {
   }
 }
 
-export async function GetFormStats() {
+/*export async function GetFormStats() {
   try {
     // Fetch all forms
     const { data: forms, errors } = await client.models.Form.list();
@@ -165,7 +165,7 @@ export async function GetFormStats() {
     console.error("Error fetching form stats:", error);
     return { visits: 0, submissions: 0, submissionRate: 0, bounceRate: 0 };
   }
-}
+}*/
 
 export async function GetForms() {
   try {
@@ -305,10 +305,19 @@ export async function PublishForm(userId: string, id: string, content: string, s
 }
 
 export async function publishFormAction(formData: FormData) {
-  const userId = formData.get("userId") as string;
+  const incomingUserId = formData.get("userId") as string;
   const id = formData.get("id") as string;
   const content = formData.get("content") as string;
   const shareURL = formData.get("shareURL") as string;
+
+  const { data: existingForm, errors } = await client.models.Form.get({ id });
+
+  if (errors || !existingForm) {
+    console.error(errors);
+    throw new Error("Failed to fetch existing form.");
+  }
+
+  const userId = existingForm.userId || incomingUserId;
 
   await PublishForm(userId, id, content, shareURL);
 }
@@ -860,8 +869,9 @@ export async function GetFormsWithClient(ClientID: string) {
   }
 }
 
-export async function GetFormsInformation() {
+export async function GetFormsInformation(userId: string, isAdmin: boolean) {
   try {
+
     const { errors: clientErrors, data: clientsData } =
       await client.models.Client.list();
 
@@ -888,7 +898,10 @@ export async function GetFormsInformation() {
 
         const { errors: formErrors, data: formsData } =
           await client.models.Form.list({
-            filter: { projID: { eq: projectItem.projectID } }, // Ensure the correct key is used
+            filter: { 
+              projID: { eq: projectItem.projectID },
+              ...(isAdmin ? {} : { userId: { eq: userId } }),
+            }, 
           });
 
         if (formErrors) {

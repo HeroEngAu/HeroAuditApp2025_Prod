@@ -240,7 +240,7 @@ export function FormComponent({
                 const numberValue = isNumber ? cellValue.match(/^\[number:(.*?)\]$/)?.[1] ?? "" : "";
                 const isDate = cellValue.startsWith("[date:");
                 const dateValue = isDate ? cellValue.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
-                const isPassFail = cellValue === "[PASS]" || cellValue === "[FAIL]";
+                const isPassFailOrSummary = cellValue === "[PASS]" || cellValue === "[FAIL]" || cellValue === "[SUMMARY]"
                 let isSelectValue = "";
                 let isSelectOptionsArray: string[] = [];
 
@@ -379,29 +379,36 @@ export function FormComponent({
                     ) : cellValue.startsWith("[image:") ? (
                       <ImageCell src={cellValue.replace("[image:", "").replace("]", "")}
                       />
-                    ) : isPassFail ? (
+                    ) : isPassFailOrSummary ? (
                       <div className="flex justify-center items-center">
-                        {cellValue === "[PASS]" ? (
-                          <button
-                            onClick={() => {
-                              if (readOnly) return;
-                              handleCellChange(row, col, "[FAIL]");
-                            }}
-                            className="px-2 py-1 rounded text-white text-sm font-semibold bg-green-600"
-                          >
-                            PASS
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              if (readOnly) return;
-                              handleCellChange(row, col, "[PASS]");
-                            }}
-                            className="px-2 py-1 rounded text-white text-sm font-semibold bg-red-600"
-                          >
-                            FAIL
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            if (readOnly) return;
+
+                            let newValue: string;
+                            if (cellValue === "[SUMMARY]") {
+                              newValue = "[PASS]";
+                            } else if (cellValue === "[PASS]") {
+                              newValue = "[FAIL]";
+                            } else {
+                              newValue = "[SUMMARY]";
+                            }
+
+                            handleCellChange(row, col, newValue);
+                          }}
+                          className={`px-2 py-1 rounded text-white text-sm font-semibold
+                            ${cellValue === "[PASS]"
+                              ? "bg-green-600"
+                              : cellValue === "[FAIL]"
+                                ? "bg-red-600"
+                                : "bg-gray-500"}`}
+                        >
+                          {cellValue === "[PASS]"
+                            ? "PASS"
+                            : cellValue === "[FAIL]"
+                              ? "FAIL"
+                              : "SUMMARY"}
+                        </button>
                       </div>
 
                     ) : !readOnly && editableCells[row][col] ? (

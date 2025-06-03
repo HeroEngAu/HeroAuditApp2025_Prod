@@ -1,12 +1,12 @@
 import '../globals.css';
-import { GetFormStats } from "../../actions/form";
+//import { GetFormStats } from "../../actions/form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import { ReactNode, Suspense } from "react";
-import { LuView } from "react-icons/lu";
+/*import { LuView } from "react-icons/lu";
 import { FaWpforms } from "react-icons/fa";
 import { HiCursorClick } from "react-icons/hi";
-import { TbArrowBounce } from "react-icons/tb";
+import { TbArrowBounce } from "react-icons/tb";*/
 import { Separator } from "../../components/ui/separator";
 import CreateFormDialog from "../../components/CreateFormDialog";
 import { Amplify } from "aws-amplify"
@@ -21,9 +21,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
   const searchTerm = params.search || "";
     return (
     <div className="container pt-4">
-      <Suspense fallback={<StatsCards loading={true} />}>
+      {/*<Suspense fallback={<StatsCards loading={true} />}>
         <CardStatsWrapper />
-      </Suspense>
+      </Suspense>*/}
 
       <Separator className="my-6" />
 
@@ -48,7 +48,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
   );
 }
 
-async function CardStatsWrapper() {
+/*async function CardStatsWrapper() {
   const stats = await GetFormStats();
   return <StatsCards loading={false} data={stats} />;
 }
@@ -102,6 +102,7 @@ function StatsCards(props: StatsCardProps) {
 
   );
 }
+*/
 
 export function StatsCard({
   title,

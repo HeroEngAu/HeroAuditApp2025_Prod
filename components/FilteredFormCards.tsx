@@ -13,6 +13,7 @@ import { Button } from "../components/ui/button";
 import { GetFormsInformation } from "../actions/form";
 import { fetchAuthSession } from "aws-amplify/auth";
 import Loading from "../app/(dashboard)/forms/[id]/loading";
+import useUserAttributes from "./userAttributes";
 
 type CustomForm = {
     id: string;
@@ -127,18 +128,56 @@ type FormInfoEntry = {
 export default function FilteredFormCards({ searchTerm }: { searchTerm: string }) {
     const [formsInfo, setFormsInfo] = useState<FormInfoEntry[]>([]);
     const [loading, setLoading] = useState(true);
+    const { attributes } = useUserAttributes();
+    const userId = attributes?.sub;
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [adminChecked, setAdminChecked] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            const data = await GetFormsInformation();
-            setFormsInfo(data);
-            setLoading(false);
+        async function checkAdmin() {
+            try {
+                const session = await fetchAuthSession();
+                const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
+                const groups: string[] = Array.isArray(rawGroups)
+                    ? rawGroups.filter((g): g is string => typeof g === "string")
+                    : typeof rawGroups === "string"
+                        ? [rawGroups]
+                        : [];
+                setIsAdmin(groups.includes("admin"));
+            } catch (error) {
+                console.error("Failed to fetch user groups", error);
+            } finally {
+                setAdminChecked(true);
+            }
         }
-        fetchData();
 
+        checkAdmin();
     }, []);
 
-    if (loading) return <Loading />;
+    useEffect(() => {
+        if (!userId || !adminChecked) return;
+
+        async function fetchData() {
+            try {
+                if (typeof userId === "string") {
+                    const data = await GetFormsInformation(userId, isAdmin);
+                    setFormsInfo(data);
+                }
+            } catch (err) {
+                console.error("Error loading forms", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchData();
+    }, [userId, isAdmin, adminChecked]);
+
+    if (!userId || !adminChecked || loading) {
+        return (
+            <Loading />
+        );
+    }
 
     const filteredForms = formsInfo.flatMap(entry =>
         entry.forms
