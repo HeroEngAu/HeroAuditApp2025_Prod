@@ -17,16 +17,17 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
   }
 
   const shareLink = shareUrl;
+  const value = `${window.location.origin}${shareLink.replace('/submit/', '/forms/')}`;
   return (
     <div className="flex flex-grow gap-4 items-center">
       <Input
-        value={`${window.location.origin}${shareLink.replace('/submit/', '/forms/')}`}
+        value={value}
         readOnly
       />
       <Button
         className="w-[250px]"
         onClick={() => {
-          navigator.clipboard.writeText(shareLink);
+          navigator.clipboard.writeText(value);
           toast({
             title: "Copied!",
             description: "Link copied to clipboard",

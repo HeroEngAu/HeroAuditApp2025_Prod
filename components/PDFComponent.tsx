@@ -246,8 +246,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 const rawTrimmed = rawCellValue.trim();
                 const isEuropeanNumber =
                   /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
-                  /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||               
-                  /^[0-9]+,[0-9]{3}$/.test(rawTrimmed);
+                  /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||
+                  /^[0-9]+,[0-9]{3}$/.test(rawTrimmed) ||
+                  /^-?\d+(?:\.\d{3})*,\d+$/.test(rawTrimmed);
                 const isImage = rawCellValue.trim().startsWith("[image:");
                 const imageBase64 = rawCellValue.trim().match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
                 const isCenteredCell =
@@ -259,7 +260,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   isEuropeanNumber ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
                   /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                !isNaN(Number(rawCellValue.trim())) ||
+                  /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                  /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                  !isNaN(Number(rawCellValue.trim())) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawCellValue.trim());

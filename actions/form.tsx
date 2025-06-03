@@ -1386,7 +1386,6 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
 }
 
 export async function GetFormsContent(FormSubmissionsId: string) {
-  console.log("Submission ID used in query:", FormSubmissionsId);
 
   if (!FormSubmissionsId || FormSubmissionsId.trim() === "") {
     console.error("FormSubmissionsId is missing or empty.");
