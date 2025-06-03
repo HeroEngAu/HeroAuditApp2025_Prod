@@ -88,6 +88,9 @@ export function FormComponent({
   };
 
   const parseCell = (cellValue: string): string => {
+    if (cellValue === "[PASS]") return "PASS";
+    if (cellValue === "[FAIL]") return "FAIL";
+
     if (cellValue.startsWith("[checkbox")) {
       return cellValue === "[checkbox:true]" ? "✔" :
         cellValue === "[checkbox:false]" ? "✖" : "-";
@@ -237,6 +240,7 @@ export function FormComponent({
                 const numberValue = isNumber ? cellValue.match(/^\[number:(.*?)\]$/)?.[1] ?? "" : "";
                 const isDate = cellValue.startsWith("[date:");
                 const dateValue = isDate ? cellValue.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
+                const isPassFail = cellValue === "[PASS]" || cellValue === "[FAIL]";
                 let isSelectValue = "";
                 let isSelectOptionsArray: string[] = [];
 
@@ -373,8 +377,33 @@ export function FormComponent({
                       />
 
                     ) : cellValue.startsWith("[image:") ? (
-                      <ImageCell src={cellValue.replace("[image:", "").replace("]", "")} 
+                      <ImageCell src={cellValue.replace("[image:", "").replace("]", "")}
                       />
+                    ) : isPassFail ? (
+                      <div className="flex justify-center items-center">
+                        {cellValue === "[PASS]" ? (
+                          <button
+                            onClick={() => {
+                              if (readOnly) return;
+                              handleCellChange(row, col, "[FAIL]");
+                            }}
+                            className="px-2 py-1 rounded text-white text-sm font-semibold bg-green-600"
+                          >
+                            PASS
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (readOnly) return;
+                              handleCellChange(row, col, "[PASS]");
+                            }}
+                            className="px-2 py-1 rounded text-white text-sm font-semibold bg-red-600"
+                          >
+                            FAIL
+                          </button>
+                        )}
+                      </div>
+
                     ) : !readOnly && editableCells[row][col] ? (
                       <Input
                         value={cellValue}
