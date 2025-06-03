@@ -56,24 +56,28 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
     }
   };
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold my-4">Project Log</h1>
+return (
+  <div>
+    <h1 className="text-2xl font-bold my-4">Project Log</h1>
 
-      {/* Cabeçalho (Header) */}
-      <div className="flex w-full bg-muted font-semibold border-y">
-        <div className="flex-1 p-2 text-center uppercase border">Equipment Name</div>
-        <div className="flex-1 p-2 text-center uppercase border">Equipment Tag</div>
-        <div className="flex-1 p-2 text-center uppercase border">Submitted At</div>
-        <div className="w-9 p-2 text-center uppercase border"></div>
+    {/* Cabeçalho (Header) */}
+    <div className="flex w-full bg-muted font-semibold border-y">
+      <div className="flex-1 p-2 text-center uppercase border">Equipment Name</div>
+      <div className="flex-1 p-2 text-center uppercase border">Equipment Tag</div>
+      <div className="flex-1 p-2 text-center uppercase border">Submitted At</div>
+      <div className="w-9 p-2 text-center uppercase border"></div>
+    </div>
 
-      </div>
-
-
-      {/* Accordion */}
-      <Accordion.Container>
-        {submissions.length > 0 ? (
-          submissions.map((s, i) => {
+    {/* Accordion */}
+    <Accordion.Container>
+      {submissions.length > 0 ? (
+        [...submissions]
+          .sort((a, b) => {
+            if (!a.submittedAt && b.submittedAt) return -1;
+            if (a.submittedAt && !b.submittedAt) return 1;
+            return (a.tag ?? "").localeCompare(b.tag ?? "");
+          })
+          .map((s, i) => {
             const wasSubmitted = Array.isArray(s.contentTest)
               ? s.contentTest.includes(s.submissionId ?? "")
               : false;
@@ -87,8 +91,8 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                     <div className="flex-1 p-2 border">
                       {s.submittedAt
                         ? formatDistance(new Date(s.submittedAt), new Date(), {
-                          addSuffix: true,
-                        })
+                            addSuffix: true,
+                          })
                         : "Not Submitted"}
                     </div>
                     <div className="w-8 p-2 border text-center">
@@ -101,7 +105,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                     <div className="text-sm">
                       <SubmissionSummary submissionId={s.submissionId ?? ""} />
                     </div>
-                    
+
                     <div className="flex gap-4 justify-between flex-wrap">
                       {wasSubmitted ? (
                         <a href={`/view-submitted/${s.submissionId}`}>
@@ -131,11 +135,12 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
               </Accordion.Item>
             );
           })
-        ) : (
-          <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
-        )}
-      </Accordion.Container>
-    </div>
-  );
+      ) : (
+        <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
+      )}
+    </Accordion.Container>
+  </div>
+);
+
 
 }

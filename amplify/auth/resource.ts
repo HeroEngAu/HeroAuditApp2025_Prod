@@ -11,19 +11,7 @@ export const auth = defineAuth({
       mutable: true,
       required: true,
     },
-
-    // Maps to Cognito standard attribute 'given_name'
-    givenName: {
-      mutable: true,
-      required: true,
-    },
-
-    // Maps to Cognito standard attribute 'locale'
-    locale: {
-      mutable: true,
-      required: false,
-    },
- 
+    
     // Maps to Cognito standard attribute 'name'
     fullname: {
       mutable: true,

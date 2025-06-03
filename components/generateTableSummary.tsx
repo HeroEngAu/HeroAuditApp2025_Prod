@@ -121,15 +121,15 @@ export function SubmissionSummary({ submissionId }: { submissionId: string }) {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="px-2 py-1 rounded text-white bg-green-500">PASS</span>
-            <span>Pass: {summary.passFail.pass}</span>
+            <span>{summary.passFail.pass}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="px-2 py-1 rounded text-white bg-red-600">FAIL</span>
-            <span>Fail: {summary.passFail.fail}</span>
+            <span>{summary.passFail.fail}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-1 rounded border border-gray-500 text-gray-400 bg-white">–</span>
-            <span>N/A: {summary.passFail.notapplicable}</span>
+            <span className="px-2 py-1 rounded border border-gray-500 text-gray-400 bg-white">N/A</span>
+            <span>{summary.passFail.notapplicable}</span>
           </div>
         </div>
       </div>
