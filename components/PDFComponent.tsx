@@ -258,7 +258,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   !isNaN(Number(rawTrimmed)) ||
                   isEuropeanNumber ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                  /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed);
+                  /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
                 !isNaN(Number(rawCellValue.trim())) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
