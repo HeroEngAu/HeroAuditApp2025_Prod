@@ -88,7 +88,6 @@ export function FormComponent({
   };
 
   const parseCell = (cellValue: string): string => {
-    if (cellValue === "[camera]") return "No picture was taken";
     if (cellValue === "[PASS]") return "PASS";
     if (cellValue === "[FAIL]") return "FAIL";
 
@@ -374,7 +373,7 @@ export function FormComponent({
                         row={row}
                         col={col}
                         handleCellChange={handleCellChange}
-                        readOnly={readOnly ?? true}
+                        readOnly={readOnly ?? false}
                       />
 
                     ) : cellValue.startsWith("[image:") ? (

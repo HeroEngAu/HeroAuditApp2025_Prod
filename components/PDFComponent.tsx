@@ -243,6 +243,11 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
               {Array.from({ length: columns }).map((_, colIndex) => {
                 const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                 const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                const rawTrimmed = rawCellValue.trim();
+                const isEuropeanNumber =
+                  /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
+                  /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||               
+                  /^[0-9]+,[0-9]{3}$/.test(rawTrimmed);
                 const isImage = rawCellValue.trim().startsWith("[image:");
                 const imageBase64 = rawCellValue.trim().match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
                 const isCenteredCell =
@@ -250,7 +255,11 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   rawCellValue.trim().startsWith("[select") ||
                   rawCellValue.trim().startsWith("[number:") ||
                   rawCellValue.trim().startsWith("[date:") ||
-                  !isNaN(Number(rawCellValue.trim())) ||
+                  !isNaN(Number(rawTrimmed)) ||
+                  isEuropeanNumber ||
+                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                  /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed);
+                !isNaN(Number(rawCellValue.trim())) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
                   /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawCellValue.trim());
