@@ -140,7 +140,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       const parseCell = (cellValue: string): string => {
         const trimmed = cellValue?.trim() || "";
-
+        if (trimmed === "[camera]") return "No picture was taken";
         if (trimmed.startsWith("[checkbox")) {
           if (trimmed === "[checkbox:true]") return "✔";
           if (trimmed === "[checkbox:false]") return "✖";

@@ -88,6 +88,7 @@ export function FormComponent({
   };
 
   const parseCell = (cellValue: string): string => {
+    if (cellValue === "[camera]") return "No picture was taken";
     if (cellValue === "[PASS]") return "PASS";
     if (cellValue === "[FAIL]") return "FAIL";
 

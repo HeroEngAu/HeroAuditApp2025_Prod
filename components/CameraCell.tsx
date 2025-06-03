@@ -11,7 +11,7 @@ type Props = {
     readOnly: boolean;
 };
 
-function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string> {
+function resizeAndCompressImage(base64: string, maxWidth = 300): Promise<string> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
@@ -24,7 +24,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string>
             if (!ctx) return reject("Canvas context error");
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.5);
             resolve(compressedBase64);
         };
         img.onerror = reject;
@@ -59,14 +59,20 @@ export function CameraCell({ row, col, handleCellChange, readOnly }: Props) {
         setOpen(false);
     };
 
-    if (readOnly && photo) {
-        return (
-            <img
-                src={photo}
-                alt="Captured"
-                className="max-w-[100px] max-h-[100px] object-contain border rounded"
-            />
-        );
+    if (readOnly) {
+        if (photo) {
+            return (
+                <img
+                    src={photo}
+                    alt="Captured"
+                    className="max-w-[100px] max-h-[100px] object-contain border rounded"
+                />
+            );
+        } else {
+            return (
+                <p>No picture was taken.</p>
+            );
+        }
     }
 
     return open ? (

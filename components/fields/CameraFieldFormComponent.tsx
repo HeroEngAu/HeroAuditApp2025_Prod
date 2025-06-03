@@ -107,7 +107,7 @@ export function FormComponent({
 
     return (
         <div className="flex flex-col items-center gap-4">
-            {!cameraOpen && (
+            {!cameraOpen && !readOnly && (
                 <>
                 <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
                 <button
