@@ -275,7 +275,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
               Use <code>[number:]</code> to display a number input field.<br />
               Use <code>[date:]</code> to display a date picker.<br />
               Use <code>[camera]</code> to open the camera and make register of the process performed.<br />
-              Use <code>[PASS] or [FAIL]</code> to display buttons to select the overall result of the table.
+              Use <code>[SUMMARY]</code> to display buttons to select the overall result of the table.
               For a regular editable text field, leave the cell blank.
             </FormDescription>
           </div>
