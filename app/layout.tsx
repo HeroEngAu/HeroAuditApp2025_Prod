@@ -86,7 +86,16 @@ function CustomHeader() {
   description:
     "Another Next.js project also using Typescript, Dnd-Kit, PostgreSQL, Prisma, Tailwind",
 };*/
-
+const formFields = {
+  signUp: {
+    "custom:Company": {
+      label: 'Company:',
+      placeholder: 'Select the company',
+      isRequired: true,
+      
+    },
+  },
+}
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="light" style={{ colorScheme: "light" }}>
@@ -96,7 +105,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <DesignerContextProvider>
             <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <div className="h-screen flex items-center justify-center">
-                <Authenticator
+                <Authenticator formFields={formFields}
                   components={{
                     Header: CustomHeader,
                   }}
