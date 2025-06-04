@@ -21,9 +21,10 @@ import {
 } from "../actions/form";
 import { useTheme } from "next-themes";
 import { fetchAuthSession } from "aws-amplify/auth";
+import useUserAttributes from "./userAttributes";
 
 interface CreateFormDialogProps {
-  onFormCreated?: () => void; // <-- torna opcional
+  onFormCreated?: () => void;
 }
 
 const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
@@ -45,8 +46,11 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const [userGroup, setUserGroup] = useState<string | null>(null);
+  const { attributes } = useUserAttributes();
+  const userId = attributes?.sub;
 
   useEffect(() => {
+    if (!userId) return;
     const fetchUserGroup = async () => {
       try {
         const session = await fetchAuthSession();
@@ -62,7 +66,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
       }
     };
     fetchUserGroup();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -106,12 +110,12 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const handleCreateForm = async () => {
     try {
       setError(null);
-      if (!name || !description || !projID) {
+      if (!name || !description || !projID || !userId) {
         setError("Please fill in all fields.");
         return;
       }
 
-      const formId = await CreateForm(name, description, projID);
+      const formId = await CreateForm(name, description, projID, userId);
       if (!formId) throw new Error("Form ID not returned");
 
       const projectID = formId.projID;
@@ -142,9 +146,9 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   return (
     <View>
       {userGroup !== "viewer" && (
-      <Card
-        onClick={() => setIsOpen(true)} // Trigger the function when the card is clicked
-        className="
+        <Card
+          onClick={() => setIsOpen(true)} // Trigger the function when the card is clicked
+          className="
         h-[235px] cursor-pointer border-2 border-dashed p-4 flex flex-col justify-center items-center
         border-black transition-colors duration-300 ease-in-out
         hover:border-blue-400
@@ -153,12 +157,12 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
         dark:hover:border-blue-300
         dark:hover:bg-gray-800
         dark:hover:text-white "
-      >
-        <CardHeader className="flex flex-col justify-center items-center gap-2">
-          <IoIosCreate className="text-4xl" />
-          <span className="text-xl font-bold">Create New Form</span>
-        </CardHeader>
-      </Card>
+        >
+          <CardHeader className="flex flex-col justify-center items-center gap-2">
+            <IoIosCreate className="text-4xl" />
+            <span className="text-xl font-bold">Create New Form</span>
+          </CardHeader>
+        </Card>
       )}
       {isOpen && (
         <View

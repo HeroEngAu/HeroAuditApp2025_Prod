@@ -974,6 +974,7 @@ export async function CreateForm(
   name: string,
   description: string,
   fullProjectName: string,
+  userId: string,
 ) {
 
   const projectName = fullProjectName.split(" (")[0];
@@ -982,7 +983,7 @@ export async function CreateForm(
     await client.models.Projectt.list({
       filter: { projectName: { eq: projectName } },
     });
-
+    
   if (projectErrors) {
     console.error("Error fetching projects:", projectErrors);
     throw new Error("Failed to fetch projects.");
@@ -998,6 +999,7 @@ export async function CreateForm(
     projID: projID,
     name: name,
     description: description,
+    userId: userId,
   });
 
   if (formerrors) {
@@ -1243,6 +1245,7 @@ export async function SaveFormAfterTestAction(formData: FormData) {
   const formtagId = formData.get("formtagID") as string;
   const rawResponses = formData.get("responses") as string;
   const rawFormContent = formData.get("formContent") as string;
+
 
   let tagId = formData.get("tagId") as string;
 
