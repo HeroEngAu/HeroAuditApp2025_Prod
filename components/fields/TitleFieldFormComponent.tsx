@@ -29,7 +29,7 @@ export function FormComponent({
     textColor === "rgb(0, 0, 0)";
 
   const fallbackBgClass =
-    isTransparent && !pdf ? "bg-white dark:bg-gray-900" : "";
+    isTransparent && !pdf ? "dark:bg-gray-900" : "";
   const fallbackTextClass =
     isTransparent && isBlackText && !pdf ? "text-black dark:text-white" : "";
 

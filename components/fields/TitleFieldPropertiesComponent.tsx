@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Checkbox } from "../ui/checkbox";
 import { CustomInstance, propertiesSchema } from "./TitleField";
 import { z } from "zod";
+import { Label } from "../ui/label";
 
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 
@@ -33,6 +34,7 @@ export function PropertiesComponent({
       textColor: element.extraAttributes.textColor || "#000000", // default to black
       textAlign: element.extraAttributes.textAlign as "center",
       noBackground: element.extraAttributes.backgroundColor === "transparent",
+      repeatOnPageBreak: element.extraAttributes.repeatOnPageBreak,
     },
   });
 
@@ -41,7 +43,7 @@ export function PropertiesComponent({
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { title, backgroundColor, textColor, textAlign, noBackground } = values;
+    const { title, backgroundColor, textColor, textAlign, noBackground, repeatOnPageBreak } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
@@ -49,6 +51,7 @@ export function PropertiesComponent({
         backgroundColor: noBackground ? "transparent" : backgroundColor,
         textColor,
         textAlign,
+        repeatOnPageBreak,
       },
     });
   }
@@ -152,9 +155,24 @@ export function PropertiesComponent({
               </FormControl>
               <FormMessage />
             </FormItem>
+
           )}
         />
-
+        <div className="space-y-1">
+          <Label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={form.watch("repeatOnPageBreak")}
+              onChange={(e) =>
+                form.setValue("repeatOnPageBreak", e.target.checked, {
+                  shouldDirty: true,
+                })
+              }
+              className="mr-2"
+            />
+            <span>Repeat on page break</span>
+          </Label>
+        </div>
       </form>
     </Form>
   );

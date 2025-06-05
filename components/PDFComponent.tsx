@@ -462,25 +462,17 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 }
 
 export default function PDFDocument({ elements, responses, formName, revision, orientation }: Props) {
-  const repeatHeaderImage = elements
-    .flat()
-    .find(
-      (el) => el.type === "ImageField" && el.extraAttributes?.repeatOnPageBreak === true
-    );
-  const headerSeparators = Array.from(
-    new Map(
-      elements
-        .flat()
-        .filter(el => el.type === "SeparatorField" && el.extraAttributes?.repeatOnPageBreak)
-        .map(el => [el.id, el])
-    ).values()
-  );
-  
-  const headerImageUrl = repeatHeaderImage?.extraAttributes?.imageUrl;
+  // Pega os elementos da primeira página com repeatOnPageBreak
+  const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
+
+  // Se houver imagem repetível, extraia para estilizar
+  const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
+
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
   const preserveOriginalSize = repeatHeaderImage?.extraAttributes?.preserveOriginalSize;
   const height = repeatHeaderImage?.extraAttributes?.height ?? 80;
   const width = repeatHeaderImage?.extraAttributes?.width;
+
   let alignStyle = {};
   if (headerImagePosition === "center") {
     alignStyle = { alignSelf: "center" };
@@ -490,60 +482,45 @@ export default function PDFDocument({ elements, responses, formName, revision, o
     alignStyle = { alignSelf: "flex-start" };
   }
 
-const imageStyle = preserveOriginalSize
-  ? {
-      width,
-      height: 'auto',
-      objectFit: 'contain',
-      ...alignStyle,
-    }
-  : {
-      width: 150,
-      height,
-      objectFit: 'contain',
-      ...alignStyle,
-    };
+  const imageStyle = preserveOriginalSize
+    ? { width, height: "auto", objectFit: "contain", ...alignStyle }
+    : { width: 150, height, objectFit: "contain", ...alignStyle };
 
   return (
     <Document>
       {elements.map((group, pageIndex) => (
-        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || 'portrait'}>
-
+        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"}>
           {/* Header */}
           <View fixed style={styles.header}>
-
-            {/* Repeated images */}
-            {repeatHeaderImage && (
-              <Image src={headerImageUrl} style={imageStyle} />
-            )}
-
-            {/* Repeated separators */}
-            {headerSeparators.map((separator, index) => (
-              <View key={`header-separator-${separator.id}-${index}`}>
-                {renderFieldValue(separator, responses[separator.id])}
-              </View>
-            ))}
+            {repeatablesInOrder.map((el) => {
+              if (el.type === "ImageField") {
+                return <Image key={el.id} src={el.extraAttributes?.imageUrl} style={imageStyle} />;
+              }
+              return (
+                <View key={`header-el-${el.id}`}>
+                  {renderFieldValue(el, responses[el.id])}
+                </View>
+              );
+            })}
           </View>
 
           {/* Footer */}
           <View fixed style={styles.footerContainer}>
             <View style={styles.footerLine} />
             <View style={styles.footerContent}>
-              <Text>{formName} REV. {revision}</Text> 
+              <Text>{formName} REV. {revision}</Text>
               <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
             </View>
           </View>
 
           {/* Page Content */}
           {group.map((element) => {
-            const value = responses[element.id];
-            if (
-              (repeatHeaderImage && element.id === repeatHeaderImage.id) ||
-              (element.type === "SeparatorField" && element.extraAttributes?.repeatOnPageBreak === true)
-            )
-
+            // não renderiza elementos repetidos no header (mesmo ID)
+            if (repeatablesInOrder.find(r => r.id === element.id)) {
               return null;
+            }
 
+            const value = responses[element.id];
             return (
               <View key={element.id} style={styles.fieldContainer}>
                 {element.type !== "SeparatorField" && element.type !== "CheckboxField" && (
@@ -556,6 +533,7 @@ const imageStyle = preserveOriginalSize
         </Page>
       ))}
     </Document>
-
   );
 }
+
+

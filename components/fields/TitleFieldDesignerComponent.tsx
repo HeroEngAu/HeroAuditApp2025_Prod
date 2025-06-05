@@ -29,7 +29,7 @@ export function DesignerComponent({
     textColor === "#000000" ||
     textColor === "rgb(0, 0, 0)";
 
-  const fallbackBgClass = isTransparent ? "bg-white dark:bg-gray-900" : "";
+  const fallbackBgClass = isTransparent ? "dark:bg-gray-900" : "";
   const fallbackTextClass = isTransparent && isBlackText ? "text-black dark:text-white" : "";
 
   return (

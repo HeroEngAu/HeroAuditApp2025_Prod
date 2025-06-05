@@ -18,6 +18,7 @@ const extraAttributes = {
   backgroundColor: "#ffffff",
   textColor: "#000000",
   textAlign: "center" as "left" | "center" | "right",
+  repeatOnPageBreak: false,
 };
 
 export const propertiesSchema = z.object({
@@ -26,7 +27,7 @@ export const propertiesSchema = z.object({
   textColor: z.string().optional(),
   textAlign: z.enum(["left", "center", "right"]),
   noBackground: z.boolean().optional(),
-
+  repeatOnPageBreak: z.boolean(),
 });
 
 export const TitleFieldFormElement: FormElement = {
