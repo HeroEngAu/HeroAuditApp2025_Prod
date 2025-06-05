@@ -34,7 +34,7 @@ export function FormComponent({
         sizes="100vw"
         style={{
           maxHeight: preserveOriginalSize ? "none" : "80px",
-          width: "auto",
+          width: preserveOriginalSize ? 'auto' : '200px',
           maxWidth: "100%",
           objectFit: "contain",
         }}

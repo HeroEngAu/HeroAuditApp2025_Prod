@@ -104,7 +104,7 @@ useEffect(() => {
             imageUrl: base64,
             preserveOriginalSize,
           },
-          height: preserveOriginalSize ? Math.max(naturalHeight, 200) : 200,
+          height: preserveOriginalSize ? Math.max(naturalHeight, 80) : 80,
         });
       };
 

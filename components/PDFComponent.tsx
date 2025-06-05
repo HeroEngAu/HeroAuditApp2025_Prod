@@ -12,6 +12,7 @@ interface Props {
   responses: { [key: string]: unknown };
   formName: string;
   revision: number | string;
+  orientation?: 'portrait' | 'landscape';
 }
 const styles = StyleSheet.create({
   page: {
@@ -460,7 +461,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName, revision }: Props) {
+export default function PDFDocument({ elements, responses, formName, revision, orientation }: Props) {
   const repeatHeaderImage = elements
     .flat()
     .find(
@@ -474,7 +475,7 @@ export default function PDFDocument({ elements, responses, formName, revision }:
         .map(el => [el.id, el])
     ).values()
   );
-
+  
   const headerImageUrl = repeatHeaderImage?.extraAttributes?.imageUrl;
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
   const preserveOriginalSize = repeatHeaderImage?.extraAttributes?.preserveOriginalSize;
@@ -489,20 +490,24 @@ export default function PDFDocument({ elements, responses, formName, revision }:
     alignStyle = { alignSelf: "flex-start" };
   }
 
-  const imageStyle = {
-    ...(preserveOriginalSize
-      ? {}
-      : {
-        height,
-        width,
-      }),
-    ...alignStyle,
-  };
+const imageStyle = preserveOriginalSize
+  ? {
+      width,
+      height: 'auto',
+      objectFit: 'contain',
+      ...alignStyle,
+    }
+  : {
+      width: 150,
+      height,
+      objectFit: 'contain',
+      ...alignStyle,
+    };
 
   return (
     <Document>
       {elements.map((group, pageIndex) => (
-        <Page key={pageIndex} style={styles.page} wrap>
+        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || 'portrait'}>
 
           {/* Header */}
           <View fixed style={styles.header}>

@@ -41,11 +41,10 @@ export function DesignerComponent({
           sizes="100vw"
           style={{
             maxWidth: '100%',
-            width: 'auto',
+            width: preserveOriginalSize ? 'auto' : '200px',
             maxHeight: preserveOriginalSize ? 'none' : '80px',
           }}
         />
-
       ) : (
         <p className="text-sm text-muted-foreground italic">No image uploaded</p>
       )}

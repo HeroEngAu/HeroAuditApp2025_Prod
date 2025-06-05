@@ -5,11 +5,13 @@ import useDesigner from "./hooks/useDesigner";
 import PDFDocument from "./PDFComponent";
 import { FormElementInstance } from "./FormElements";
 import { pdf } from "@react-pdf/renderer";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-function PreviewPDFDialogBtn({ formName, revision }: { formName: string, revision:number }) {
+function PreviewPDFDialogBtn({ formName, revision }: { formName: string, revision: number }) {
   const { elements, setSelectedElement } = useDesigner();
   const [loading, setLoading] = useState(false);
-  const documentNumber = formName || "Unknown Document Number";
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
 
   const generateAndOpenPDF = async () => {
     setSelectedElement(null);
@@ -40,7 +42,13 @@ function PreviewPDFDialogBtn({ formName, revision }: { formName: string, revisio
     }
 
     const blob = await pdf(
-      <PDFDocument elements={groups} responses={{}} formName={documentNumber} revision={revision} />
+      <PDFDocument
+        elements={groups}
+        responses={{}}
+        formName={formName || "Unknown Document Number"}
+        revision={revision}
+        orientation={orientation}
+      />
     ).toBlob();
 
     const url = URL.createObjectURL(blob);
@@ -49,10 +57,29 @@ function PreviewPDFDialogBtn({ formName, revision }: { formName: string, revisio
   };
 
   return (
-    <Button variant="outline" className="gap-2" onClick={generateAndOpenPDF} disabled={loading}>
-      <MdPreview className="h-6 w-6" />
-      {loading ? "Generating..." : "Preview PDF"}
-    </Button>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="gap-2" disabled={loading}>
+          <MdPreview className="h-6 w-6" />
+          {loading ? "Generating..." : "Preview PDF"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 space-y-3">
+        <div className="text-sm font-medium">Select Page Orientation</div>
+        <Select value={orientation} onValueChange={(v) => setOrientation(v as "portrait" | "landscape")}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Orientation" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="portrait">Portrait</SelectItem>
+            <SelectItem value="landscape">Landscape</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button className="w-full" onClick={generateAndOpenPDF} disabled={loading}>
+          {loading ? "Generating..." : "Generate PDF"}
+        </Button>
+      </PopoverContent>
+    </Popover>
   );
 }
 
