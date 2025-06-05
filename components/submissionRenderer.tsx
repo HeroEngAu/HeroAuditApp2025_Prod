@@ -5,7 +5,6 @@ import { GetFormNameFromSubmissionId } from "../actions/form";
 import PDFDocument from "./PDFComponent";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { FormElements } from "./FormElements";
-import { Cross2Icon } from "@radix-ui/react-icons";
 
 interface Props {
   elements: FormElementInstance[];
