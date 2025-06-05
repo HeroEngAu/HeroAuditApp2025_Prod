@@ -56,91 +56,96 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
     }
   };
 
-return (
-  <div>
-    <h1 className="text-2xl font-bold my-4">Project Log</h1>
+  return (
+    <div>
+      <h1 className="text-2xl font-bold my-4 text-foreground">Project Log</h1>
 
-    {/* Cabeçalho (Header) */}
-    <div className="flex w-full bg-muted font-semibold border-y">
-      <div className="flex-1 p-2 text-center uppercase border">Equipment Name</div>
-      <div className="flex-1 p-2 text-center uppercase border">Equipment Tag</div>
-      <div className="flex-1 p-2 text-center uppercase border">Submitted At</div>
-      <div className="w-9 p-2 text-center uppercase border"></div>
-    </div>
+      {/* Header */}
+      <div className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white font-semibold border-y border-border dark:border-neutral-700">
+        <div className="flex-1 p-2 text-center uppercase border-r dark:border-neutral-700">Equipment Name</div>
+        <div className="flex-1 p-2 text-center uppercase border-r dark:border-neutral-700">Equipment Tag</div>
+        <div className="flex-1 p-2 text-center uppercase border-r dark:border-neutral-700">Submitted At</div>
+        <div className="w-9 p-2 text-center uppercase"></div>
+      </div>
 
-    {/* Accordion */}
-    <Accordion.Container>
-      {submissions.length > 0 ? (
-        [...submissions]
-          .sort((a, b) => {
-            if (!a.submittedAt && b.submittedAt) return -1;
-            if (a.submittedAt && !b.submittedAt) return 1;
-            return (a.tag ?? "").localeCompare(b.tag ?? "");
-          })
-          .map((s, i) => {
-            const wasSubmitted = Array.isArray(s.contentTest)
-              ? s.contentTest.includes(s.submissionId ?? "")
-              : false;
+      {/* Accordion */}
+      <Accordion.Container>
+        {submissions.length > 0 ? (
+          [...submissions]
+            .sort((a, b) => {
+              if (!a.submittedAt && b.submittedAt) return -1;
+              if (a.submittedAt && !b.submittedAt) return 1;
+              return (a.tag ?? "").localeCompare(b.tag ?? "");
+            })
+            .map((s, i) => {
+              const wasSubmitted = Array.isArray(s.contentTest)
+                ? s.contentTest.includes(s.submissionId ?? "")
+                : false;
 
-            return (
-              <Accordion.Item key={i} value={`item-${i}`}>
-                <Accordion.Trigger>
-                  <div className="flex w-full items-center">
-                    <div className="flex-1 p-2 border">{s.equipmentName}</div>
-                    <div className="flex-1 p-2 border">{s.tag}</div>
-                    <div className="flex-1 p-2 border">
-                      {s.submittedAt
-                        ? formatDistance(new Date(s.submittedAt), new Date(), {
+              return (
+                <Accordion.Item key={i} value={`item-${i}`}>
+                  <Accordion.Trigger>
+                    <div className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
+                      <div className="flex-1 p-2 border border-border dark:border-neutral-700">
+                        {s.equipmentName}
+                      </div>
+                      <div className="flex-1 p-2 border border-border dark:border-neutral-700">
+                        {s.tag}
+                      </div>
+                      <div className="flex-1 p-2 border border-border dark:border-neutral-700">
+                        {s.submittedAt
+                          ? formatDistance(new Date(s.submittedAt), new Date(), {
                             addSuffix: true,
                           })
-                        : "Not Submitted"}
-                    </div>
-                    <div className="w-8 p-2 border text-center">
-                      <Accordion.Icon />
-                    </div>
-                  </div>
-                </Accordion.Trigger>
-                <Accordion.Content>
-                  <div className="p-4 bg-muted rounded-md space-y-4">
-                    <div className="text-sm">
-                      <SubmissionSummary submissionId={s.submissionId ?? ""} />
+                          : "Not Submitted"}
+                      </div>
+                      <div className="w-8 p-2 border border-border dark:border-neutral-700 text-center">
+                        <Accordion.Icon />
+                      </div>
                     </div>
 
-                    <div className="flex gap-4 justify-between flex-wrap">
-                      {wasSubmitted ? (
-                        <a href={`/view-submitted/${s.submissionId}`}>
-                          <Button variant="outline" className="gap-2">
-                            <MdPreview className="h-6 w-6" />
-                            View Form
+                  </Accordion.Trigger>
+                  <Accordion.Content>
+                    <div className="p-4 bg-muted dark:bg-neutral-800 rounded-md space-y-4 text-foreground">
+                      <div className="text-sm">
+                        <SubmissionSummary submissionId={s.submissionId ?? ""} />
+                      </div>
+
+                      <div className="flex gap-4 justify-between flex-wrap">
+                        {wasSubmitted ? (
+                          <a href={`/view-submitted/${s.submissionId}`}>
+                            <Button variant="outline" className="gap-2">
+                              <MdPreview className="h-6 w-6" />
+                              View Form
+                            </Button>
+                          </a>
+                        ) : (
+                          <ResumeTestBtn formTag2Id={s.formtagId} />
+                        )}
+
+                        {isAdmin && (
+                          <Button
+                            variant="destructive"
+                            className="gap-2"
+                            onClick={() => handleDelete(s.submissionId ?? "")}
+                            disabled={!s.submissionId}
+                          >
+                            <FaTrash />
+                            Delete
                           </Button>
-                        </a>
-                      ) : (
-                        <ResumeTestBtn formTag2Id={s.formtagId} />
-                      )}
-
-                      {isAdmin && (
-                        <Button
-                          variant="destructive"
-                          className="gap-2"
-                          onClick={() => handleDelete(s.submissionId ?? "")}
-                          disabled={!s.submissionId}
-                        >
-                          <FaTrash />
-                          Delete
-                        </Button>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Accordion.Content>
-              </Accordion.Item>
-            );
-          })
-      ) : (
-        <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
-      )}
-    </Accordion.Container>
-  </div>
-);
+                  </Accordion.Content>
+                </Accordion.Item>
+              );
+            })
+        ) : (
+          <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
+        )}
+      </Accordion.Container>
+    </div>
+  );
 
 
 }

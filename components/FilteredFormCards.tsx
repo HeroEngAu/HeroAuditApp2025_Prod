@@ -14,6 +14,7 @@ import { GetFormsInformation } from "../actions/form";
 import { fetchAuthSession } from "aws-amplify/auth";
 import Loading from "../app/(dashboard)/forms/[id]/loading";
 import useUserAttributes from "./userAttributes";
+import CreateFormDialog from "./CreateFormDialog";
 
 type CustomForm = {
     id: string;
@@ -130,11 +131,11 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
     const [loading, setLoading] = useState(true);
     const { attributes } = useUserAttributes();
     const userId = attributes?.sub;
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [adminChecked, setAdminChecked] = useState(false);
+    const [userGroup, setUserGroup] = useState<string | null>(null);
+    const [groupChecked, setGroupChecked] = useState(false);
 
     useEffect(() => {
-        async function checkAdmin() {
+        async function fetchUserGroup() {
             try {
                 const session = await fetchAuthSession();
                 const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
@@ -143,24 +144,27 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
                     : typeof rawGroups === "string"
                         ? [rawGroups]
                         : [];
-                setIsAdmin(groups.includes("admin"));
+
+                setUserGroup(groups[0] ?? null);
             } catch (error) {
-                console.error("Failed to fetch user groups", error);
+                console.error("Failed to fetch user group", error);
             } finally {
-                setAdminChecked(true);
+                setGroupChecked(true);
             }
         }
 
-        checkAdmin();
+        fetchUserGroup();
     }, []);
 
+    const company = attributes?.["custom:Company"];
+
     useEffect(() => {
-        if (!userId || !adminChecked) return;
+        if (!userId || !groupChecked || !company || !userGroup) return;
 
         async function fetchData() {
             try {
                 if (typeof userId === "string") {
-                    const data = await GetFormsInformation(userId, isAdmin);
+                    const data = await GetFormsInformation(userId, userGroup!, company!);
                     setFormsInfo(data);
                 }
             } catch (err) {
@@ -171,9 +175,11 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
         }
 
         fetchData();
-    }, [userId, isAdmin, adminChecked]);
+    }, [userId, userGroup, groupChecked, company]);
 
-    if (!userId || !adminChecked || loading) {
+
+
+    if (!userId || !groupChecked || loading) {
         return (
             <Loading />
         );
@@ -197,6 +203,9 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
     );
     return (
         <>
+            {userGroup !== "viewer" && (
+                <CreateFormDialog />
+            )}
             {filteredForms.length === 0 && <p>No forms found.</p>}
             {filteredForms.map((form) => (
                 <FormCard key={form.id} form={form} />

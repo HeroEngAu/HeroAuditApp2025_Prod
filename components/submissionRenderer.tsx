@@ -15,6 +15,7 @@ interface Props {
 
 export default function SubmissionRenderer({ submissionID, elements, responses }: Props) {
   const [formName, setFormName] = useState<string>("Loading...");
+  const [revision, setRevision] = useState<number | string>("Loading...");
   const [pageGroups, setPageGroups] = useState<FormElementInstance[][]>([]);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
       try {
         const result = await GetFormNameFromSubmissionId(submissionID);
         setFormName(result.formName || "Untitled Form");
+        setRevision(result.revision || "0");
       } catch {
         setFormName("Unknown");
       }
@@ -68,12 +70,13 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
                 elements={pageGroups}
                 responses={responses}
                 formName={formName}
+                revision={revision}
               />
             }
             fileName={`${formName}.pdf`}
           >
             {({ loading }) => (
-              <Button size="sm" className="h-8 px-3 ">
+              <Button size="sm" className="h-8 px-3 bg-background text-foreground border border-border hover:bg-muted">
                 {loading ? "Preparing..." : "Export as PDF"}
               </Button>
             )}
@@ -81,13 +84,19 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         </div>
 
         {/* Right: Close Button */}
-        <button
+        <Button
           onClick={() => window.history.back()}
-          className="self-end flex items-center justify-center w-8 h-8 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+          className="
+          self-end flex items-center justify-center w-8 h-8 rounded-sm 
+          opacity-70 hover:opacity-100 
+          focus:outline-none focus:ring-2 focus:ring-ring 
+          text-foreground bg-background border border-border font-bold text-lg
+          hover:bg-neutral-700 dark:hover:bg-neutral-300 dark:hover:text-black
+        "
         >
-          <Cross2Icon className="w-4 h-4" />
+          X
           <span className="sr-only">Close</span>
-        </button>
+        </Button>
       </div>
       <div className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto" style={{ paddingTop: "94px", maxHeight: "100vh" }}>
         {pageGroups.map((group, idx) => (

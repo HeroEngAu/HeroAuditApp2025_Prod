@@ -12,11 +12,12 @@ const schema = a.schema({
       content: a.string().default("[]"),
       visits: a.integer().default(0),
       submissions: a.integer().default(0),
+      revision: a.integer().default(0),
       shareURL: a.string(),
       FormSubmissions: a.hasMany('FormSubmissions', 'formId'), // One-to-many relationship
       projID: a.id(),
       projects: a.belongsTo('Projectt', 'projID'),
-      equipmentTAGs: a.hasMany('FormTag2', 'formID')
+      equipmentTAGs: a.hasMany('FormTag2', 'formID'),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 

@@ -8,7 +8,7 @@ import { Authenticator, Avatar, IconsProvider } from '@aws-amplify/ui-react';
 import { FiUser } from 'react-icons/fi';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
-import {fetchUserAttributes, signOut } from 'aws-amplify/auth';
+import { fetchUserAttributes, signOut } from 'aws-amplify/auth';
 
 Amplify.configure(outputs);
 
@@ -18,37 +18,39 @@ function getInitials(name: string) {
 
 function Layout({ children }: { children: ReactNode }) {
   const [userName, setUserName] = useState('User');
+  const [email, setEmail] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const [company, setCompany] = useState('');
   type ErrorWithMessage = {
-  message: string;
-};
+    message: string;
+  };
 
-useEffect(() => {
-  async function loadAttributes() {
-    try {
-      const attrs = await fetchUserAttributes();
-
-      if (attrs.name) setUserName(attrs.name);
-    } catch (err) {
-      const e = err as Partial<ErrorWithMessage>;
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "message" in err &&
-        typeof e.message === "string" &&
-        e.message.includes("NotAuthorizedException")
-      ) {
-        console.log("Token inválido, redirecionando para login...");
-        // Exemplo: window.location.href = '/login';
-      } else {
-        console.error("Failed to fetch user attributes:", err);
+  useEffect(() => {
+    async function loadAttributes() {
+      try {
+        const attrs = await fetchUserAttributes();
+        if (attrs.name) setUserName(attrs.name);
+        if (attrs.email) setEmail(attrs.email);
+        if (attrs['custom:Company']) setCompany(attrs['custom:Company']);
+      } catch (err) {
+        const e = err as Partial<ErrorWithMessage>;
+        if (
+          typeof err === "object" &&
+          err !== null &&
+          "message" in err &&
+          typeof e.message === "string" &&
+          e.message.includes("NotAuthorizedException")
+        ) {
+          console.log("Token inválido, redirecionando para login...");
+          // Exemplo: window.location.href = '/login';
+        } else {
+          console.error("Failed to fetch user attributes:", err);
+        }
       }
     }
-  }
-  loadAttributes();
-}, []);
+    loadAttributes();
+  }, []);
 
 
 
@@ -98,11 +100,15 @@ useEffect(() => {
                   >
                     {userInitials}
                   </Avatar>
-
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-300 rounded shadow-lg z-50">
+                    <div className="absolute right-0 mt-2 w-100 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded shadow-lg z-50 text-sm text-gray-800 dark:text-gray-100">
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-zinc-700">
+                        <div className="font-medium truncate">{userName}</div>
+                        <div className="text-gray-500 dark:text-gray-300 truncate">{email}</div>
+                        <div className="text-gray-500 dark:text-gray-300 truncate">{company}</div>
+                      </div>
                       <button
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700"
                         onClick={() => {
                           setDropdownOpen(false);
                           signOut();

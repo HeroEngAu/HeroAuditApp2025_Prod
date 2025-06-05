@@ -230,8 +230,6 @@ export async function GetFormById(id: string) {
         }
       }
     }
-
-
     return {
       form,
       projectName,
@@ -240,6 +238,7 @@ export async function GetFormById(id: string) {
       visits: form.visits ?? 0,
       submissions: form.submissions ?? 0,
       FormDescription: form.description,
+      revision: form.revision ?? 0,
     };
   } catch (error) {
     console.error("Error fetching form by ID:", error);
@@ -281,6 +280,16 @@ export async function saveFormAction(formData: FormData) {
 
 export async function PublishForm(userId: string, id: string, content: string, shareURL: string) {
   try {
+    const { data: currentForm, errors: fetchErrors } = await client.models.Form.get({ id });
+
+    if (fetchErrors || !currentForm) {
+      console.error(fetchErrors);
+      throw new Error("Failed to fetch current form.");
+    }
+
+    const isAlreadyPublished = currentForm.published === true;
+    const currentRevision = currentForm.revision ?? 0;
+    const newRevision = isAlreadyPublished ? currentRevision + 1 : currentRevision;
 
     const form = {
       id: id,
@@ -288,6 +297,7 @@ export async function PublishForm(userId: string, id: string, content: string, s
       shareURL: shareURL,
       userId: userId,
       published: true,
+      revision: newRevision,
     };
 
     const { data: updatedForm, errors } = await client.models.Form.update(form);
@@ -869,24 +879,23 @@ export async function GetFormsWithClient(ClientID: string) {
   }
 }
 
-export async function GetFormsInformation(userId: string, isAdmin: boolean) {
+export async function GetFormsInformation(userId: string, group: string, company: string) {
   try {
-
-    const { errors: clientErrors, data: clientsData } =
-      await client.models.Client.list();
+    const { errors: clientErrors, data: clientsData } = await client.models.Client.list();
 
     if (clientErrors) {
       console.error("Error:", clientErrors);
-      throw new Error("Failed to fetch forms.");
+      throw new Error("Failed to fetch clients.");
     }
 
     const results = [];
 
     for (const clientItem of clientsData) {
-      const { errors: projectErrors, data: projectsData } =
-        await client.models.Projectt.list({
-          filter: { ClientID: { eq: clientItem.id } },
-        });
+      if (group === "viewer" && clientItem.ClientName !== company) continue;
+
+      const { errors: projectErrors, data: projectsData } = await client.models.Projectt.list({
+        filter: { ClientID: { eq: clientItem.id } },
+      });
 
       if (projectErrors) {
         console.error("Error:", projectErrors);
@@ -894,39 +903,43 @@ export async function GetFormsInformation(userId: string, isAdmin: boolean) {
       }
 
       for (const projectItem of projectsData) {
-        //console.log(`Fetching forms for project: ${projectItem.projectName}, ID: ${projectItem.projectID}`);
+        let formFilter: any = {
+          projID: { eq: projectItem.projectID },
+        };
 
-        const { errors: formErrors, data: formsData } =
-          await client.models.Form.list({
-            filter: { 
-              projID: { eq: projectItem.projectID },
-              ...(isAdmin ? {} : { userId: { eq: userId } }),
-            }, 
-          });
+        if (group === "user") {
+          formFilter.userId = { eq: userId };
+        }
+
+        const { errors: formErrors, data: formsData } = await client.models.Form.list({
+          filter: formFilter,
+        });
 
         if (formErrors) {
           console.error("Error:", formErrors);
           throw new Error("Error fetching forms");
         }
 
-        results.push({
-          clientName: clientItem.ClientName,
-          projectName: projectItem.projectName,
-          projectID: projectItem.projectID,
-          forms: formsData.map((form) => ({
-            id: form.id,
-            name: form.name,
-            description: form.description,
-            published: form.published,
-            content: form.content,
-            createdAt: form.createdAt,
-            visits: form.visits,
-            submissions: form.submissions,
-          })),
-        });
+        if (formsData.length > 0) {
+          results.push({
+            clientName: clientItem.ClientName,
+            projectName: projectItem.projectName,
+            projectID: projectItem.projectID,
+            forms: formsData.map((form) => ({
+              id: form.id,
+              name: form.name,
+              description: form.description,
+              published: form.published,
+              content: form.content,
+              createdAt: form.createdAt,
+              visits: form.visits,
+              submissions: form.submissions,
+            })),
+          });
+        }
       }
     }
-    //console.log("Results:", results);
+
     return results;
   } catch (error) {
     console.error("Error", error);
@@ -1362,7 +1375,6 @@ export async function getEquipmentTagID(
 
 export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
   try {
-
     // Fetch the FormSubmission using the FormSubmissions ID
     const { errors, data: formSubmissionData } = await client.models.FormSubmissions.list({
       filter: { id: { eq: FormSubmissionsId } },
@@ -1374,8 +1386,6 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
     }
 
     const formSubmission = formSubmissionData[0];
-
-    // Extract the formId from the FormSubmission
     const formId = formSubmission.formId;
 
     if (!formId) {
@@ -1392,14 +1402,21 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
       throw new Error("Form not found.");
     }
 
-    const formName = formData.length > 0 ? formData[0].name : null;
+    if (formData.length === 0) {
+      throw new Error("Form not found.");
+    }
 
-    return { formName };
+    const form = formData[0];
+    const formName = form.name ?? null;
+    const revision = form.revision ?? 0;
+
+    return { formName, revision };
   } catch (error) {
     console.error("Error:", error);
     throw error;
   }
 }
+
 
 export async function GetFormsContent(FormSubmissionsId: string) {
 
@@ -1416,4 +1433,34 @@ export async function GetFormsContent(FormSubmissionsId: string) {
   }
 
   return data.content;
+}
+
+import {
+  CognitoIdentityProviderClient,
+  ListUsersCommand,
+} from "@aws-sdk/client-cognito-identity-provider";
+import { fromEnv } from "@aws-sdk/credential-providers";
+
+const clients = new CognitoIdentityProviderClient({
+  region: process.env.AWS_REGION!,
+  credentials: fromEnv(), // lê as credenciais do ambiente automaticamente
+});
+
+export async function listUsers() {
+  const command = new ListUsersCommand({
+    UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+    Limit: 50,
+  });
+
+  try {
+    const { Users } = await clients.send(command);
+    return Users?.map(user => {
+      const email = user.Attributes?.find(attr => attr.Name === "email")?.Value || "";
+      const name = user.Attributes?.find(attr => attr.Name === "name")?.Value || "";
+      return { email, name };
+    }).filter(user => user.email);
+  } catch (err) {
+    console.error("Error listing users:", err);
+    return [];
+  }
 }

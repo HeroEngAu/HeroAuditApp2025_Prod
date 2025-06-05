@@ -11,6 +11,7 @@ interface Props {
   elements: FormElementInstance[][];
   responses: { [key: string]: unknown };
   formName: string;
+  revision: number | string;
 }
 const styles = StyleSheet.create({
   page: {
@@ -459,7 +460,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName }: Props) {
+export default function PDFDocument({ elements, responses, formName, revision }: Props) {
   const repeatHeaderImage = elements
     .flat()
     .find(
@@ -523,7 +524,7 @@ export default function PDFDocument({ elements, responses, formName }: Props) {
           <View fixed style={styles.footerContainer}>
             <View style={styles.footerLine} />
             <View style={styles.footerContent}>
-              <Text>{formName}</Text>
+              <Text>{formName} REV. {revision}</Text> 
               <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
             </View>
           </View>

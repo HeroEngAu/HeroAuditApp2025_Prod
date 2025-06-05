@@ -1,4 +1,5 @@
 import { defineAuth } from "@aws-amplify/backend";
+import { postConfirmation } from "./post-confirmation/resource"
 
 export const auth = defineAuth({
   loginWith: {
@@ -38,5 +39,11 @@ export const auth = defineAuth({
     },
   
   },
-  groups: ["viewer", "admin", "user"]
+  groups: ["viewer", "admin", "user"],
+  triggers: {
+    postConfirmation,
+  },
+  access: (allow) => [
+    allow.resource(postConfirmation).to(["addUserToGroup"]),
+  ],
 });

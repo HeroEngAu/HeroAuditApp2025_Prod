@@ -6,7 +6,7 @@ import PDFDocument from "./PDFComponent";
 import { FormElementInstance } from "./FormElements";
 import { pdf } from "@react-pdf/renderer";
 
-function PreviewPDFDialogBtn({ formName }: { formName: string }) {
+function PreviewPDFDialogBtn({ formName, revision }: { formName: string, revision:number }) {
   const { elements, setSelectedElement } = useDesigner();
   const [loading, setLoading] = useState(false);
   const documentNumber = formName || "Unknown Document Number";
@@ -40,7 +40,7 @@ function PreviewPDFDialogBtn({ formName }: { formName: string }) {
     }
 
     const blob = await pdf(
-      <PDFDocument elements={groups} responses={{}} formName={documentNumber} />
+      <PDFDocument elements={groups} responses={{}} formName={documentNumber} revision={revision} />
     ).toBlob();
 
     const url = URL.createObjectURL(blob);

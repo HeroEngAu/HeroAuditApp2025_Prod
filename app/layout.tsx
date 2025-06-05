@@ -98,7 +98,7 @@ const formFields = {
 }
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="light" style={{ colorScheme: "light" }}>
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <NextTopLoader />
         <AmplifyThemeProvider theme={theme} colorMode={colorMode}>

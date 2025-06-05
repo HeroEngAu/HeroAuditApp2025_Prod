@@ -27,6 +27,7 @@ export default async function BuilderPage({
       projectName={cleanForm.projectName}
       clientName={cleanForm.clientName}
       formName={cleanForm.form.name ?? "Default Form Name"}
+      revision={cleanForm.revision}
     />
   );
 }

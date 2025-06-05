@@ -8,7 +8,6 @@ import { FaWpforms } from "react-icons/fa";
 import { HiCursorClick } from "react-icons/hi";
 import { TbArrowBounce } from "react-icons/tb";*/
 import { Separator } from "../../components/ui/separator";
-import CreateFormDialog from "../../components/CreateFormDialog";
 import { Amplify } from "aws-amplify"
 import outputs from "../../amplify_outputs.json"
 import FilteredFormCards from "../../components/FilteredFormCards"
@@ -35,7 +34,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
       <Separator className="my-6" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-        <CreateFormDialog />
+        
         <Suspense
           fallback={[1, 2, 3, 4].map((el) => (
             <FormCardSkeleton key={el} />
