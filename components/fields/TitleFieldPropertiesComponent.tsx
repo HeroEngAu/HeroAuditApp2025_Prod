@@ -162,13 +162,8 @@ export function PropertiesComponent({
           <Label className="flex items-center space-x-2">
             <input
               type="checkbox"
-              checked={form.watch("repeatOnPageBreak")}
-              onChange={(e) =>
-                form.setValue("repeatOnPageBreak", e.target.checked, {
-                  shouldDirty: true,
-                })
-              }
-              className="mr-2"
+              checked={!!form.watch("repeatOnPageBreak")}
+              onChange={(e) => form.setValue("repeatOnPageBreak", e.target.checked)}
             />
             <span>Repeat on page break</span>
           </Label>
