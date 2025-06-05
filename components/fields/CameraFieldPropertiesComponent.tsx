@@ -59,6 +59,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                 <Input
                   {...field}
                   placeholder="Enter label for the camera"
+                  onBlur={form.handleSubmit(applyChanges)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") e.currentTarget.blur();
                   }}

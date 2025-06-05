@@ -19,6 +19,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
   const [revision, setRevision] = useState<number | string>("Loading...");
   const [pageGroups, setPageGroups] = useState<FormElementInstance[][]>([]);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [pageSize, setPageSize] = useState<"A4" | "A3">("A4");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         formName={formName}
         revision={revision}
         orientation={orientation}
+        pageSize={pageSize}
       />
     ).toBlob();
 
@@ -85,7 +87,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
     <div className="flex flex-col items-center w-full h-full">
       {/* Top Bar */}
       <div className="fixed h-24 top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 border-b bg-white shadow-sm w-full">
-        {/* Left: Export with orientation selection */}
+        {/* Left: Export with config */}
         <div className="self-end">
           <Popover>
             <PopoverTrigger asChild>
@@ -93,17 +95,30 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
                 {loading ? "Preparing..." : "Export as PDF"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 space-y-3">
-              <div className="text-sm font-medium">Select Orientation</div>
-              <Select value={orientation} onValueChange={(v) => setOrientation(v as "portrait" | "landscape")}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Orientation" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="portrait">Portrait</SelectItem>
-                  <SelectItem value="landscape">Landscape</SelectItem>
-                </SelectContent>
-              </Select>
+            <PopoverContent className="w-60 space-y-3">
+              <div className="text-sm font-medium">Select Page Configuration</div>
+              <div className="space-y-2">
+                <Select value={orientation} onValueChange={(v) => setOrientation(v as "portrait" | "landscape")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Orientation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="portrait">Portrait</SelectItem>
+                    <SelectItem value="landscape">Landscape</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={pageSize} onValueChange={(v) => setPageSize(v as "A4" | "A3")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Page Size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A4">A4</SelectItem>
+                    <SelectItem value="A3">A3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button className="w-full" onClick={handleExportPDF} disabled={loading}>
                 {loading ? "Generating..." : "Download PDF"}
               </Button>
@@ -114,13 +129,10 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         {/* Right: Close Button */}
         <Button
           onClick={() => window.history.back()}
-          className="
-          self-end flex items-center justify-center w-8 h-8 rounded-sm 
-          opacity-70 hover:opacity-100 
-          focus:outline-none focus:ring-2 focus:ring-ring 
-          text-foreground bg-background border border-border font-bold text-lg
-          hover:bg-neutral-700 dark:hover:bg-neutral-300 dark:hover:text-black
-        "
+          className="self-end flex items-center justify-center w-8 h-8 rounded-sm 
+          opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 
+          focus:ring-ring text-foreground bg-background border border-border 
+          font-bold text-lg hover:bg-neutral-700 dark:hover:bg-neutral-300 dark:hover:text-black"
         >
           X
           <span className="sr-only">Close</span>

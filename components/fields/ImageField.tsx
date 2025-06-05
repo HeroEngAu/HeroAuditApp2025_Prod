@@ -14,6 +14,7 @@ import { PropertiesComponent } from "./ImageFieldPropertiesComponent";
 const type: ElementsType = "ImageField";
 
 export const extraAttributes = {
+  label: "",
   imageUrl: "",
   position: "center",
   repeatOnPageBreak: false,
@@ -21,6 +22,7 @@ export const extraAttributes = {
 };
 
 export const propertiesSchema = z.object({
+  label: z.string().min(0).max(50),
   imageUrl: z.string().url("Must be a valid URL").optional(),
   position: z.enum(["left", "center", "right"]),
   repeatOnPageBreak: z.boolean(),

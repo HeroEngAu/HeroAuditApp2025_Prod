@@ -13,6 +13,7 @@ interface Props {
   formName: string;
   revision: number | string;
   orientation?: 'portrait' | 'landscape';
+  pageSize?: 'A3' | 'A4';
 }
 const styles = StyleSheet.create({
   page: {
@@ -101,8 +102,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       if (!imageUrl) return <Text>[Invalid image]</Text>;
 
-      const width = element.extraAttributes?.width;
-      const height = element.extraAttributes?.height ?? 200;
+      const width = element.extraAttributes?.width ?? 300;
+      const height = element.extraAttributes?.height ?? "auto";
       const alignment = element.extraAttributes?.position ?? "left";
       const preserveOriginalSize = element.extraAttributes?.preserveOriginalSize;
 
@@ -119,7 +120,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         ? {
           objectFit: "contain",
           maxWidth: "100%",
-          maxHeight: 500,
+          maxHeight: "100%",
           ...alignStyle,
         }
         : {
@@ -461,7 +462,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName, revision, orientation }: Props) {
+export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize }: Props) {
   // Pega os elementos da primeira página com repeatOnPageBreak
   const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
 
@@ -489,7 +490,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
   return (
     <Document>
       {elements.map((group, pageIndex) => (
-        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"}>
+        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"} size={pageSize || "A4"}>
           {/* Header */}
           <View fixed style={styles.header}>
             {repeatablesInOrder.map((el) => {

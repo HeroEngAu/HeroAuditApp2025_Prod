@@ -11,7 +11,12 @@ import useDesigner from "../hooks/useDesigner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import {
   Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
   FormLabel,
+  FormMessage,
 } from "../ui/form";
 import { Button } from "../ui/button";
 import { Upload } from "lucide-react";
@@ -37,6 +42,7 @@ export function PropertiesComponent({
         : "center",
       repeatOnPageBreak: element.extraAttributes.repeatOnPageBreak,
       preserveOriginalSize: element.extraAttributes.preserveOriginalSize,
+      label: element.extraAttributes.label,
     },
   });
 
@@ -46,7 +52,7 @@ export function PropertiesComponent({
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize } = values;
+    const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize, label } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
@@ -54,39 +60,41 @@ export function PropertiesComponent({
         position,
         repeatOnPageBreak,
         preserveOriginalSize,
+        label,
       },
     });
   }
 
-useEffect(() => {
-  const imageUrl = element.extraAttributes?.imageUrl;
-  if (!imageUrl) return;
+  useEffect(() => {
+    const imageUrl = element.extraAttributes?.imageUrl;
+    if (!imageUrl) return;
+    const label = element.extraAttributes?.label;
+    const img = new Image();
+    img.onload = () => {
+      const naturalHeight = img.naturalHeight;
+      const preserveOriginalSize = form.getValues("preserveOriginalSize");
 
-  const img = new Image();
-  img.onload = () => {
-    const naturalHeight = img.naturalHeight;
-    const preserveOriginalSize = form.getValues("preserveOriginalSize");
-
-    updateElement(element.id, {
-      ...element,
-      height: preserveOriginalSize ? naturalHeight : 80,
-      extraAttributes: {
-        ...element.extraAttributes,
-        preserveOriginalSize,
-        position: form.getValues("position"),
-        repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
-      },
-    });
-  };
-  img.src = imageUrl;
-}, [element, form, updateElement]);
+      updateElement(element.id, {
+        ...element,
+        height: preserveOriginalSize ? naturalHeight : 80,
+        extraAttributes: {
+          ...element.extraAttributes,
+          preserveOriginalSize,
+          position: form.getValues("position"),
+          repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
+          label: form.getValues("label"),
+        },
+      });
+    };
+    img.src = imageUrl;
+  }, [element, form, updateElement]);
 
 
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    const label = element.extraAttributes?.label;
     const reader = new FileReader();
 
     reader.onloadend = () => {
@@ -103,6 +111,7 @@ useEffect(() => {
             ...element.extraAttributes,
             imageUrl: base64,
             preserveOriginalSize,
+            label,
           },
           height: preserveOriginalSize ? Math.max(naturalHeight, 80) : 80,
         });
@@ -127,6 +136,33 @@ useEffect(() => {
         onSubmit={(e) => e.preventDefault()}
         className="space-y-3"
       >
+        <FormField
+          control={form.control}
+          name="label"
+          render={({ field }) => {
+            const id = "label-input";
+            return (
+              <FormItem>
+                <FormLabel htmlFor={id}>Label</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    id={id}
+                    placeholder="Enter label for the picture"
+                    onBlur={form.handleSubmit(applyChanges)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.currentTarget.blur();
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  The label of the field. <br /> It will be displayed above the field
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
         <div className="space-y-1">
           <FormLabel> </FormLabel>
           <Button
@@ -163,7 +199,7 @@ useEffect(() => {
               img.onload = () => {
                 const naturalHeight = img.naturalHeight;
                 const preserveOriginalSize = form.getValues("preserveOriginalSize");
-                
+
                 updateElement(element.id, {
                   ...element,
                   extraAttributes: {
@@ -206,7 +242,7 @@ useEffect(() => {
           <Label className="flex items-center space-x-2">
             <input
               type="checkbox"
-              checked={form.watch("repeatOnPageBreak")}
+              checked={!!form.watch("repeatOnPageBreak")}
               onChange={(e) =>
                 form.setValue("repeatOnPageBreak", e.target.checked, {
                   shouldDirty: true,
@@ -221,7 +257,7 @@ useEffect(() => {
           <Label className="flex items-center space-x-2">
             <input
               type="checkbox"
-              checked={form.watch("preserveOriginalSize")}
+              checked={!!form.watch("preserveOriginalSize")}
               onChange={(e) =>
                 form.setValue("preserveOriginalSize", e.target.checked, {
                   shouldDirty: true,
@@ -232,7 +268,6 @@ useEffect(() => {
             <span>Keep original image size</span>
           </Label>
         </div>
-
       </form>
     </Form>
   );

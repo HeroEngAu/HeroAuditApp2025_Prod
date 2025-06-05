@@ -12,7 +12,7 @@ export function DesignerComponent({
   elementInstance: FormElementInstance;
 }) {
   const element = elementInstance as CustomInstance;
-  const { preserveOriginalSize, imageUrl, position = "center" } = element.extraAttributes;
+  const { preserveOriginalSize, imageUrl, label, position = "center" } = element.extraAttributes;
 
   let alignmentClass = "";
   switch (position) {
@@ -29,7 +29,7 @@ export function DesignerComponent({
 
   return (
     <div className="flex flex-col gap-2 w-full items-start">
-      <Label />
+      <Label>{label}</Label>
 
       {imageUrl ? (
         <img
