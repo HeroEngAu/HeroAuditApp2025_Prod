@@ -225,7 +225,7 @@ export function FormComponent({
         <TableHeader>
           <TableRow>
             {Array.from({ length: columns }, (_, col) => (
-              <TableHead key={col} style={{ minWidth: "50px" }}>{columnHeaders[col] || `Col ${col + 1}`}</TableHead>
+              <TableHead key={col} className="whitespace-pre-wrap break-words" style={{ minWidth: "50px" }}>{columnHeaders[col] || `Col ${col + 1}`}</TableHead>
             ))}
           </TableRow>
         </TableHeader>

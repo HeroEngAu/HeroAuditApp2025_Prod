@@ -42,11 +42,13 @@ export function DesignerComponent({ elementInstance }: { elementInstance: FormEl
             {[...Array(columns)].map((_, col) => (
               <TableHead key={col}
                 style={{
-                  maxWidth: "auto",
-                  minWidth: "50px",
-                  width: "auto",
-                  whiteSpace: "normal",
-                  wordWrap: "break-word",
+                    maxWidth: "auto",
+                    minWidth: "50px",
+                    width: "auto",
+                    whiteSpace: "pre-wrap",
+                    wordWrap: "break-word",
+                    overflowWrap: "break-word",
+                    verticalAlign: "top",
                 }}>
                 {columnHeaders[col] || `Col ${col + 1}`}
               </TableHead>
@@ -62,7 +64,7 @@ export function DesignerComponent({ elementInstance }: { elementInstance: FormEl
                     maxWidth: "auto",
                     minWidth: "50px",
                     width: "auto",
-                    whiteSpace: "pre-wrap", // aqui
+                    whiteSpace: "pre-wrap",
                     wordWrap: "break-word",
                     overflowWrap: "break-word",
                     verticalAlign: "top",

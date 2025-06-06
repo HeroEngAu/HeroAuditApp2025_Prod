@@ -300,12 +300,12 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                   <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
                     ✕
                   </Button>
-                  <Input
-                    className="w-full"
+                  <Textarea
+                    className="w-full min-h-[40px] p-1 text-sm resize-y"
                     value={columnHeaders[col] || ""}
                     onChange={(e) => handleHeaderChange(col, e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
                   />
-
                 </TableHead>
               ))}
             </TableRow>
