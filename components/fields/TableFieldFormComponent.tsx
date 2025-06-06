@@ -260,7 +260,7 @@ export function FormComponent({
                   }
                 }
                 return (
-                  <TableCell key={col} className="justify-center items-center table-cell-wrap">
+                  <TableCell key={col} className="justify-center items-center table-cell-wrap break-words whitespace-normal">
                     {isCheckbox ? (
                       <div
                         onClick={() => {
@@ -418,7 +418,7 @@ export function FormComponent({
                         onChange={(e) => handleCellChange(row, col, e.target.value)}
                       />
                     ) : (
-                      <div>{cellValue}</div>
+                      <div className="whitespace-pre-wrap break-words">{cellValue}</div>
                     )}
                   </TableCell>
                 );

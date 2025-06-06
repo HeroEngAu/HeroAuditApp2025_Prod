@@ -25,6 +25,7 @@ import { Button } from "../ui/button";
 import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
 import { CustomInstance, propertiesSchema } from "./TableField";
+import { Textarea } from "../ui/textarea";
 
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 
@@ -314,9 +315,11 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
               <TableRow key={row}>
                 {[...Array(watchColumns)].map((_, col) => (
                   <TableCell key={col}>
-                    <Input
+                    <Textarea
+                      className="w-full min-h-[60px] p-2 border rounded resize-y"
                       value={data?.[row]?.[col] || ""}
                       onChange={(e) => handleCellChange(row, col, e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()} // evita efeitos colaterais do Enter
                     />
                   </TableCell>
                 ))}

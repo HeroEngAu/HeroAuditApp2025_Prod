@@ -3,7 +3,7 @@
 import {
   FormElementInstance,
 } from "../FormElements";
-import { useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import useDesigner from "../hooks/useDesigner";
 import {
   Table,
@@ -62,20 +62,15 @@ export function DesignerComponent({ elementInstance }: { elementInstance: FormEl
                     maxWidth: "auto",
                     minWidth: "50px",
                     width: "auto",
-                    whiteSpace: "normal",
+                    whiteSpace: "pre-wrap", // aqui
                     wordWrap: "break-word",
+                    overflowWrap: "break-word",
                     verticalAlign: "top",
-                  }}>
-                  <div
-                    style={{
-                      whiteSpace: "normal",
-                      wordWrap: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {data?.[row]?.[col] || " "}
-                  </div>
+                  }}
+                >
+                  {data?.[row]?.[col] || " "}
                 </TableCell>
+
               ))}
             </TableRow>
           ))}
