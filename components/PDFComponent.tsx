@@ -145,19 +145,19 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
         if (trimmed.startsWith("[select")) {
           const match = trimmed.match(/^\[select:"(.*?)":/);
-          return match?.[1] || "-";
+          return match?.[1] || "";
         }
 
         if (trimmed.startsWith("[number:")) {
-          return trimmed.match(/^\[number:(.*?)\]$/)?.[1] || "-";
+          return trimmed.match(/^\[number:(.*?)\]$/)?.[1] || "";
         }
 
         if (trimmed.startsWith("[date:")) {
           const isoDate = trimmed.match(/^\[date:(.*?)\]$/)?.[1];
-          if (!isoDate) return "-";
+          if (!isoDate) return "";
 
           const dateObj = new Date(isoDate);
-          if (isNaN(dateObj.getTime())) return "-";
+          if (isNaN(dateObj.getTime())) return " ";
 
           const day = String(dateObj.getDate()).padStart(2, "0");
           const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -166,7 +166,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           return `${day}.${month}.${year}`;
         }
 
-        return trimmed || "-";
+        return trimmed || "";
       };
 
       // Get the column widths based on the content
@@ -201,7 +201,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         });
 
         const minWidth = 50;
-        const maxWidth = 500;
+        const maxWidth = 800;
 
         return maxCharPerColumn.map((w) =>
           Math.min(Math.max(w, minWidth), maxWidth)

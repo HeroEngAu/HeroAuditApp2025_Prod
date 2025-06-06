@@ -17,7 +17,7 @@ type TextNode = {
 export function renderHtmlToPDFElements(htmlString: string): ReactElement[] {
   const elements: TextNode[] = [];
   let currentText = "";
-  let styleStack: TextStyle[] = [{}];
+  const styleStack: TextStyle[] = [{}];
 
   const pushTextNode = () => {
     if (currentText) {

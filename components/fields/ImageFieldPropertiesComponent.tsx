@@ -193,7 +193,7 @@ export function PropertiesComponent({
               if (!url) return;
 
               const img = new Image();
-              img.crossOrigin = "anonymous"; // importante para carregar imagens externas
+              img.crossOrigin = "anonymous";
 
               img.onload = () => {
                 const naturalHeight = img.naturalHeight;
