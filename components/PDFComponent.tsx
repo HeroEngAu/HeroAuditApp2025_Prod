@@ -95,8 +95,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       if (!imageUrl) return <Text>[Invalid image]</Text>;
 
-      const width = element.extraAttributes?.width ?? 300;
-      const height = element.extraAttributes?.height ?? "auto";
+      const width = element.extraAttributes?.width;
+      const height = element.extraAttributes?.height;
       const alignment = element.extraAttributes?.position ?? "left";
       const preserveOriginalSize = element.extraAttributes?.preserveOriginalSize;
 
@@ -112,8 +112,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const imageStyle = preserveOriginalSize
         ? {
           objectFit: "contain",
-          maxWidth: "100%",
-          maxHeight: "100%",
+          width: "200px",
+          height: "80px",
           ...alignStyle,
         }
         : {
@@ -313,7 +313,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
     case "NumberField": {
       const { required } = element.extraAttributes ?? {};
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text style={{ fontSize: 10, fontWeight: "bold", marginBottom: 4 }}>
             {required ? "*" : ""}
           </Text>
@@ -328,7 +328,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const label = element.extraAttributes?.label ?? "";
 
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }}>
           <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
             {checked ? "☑" : "☐"}
           </Text>
@@ -352,7 +352,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       return (
         <View
           style={{
-            padding: 8,
+            padding: 2,
             backgroundColor: isTransparent ? undefined : backgroundColor,
             borderRadius: 4,
           }}
@@ -376,16 +376,13 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const html = typeof text === "string" ? text.trim() : "";
 
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text style={{ fontSize: 10, lineHeight: 1.5 }}>
             {renderHtmlToPDFElements(html)}
           </Text>
         </View>
       );
     }
-
-
-
 
     case "DateField": {
       let dateOnly = "";
@@ -406,7 +403,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       }
 
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text>{dateOnly}</Text>
         </View>
       );
@@ -416,7 +413,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         typeof value === "string" ? value.trim() : "";
 
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
@@ -428,7 +425,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         typeof value === "string" ? value.trim() : "";
 
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
@@ -450,10 +447,16 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
+    case "SpacerField": {
+  // A altura vem de extraAttributes.height, padrão 10px se não definido
+  const height = element.extraAttributes?.height || 10;
+
+  return <View style={{ height, width: "100%" }} />;
+}
 
     default:
       return (
-        <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
           <Text>{String(value)}</Text>
         </View>
       );
@@ -486,7 +489,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
   return (
     <Document>
       {elements.map((group, pageIndex) => (
-        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"} size={pageSize || "A4"}>
+        <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"} size={pageSize || "A3"}>
           {/* Header */}
           <View fixed style={styles.header}>
             {repeatablesInOrder.map((el) => {
@@ -512,7 +515,6 @@ export default function PDFDocument({ elements, responses, formName, revision, o
 
           {/* Page Content */}
           {group.map((element) => {
-            // não renderiza elementos repetidos no header (mesmo ID)
             if (repeatablesInOrder.find(r => r.id === element.id)) {
               return null;
             }

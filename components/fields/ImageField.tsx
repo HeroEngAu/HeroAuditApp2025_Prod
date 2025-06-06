@@ -19,6 +19,8 @@ export const extraAttributes = {
   position: "center",
   repeatOnPageBreak: false,
   preserveOriginalSize: false,
+  width: 0,
+  height: 0,
 };
 
 export const propertiesSchema = z.object({
@@ -27,6 +29,8 @@ export const propertiesSchema = z.object({
   position: z.enum(["left", "center", "right"]),
   repeatOnPageBreak: z.boolean(),
   preserveOriginalSize: z.boolean(),
+  width: z.number(),
+  height: z.number(),
 });
 
 export const ImageFieldFormElement: FormElement = {
@@ -36,6 +40,7 @@ export const ImageFieldFormElement: FormElement = {
     type,
     extraAttributes,
     label: "Image Field",
+    height: 0,
   }),
   designerBtnElement: {
     icon: MdImage,
@@ -44,7 +49,16 @@ export const ImageFieldFormElement: FormElement = {
   designerComponent: DesignerComponent,
   formComponent: FormComponent,
   propertiesComponent: PropertiesComponent,
-  validate: () => true,
+  validate: (
+    formElement: FormElementInstance,
+    currentValue: string,
+  ): boolean => {
+    const element = formElement as CustomInstance;
+    if (element.extraAttributes.required) {
+      return currentValue === "true";
+    }
+    return true;
+  },
 };
 
 export type CustomInstance = FormElementInstance & {

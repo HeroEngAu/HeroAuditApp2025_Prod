@@ -6,7 +6,7 @@ import {
 import { Label } from "../ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import useDesigner from "../hooks/useDesigner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import {
@@ -32,6 +32,7 @@ export function PropertiesComponent({
 }) {
   const element = elementInstance as CustomInstance;
   const { updateElement } = useDesigner();
+  const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
   const form = useForm<propertiesFormSchemaType>({
     resolver: zodResolver(propertiesSchema),
     mode: "onBlur",
@@ -43,6 +44,7 @@ export function PropertiesComponent({
       repeatOnPageBreak: element.extraAttributes.repeatOnPageBreak,
       preserveOriginalSize: element.extraAttributes.preserveOriginalSize,
       label: element.extraAttributes.label,
+      width: element.extraAttributes.width || 200,
     },
   });
 
@@ -51,8 +53,42 @@ export function PropertiesComponent({
     form.reset(element.extraAttributes as propertiesFormSchemaType);
   }, [element, form]);
 
+  useEffect(() => {
+    const imageUrl = element.extraAttributes?.imageUrl;
+    if (!imageUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
+      const preserveOriginalSize = form.getValues("preserveOriginalSize");
+      const width = preserveOriginalSize ? img.naturalWidth : form.getValues("width") || 200;
+      const height = preserveOriginalSize ? img.naturalHeight : (img.naturalHeight / img.naturalWidth) * width;
+
+      updateElement(element.id, {
+        ...element,
+        extraAttributes: {
+          ...element.extraAttributes,
+          preserveOriginalSize,
+          position: form.getValues("position"),
+          repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
+          label: form.getValues("label"),
+          width,
+          height,
+        },
+      });
+
+      form.setValue("width", width, { shouldDirty: false });
+    };
+    img.src = imageUrl;
+  }, [element.extraAttributes?.imageUrl]);
+
+
   function applyChanges(values: propertiesFormSchemaType) {
-    const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize, label } = values;
+    const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize, label, width } = values;
+    if (!naturalSize) return;
+
+    const ratio = naturalSize.height / naturalSize.width;
+    const height = preserveOriginalSize ? naturalSize.height : width * ratio;
+
     updateElement(element.id, {
       ...element,
       extraAttributes: {
@@ -61,33 +97,11 @@ export function PropertiesComponent({
         repeatOnPageBreak,
         preserveOriginalSize,
         label,
+        width,
+        height,
       },
     });
   }
-
-  useEffect(() => {
-    const imageUrl = element.extraAttributes?.imageUrl;
-    if (!imageUrl) return;
-    const img = new Image();
-    img.onload = () => {
-      const naturalHeight = img.naturalHeight;
-      const preserveOriginalSize = form.getValues("preserveOriginalSize");
-
-      updateElement(element.id, {
-        ...element,
-        height: preserveOriginalSize ? naturalHeight : 80,
-        extraAttributes: {
-          ...element.extraAttributes,
-          preserveOriginalSize,
-          position: form.getValues("position"),
-          repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
-          label: form.getValues("label"),
-        },
-      });
-    };
-    img.src = imageUrl;
-  }, [element, form, updateElement]);
-
 
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -101,8 +115,10 @@ export function PropertiesComponent({
 
       const img = new Image();
       img.onload = () => {
-        const naturalHeight = img.naturalHeight;
+        setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
         const preserveOriginalSize = form.getValues("preserveOriginalSize");
+        const width = preserveOriginalSize ? img.naturalWidth : form.getValues("width") || 200;
+        const height = preserveOriginalSize ? img.naturalHeight : (img.naturalHeight / img.naturalWidth) * width;
 
         updateElement(element.id, {
           ...element,
@@ -111,9 +127,11 @@ export function PropertiesComponent({
             imageUrl: base64,
             preserveOriginalSize,
             label,
+            width,
+            height,
           },
-          height: preserveOriginalSize ? Math.max(naturalHeight, 80) : 80,
         });
+        form.setValue("width", width, { shouldDirty: false });
       };
 
       img.src = base64;
@@ -270,6 +288,40 @@ export function PropertiesComponent({
             <span>Keep original image size</span>
           </Label>
         </div>
+        <FormField
+          control={form.control}
+          name="width"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image width (px): {field.value}</FormLabel>
+              <FormControl>
+                <input
+                  type="range"
+                  min={10}
+                  max={naturalSize ? naturalSize.width * 2 : 1000}
+                  {...field}
+                  onChange={(e) => {
+                    const newWidth = Number(e.target.value);
+                    field.onChange(newWidth);
+
+                    if (naturalSize) {
+                      const ratio = naturalSize.height / naturalSize.width;
+                      const newHeight = newWidth * ratio;
+                      form.setValue("height", newHeight, { shouldDirty: true });
+                    }
+                  }}
+                  style={{
+                    width: "50%",  
+                    height: "10px", 
+                    cursor: "pointer",
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <input type="hidden" {...form.register("height")} />
       </form>
     </Form>
   );

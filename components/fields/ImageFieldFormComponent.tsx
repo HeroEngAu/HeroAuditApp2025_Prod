@@ -16,6 +16,8 @@ export function FormComponent({
   const position = element.extraAttributes.position || "center";
   const preserveOriginalSize = element.extraAttributes.preserveOriginalSize;
   const label = element.extraAttributes.label;
+  const width = element.extraAttributes.width;
+  const height = element.extraAttributes.height;
 
   const justifyClass =
     position === "left"
@@ -34,13 +36,11 @@ export function FormComponent({
         <img
           src={imageUrl}
           alt="Uploaded"
-          width={0}
-          height={0}
+          width={width ?? (preserveOriginalSize ? undefined : 200)}
+          height={height ?? (preserveOriginalSize ? undefined : 80)}
           sizes="100vw"
           style={{
-            maxHeight: preserveOriginalSize ? "none" : "80px",
-            width: preserveOriginalSize ? 'auto' : '200px',
-            maxWidth: "100%",
+
             objectFit: "contain",
           }}
         />
