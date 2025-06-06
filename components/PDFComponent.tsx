@@ -201,7 +201,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         });
 
         const minWidth = 50;
-        const maxWidth = 800;
+        const maxWidth = 1200;
 
         return maxCharPerColumn.map((w) =>
           Math.min(Math.max(w, minWidth), maxWidth)
