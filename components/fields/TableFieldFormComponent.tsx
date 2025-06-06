@@ -36,7 +36,7 @@ export function FormComponent({
   pdf?: boolean;
 }) {
   const element = elementInstance as CustomInstance;
-  const { rows, columns, label, columnHeaders = [] } = element.extraAttributes;
+  const { rows, columns, label, columnHeaders = [] } = element.extraAttributes; //test
   const initialData: string[][] = Array.isArray(defaultValue)
     ? (defaultValue as string[][])
     : Array.isArray(element.extraAttributes.data)

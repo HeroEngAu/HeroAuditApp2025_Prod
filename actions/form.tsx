@@ -1443,7 +1443,7 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 
 const clients = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION!,
-  credentials: fromEnv(), // lê as credenciais do ambiente automaticamente
+  credentials: fromEnv(),
 });
 
 export async function listUsers() {
