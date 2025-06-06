@@ -22,7 +22,7 @@ const extraAttributes = {
 };
 
 export const propertiesSchema = z.object({
-  title: z.string().min(2).max(50),
+  title: z.string().min(2).max(100),
   backgroundColor: z.string().optional(),
   textColor: z.string().optional(),
   textAlign: z.enum(["left", "center", "right"]),

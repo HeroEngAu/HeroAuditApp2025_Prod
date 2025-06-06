@@ -1,6 +1,7 @@
 // components/PDFDocument.tsx
 import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
 import { FormElementInstance } from "./FormElements";
+import { renderHtmlToPDFElements } from "./converthtmlreact";
 
 Font.register({
   family: 'DejaVuSans',
@@ -84,14 +85,6 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
 });
-
-function stripHtml(html: string) {
-  const tmp = html.replace(/<\/?[^>]+(>|$)/g, "");
-
-  const txt = document.createElement("textarea");
-  txt.innerHTML = tmp;
-  return txt.value;
-}
 
 function renderFieldValue(element: FormElementInstance, value: unknown) {
 
@@ -376,19 +369,24 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
+    // or custom parsing logic
+
     case "ParagraphField": {
       const { text } = element.extraAttributes ?? {};
-      const paragraphValue = typeof text === "string" ? text.trim() : "";
-      const cleanText = stripHtml(paragraphValue);
+      const html = typeof text === "string" ? text.trim() : "";
 
       return (
         <View style={{ padding: 8, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 10 }}>
-            {cleanText || "-"}
+          <Text style={{ fontSize: 10, lineHeight: 1.5 }}>
+            {renderHtmlToPDFElements(html)}
           </Text>
         </View>
       );
     }
+
+
+
+
     case "DateField": {
       let dateOnly = "";
       if (
@@ -463,10 +461,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 }
 
 export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize }: Props) {
-  // Pega os elementos da primeira página com repeatOnPageBreak
   const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
 
-  // Se houver imagem repetível, extraia para estilizar
   const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
 
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";

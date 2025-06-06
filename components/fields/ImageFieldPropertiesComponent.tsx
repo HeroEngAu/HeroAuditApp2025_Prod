@@ -68,7 +68,6 @@ export function PropertiesComponent({
   useEffect(() => {
     const imageUrl = element.extraAttributes?.imageUrl;
     if (!imageUrl) return;
-    const label = element.extraAttributes?.label;
     const img = new Image();
     img.onload = () => {
       const naturalHeight = img.naturalHeight;
@@ -156,7 +155,7 @@ export function PropertiesComponent({
                   />
                 </FormControl>
                 <FormDescription>
-                  The label of the field. <br /> It will be displayed above the field
+                  The label of the field. It will be displayed above the field
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -220,6 +219,9 @@ export function PropertiesComponent({
               img.src = url;
             }}
           />
+          <FormDescription>
+            Image shall be .png/.jpeg
+          </FormDescription>
         </div>
 
         <div className="space-y-1">

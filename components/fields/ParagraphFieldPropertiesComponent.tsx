@@ -13,13 +13,22 @@ import { Button } from "../ui/button";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { Input } from "../ui/input";
 import { CustomInstance } from "./ParagraphField";
-
+import ListItem from '@tiptap/extension-list-item';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
 
 export function PropertiesComponent({ elementInstance }: { elementInstance: FormElementInstance }) {
     const element = elementInstance as CustomInstance;
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                bulletList: false,  // desliga bulletList do StarterKit para evitar conflito
+                orderedList: false, // desliga orderedList do StarterKit para evitar conflito
+                listItem: false,    // desliga listItem do StarterKit para evitar conflito
+            }),
+            BulletList,
+            OrderedList,
+            ListItem,
             TextStyle,
             Color,
             TextAlign.configure({ types: ["paragraph"] }),
