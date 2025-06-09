@@ -888,6 +888,17 @@ export async function GetFormsInformation(userId: string, group: string, company
       throw new Error("Failed to fetch clients.");
     }
 
+    const { data: userSubmissions, errors: submissionErrors } =
+      await client.models.FormSubmissions.list({
+        filter: { userId: { eq: userId } },
+      });
+
+    if (submissionErrors) {
+      console.error("Error:", submissionErrors);
+      throw new Error("Failed to fetch form submissions.");
+    }
+
+    const submittedFormIds = new Set(userSubmissions.map((sub) => sub.formId));
     const results = [];
 
     for (const clientItem of clientsData) {
@@ -903,16 +914,8 @@ export async function GetFormsInformation(userId: string, group: string, company
       }
 
       for (const projectItem of projectsData) {
-        let formFilter: any = {
-          projID: { eq: projectItem.projectID },
-        };
-
-        if (group === "user") {
-          formFilter.userId = { eq: userId };
-        }
-
         const { errors: formErrors, data: formsData } = await client.models.Form.list({
-          filter: formFilter,
+          filter: { projID: { eq: projectItem.projectID } },
         });
 
         if (formErrors) {
@@ -920,12 +923,23 @@ export async function GetFormsInformation(userId: string, group: string, company
           throw new Error("Error fetching forms");
         }
 
-        if (formsData.length > 0) {
+        const visibleForms = formsData.filter((form) => {
+          if (group === "admin") return true;
+          if (group === "user") {
+            return form.userId === userId || submittedFormIds.has(form.id);
+          }
+          if (group === "viewer") {
+            return form.published === true;
+          }
+          return false;
+        });
+
+        if (visibleForms.length > 0) {
           results.push({
             clientName: clientItem.ClientName,
             projectName: projectItem.projectName,
             projectID: projectItem.projectID,
-            forms: formsData.map((form) => ({
+            forms: visibleForms.map((form) => ({
               id: form.id,
               name: form.name,
               description: form.description,
@@ -946,6 +960,8 @@ export async function GetFormsInformation(userId: string, group: string, company
     throw error;
   }
 }
+
+
 
 /*const formsInfo = await GetFormsInformation()
 console.log('Form Info:', formsInfo);*/
