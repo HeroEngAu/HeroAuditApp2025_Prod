@@ -128,6 +128,8 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
     case "TableField": {
       const tableData = value || element.extraAttributes?.data;
+      const headerRowIndexes: number[] = element.extraAttributes?.headerRowIndexes || [];
+
       if (!tableData || !Array.isArray(tableData)) return <Text>[Invalid table]</Text>;
 
       const rows = tableData.length;
@@ -211,9 +213,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const columnWidths = estimateColumnWidths(tableData, columns, columnHeaders);
 
       return (
-        <View style={styles.table}>
+        <View style={styles.table} >
           {/* Header */}
-          <View style={styles.tableRow}>
+          <View style={styles.tableRow} wrap={false}>
             {Array.from({ length: columns }).map((_, colIndex) => (
               <View
                 key={colIndex}
@@ -225,6 +227,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     flexShrink: 0,
                   },
                 ]}
+                wrap={false}
               >
                 <Text style={{ fontSize: 10, textAlign: "center" }}>
                   {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
@@ -234,71 +237,83 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           </View>
 
           {/* Body */}
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <View key={rowIndex} style={styles.tableRow} wrap={false}>
-              {Array.from({ length: columns }).map((_, colIndex) => {
-                const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
-                const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
-                const rawTrimmed = rawCellValue.trim();
-                const isEuropeanNumber =
-                  /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
-                  /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||
-                  /^[0-9]+,[0-9]{3}$/.test(rawTrimmed) ||
-                  /^-?\d+(?:\.\d{3})*,\d+$/.test(rawTrimmed);
-                const isImage = rawCellValue.trim().startsWith("[image:");
-                const imageBase64 = rawCellValue.trim().match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
-                const isCenteredCell =
-                  ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(rawCellValue.trim()) ||
-                  rawCellValue.trim().startsWith("[select") ||
-                  rawCellValue.trim().startsWith("[number:") ||
-                  rawCellValue.trim().startsWith("[date:") ||
-                  !isNaN(Number(rawTrimmed)) ||
-                  isEuropeanNumber ||
-                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                  /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                  /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                  /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                  !isNaN(Number(rawCellValue.trim())) ||
-                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawCellValue.trim()) ||
-                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawCellValue.trim()) ||
-                  /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawCellValue.trim());
-                return (
-                  <View
-                    key={colIndex}
-                    style={[
-                      styles.tableCell,
-                      { width: columnWidths[colIndex] },
-                    ]}
-                  >
-                    {isImage && imageBase64 ? (
-                      <Image
-                        src={imageBase64}
-                        style={{
-                          //width: columnWidths[colIndex] - 10,
-                          height: 60,
-                          objectFit: "contain",
-                          marginVertical: 2,
-                        }}
-                      />
-                    ) : (
-                      <Text
-                        style={{
-                          fontFamily: 'DejaVuSans',
-                          textAlign: "justify",
-                          ...(isCenteredCell && {
-                            textAlign: "center",
-                            textAlignVertical: "center",
-                          }),
-                        }}
-                      >
-                        {cellText}
-                      </Text>
-                    )}
-                  </View>
-                );
-              })}
-            </View>
-          ))}
+          {Array.from({ length: rows }).map((_, rowIndex) => {
+            const isHeaderRow = headerRowIndexes.includes(rowIndex);
+            return (
+              <View
+                key={rowIndex}
+                style={[
+                  styles.tableRow,
+                  isHeaderRow ? { backgroundColor: "#eee" } : {},
+                ]}
+                wrap={false}
+              >
+                {Array.from({ length: columns }).map((_, colIndex) => {
+                  const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
+                  const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                  const rawTrimmed = rawCellValue.trim();
+                  const isEuropeanNumber =
+                    /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
+                    /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||
+                    /^[0-9]+,[0-9]{3}$/.test(rawTrimmed) ||
+                    /^-?\d+(?:\.\d{3})*,\d+$/.test(rawTrimmed);
+                  const isImage = rawTrimmed.startsWith("[image:");
+                  const imageBase64 = rawTrimmed.match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
+                  const isCenteredCell =
+                    ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(rawTrimmed) ||
+                    rawTrimmed.startsWith("[select") ||
+                    rawTrimmed.startsWith("[number:") ||
+                    rawTrimmed.startsWith("[date:") ||
+                    !isNaN(Number(rawTrimmed)) ||
+                    isEuropeanNumber ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                    /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                    /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                    /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
+                    !isNaN(Number(rawTrimmed)) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawTrimmed) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawTrimmed) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawTrimmed);
+
+                  return (
+                    <View
+                      key={colIndex}
+                      style={[
+                        styles.tableCell,
+                        { width: columnWidths[colIndex] },
+                      ]}
+                    >
+                      {isImage && imageBase64 ? (
+                        <Image
+                          src={imageBase64}
+                          style={{
+                            height: 60,
+                            objectFit: "contain",
+                            marginVertical: 2,
+                          }}
+                        />
+                      ) : (
+                        <Text
+                          style={{
+                            fontFamily: 'DejaVuSans',
+                            textAlign: isCenteredCell ? "center" : "justify",
+                            ...(isHeaderRow && {
+                              textAlign: "center",
+                              fontWeight: 600,
+                              color: "#000",
+                            }),
+                          }}
+                        >
+                          {cellText}
+                        </Text>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
+
         </View>
       );
     }
@@ -313,7 +328,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
     case "NumberField": {
       const { required } = element.extraAttributes ?? {};
       return (
-        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }} wrap={false}>
           <Text style={{ fontSize: 10, fontWeight: "bold", marginBottom: 4 }}>
             {required ? "*" : ""}
           </Text>
@@ -328,7 +343,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const label = element.extraAttributes?.label ?? "";
 
       return (
-        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }} wrap={false}>
           <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
             {checked ? "☑" : "☐"}
           </Text>
@@ -356,6 +371,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
             backgroundColor: isTransparent ? undefined : backgroundColor,
             borderRadius: 4,
           }}
+          wrap={false}
         >
           <Text
             style={{
@@ -367,9 +383,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
             {title || "-"}
           </Text>
         </View>
+
       );
     }
-    // or custom parsing logic
 
     case "ParagraphField": {
       const { text } = element.extraAttributes ?? {};
@@ -377,9 +393,17 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       return (
         <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
-          <Text style={{ fontSize: 10, lineHeight: 1.5 }}>
+          <Text
+            style={{
+              fontSize: 10,
+              lineHeight: 1.5,
+              flexWrap: "wrap",
+            }}
+            wrap={false}
+          >
             {renderHtmlToPDFElements(html)}
           </Text>
+
         </View>
       );
     }
@@ -403,7 +427,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       }
 
       return (
-        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }} wrap={false}>
           <Text>{dateOnly}</Text>
         </View>
       );
@@ -413,7 +437,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         typeof value === "string" ? value.trim() : "";
 
       return (
-        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }}>
+        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4 }} wrap={false}>
           <Text style={{ fontSize: 10 }}>
             {cleanText || "-"}
           </Text>
@@ -448,11 +472,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       );
     }
     case "SpacerField": {
-  // A altura vem de extraAttributes.height, padrão 10px se não definido
-  const height = element.extraAttributes?.height || 10;
-
-  return <View style={{ height, width: "100%" }} />;
-}
+      const height = element.extraAttributes?.height || 10;
+      return <View style={{ height, width: "100%" }} />;
+    }
 
     default:
       return (
@@ -465,9 +487,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
 export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize }: Props) {
   const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
-
   const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
-
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
   const preserveOriginalSize = repeatHeaderImage?.extraAttributes?.preserveOriginalSize;
   const height = repeatHeaderImage?.extraAttributes?.height ?? 80;
@@ -514,14 +534,39 @@ export default function PDFDocument({ elements, responses, formName, revision, o
           </View>
 
           {/* Page Content */}
-          {group.map((element) => {
-            if (repeatablesInOrder.find(r => r.id === element.id)) {
+          {group.map((element, index) => {
+            if (repeatablesInOrder.find(r => r.id === element.id)) return null;
+
+            const nextElement = group[index + 1];
+            const isTitleFollowedByParagraph =
+              element.type === "TitleField" && nextElement?.type === "ParagraphField";
+
+            if (isTitleFollowedByParagraph) {
+              const titleValue = responses[element.id];
+              const paraValue = responses[nextElement.id];
+
+              return (
+                <View key={`combo-${element.id}-${nextElement.id}`} wrap={false} style={styles.fieldContainer}>
+                  <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
+                  {renderFieldValue(element, titleValue)}
+                  <Text style={styles.fieldTitle}>{nextElement.extraAttributes?.label}</Text>
+                  {renderFieldValue(nextElement, paraValue)}
+                </View>
+              );
+            }
+
+            if (
+              index > 0 &&
+              group[index - 1].type === "TitleField" &&
+              element.type === "ParagraphField"
+            ) {
               return null;
             }
 
             const value = responses[element.id];
+
             return (
-              <View key={element.id} style={styles.fieldContainer}>
+              <View key={element.id} wrap={false} style={styles.fieldContainer}>
                 {element.type !== "SeparatorField" && element.type !== "CheckboxField" && (
                   <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
                 )}

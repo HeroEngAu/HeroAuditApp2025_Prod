@@ -36,7 +36,7 @@ export function FormComponent({
   pdf?: boolean;
 }) {
   const element = elementInstance as CustomInstance;
-  const { rows, columns, label, columnHeaders = [] } = element.extraAttributes; //test
+  const { rows, columns, label, columnHeaders = [], headerRowIndexes = [] as number[] } = element.extraAttributes; //test
   const initialData: string[][] = Array.isArray(defaultValue)
     ? (defaultValue as string[][])
     : Array.isArray(element.extraAttributes.data)
@@ -176,7 +176,13 @@ export function FormComponent({
           </thead>
           <tbody>
             {Array.from({ length: rows }, (_, row) => (
-              <tr key={row}>
+              <tr
+                key={row}
+                style={{
+                  backgroundColor: headerRowIndexes.includes(row) ? "#f0f0f0" : "transparent",
+                  fontWeight: headerRowIndexes.includes(row) ? "bold" : "normal",
+                }}
+              >
                 {Array.from({ length: columns }, (_, col) => {
                   const cellValue = editableData[row]?.[col] || "";
                   return (
@@ -231,7 +237,11 @@ export function FormComponent({
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }, (_, row) => (
-            <TableRow key={row}>
+            <TableRow
+              key={row}
+              className={`whitespace-pre-wrap break-words ${headerRowIndexes.includes(row) ? "bg-gray-100 text-muted-foreground font-medium" : ""
+                }`}
+            >
               {Array.from({ length: columns }, (_, col) => {
                 const cellValue = editableData[row]?.[col] || "";
                 const isCheckbox = cellValue.startsWith("[checkbox");
@@ -427,6 +437,6 @@ export function FormComponent({
           ))}
         </TableBody>
       </Table>
-    </div>
+    </div >
   );
 }

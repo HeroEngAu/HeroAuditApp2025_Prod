@@ -9,7 +9,7 @@ import { TextAreaFormElement } from "./fields/TextAreaField";
 import { TextFieldFormElement } from "./fields/TextField";
 import { TitleFieldFormElement } from "./fields/TitleField";
 import { TableFieldFormElement } from "./fields/TableField";
-import {ImageFieldFormElement} from "./fields/ImageField";
+import { ImageFieldFormElement } from "./fields/ImageField";
 import { PageBreakFieldFormElement } from "./fields/PageBreakField";
 import { CameraFieldFormElement } from "./fields/CameraField";
 
@@ -82,7 +82,8 @@ interface TextFieldExtraAttributes {
   textAlign?: string;
   preserveOriginalSize?: boolean;
   width?: number;
-  content?:string;
+  content?: string;
+  headerRowIndexes?: number[];
 }
 
 export type FormElementInstance = {

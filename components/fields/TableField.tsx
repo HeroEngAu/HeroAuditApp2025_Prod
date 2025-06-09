@@ -20,6 +20,7 @@ const extraAttributes = {
   required: false,
   data: [["", ""], ["", ""]],
   columnHeaders: ["Col 1", "Col 2"],
+  headerRowIndexes: [],
 };
 
 export const propertiesSchema = z.object({
@@ -29,6 +30,7 @@ export const propertiesSchema = z.object({
   required: z.boolean().optional(),
   data: z.array(z.array(z.string())).optional(),
   columnHeaders: z.array(z.string()).optional(),
+  headerRowIndexes: z.array(z.number()).optional(),
 });
 
 export type CustomInstance = FormElementInstance & {
@@ -43,6 +45,7 @@ export const TableFieldFormElement: FormElement = {
     label: extraAttributes.label,
     extraAttributes,
     height: 0, // Initialize height with a default value
+
   }),
   designerBtnElement: {
     icon: MdTableChart,

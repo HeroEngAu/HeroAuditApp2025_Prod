@@ -32,6 +32,7 @@ type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 export function PropertiesComponent({ elementInstance }: { elementInstance: FormElementInstance }) {
   const element = elementInstance as CustomInstance;
   const { updateElement } = useDesigner();
+  const [headerRowIndexes, setHeaderRowIndexes] = useState<number[]>(element.extraAttributes.headerRowIndexes || []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const form = useForm<propertiesFormSchemaType>({
     resolver: zodResolver(propertiesSchema),
@@ -121,6 +122,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
         columns: values.columns,
         data,
         columnHeaders,
+        headerRowIndexes,
       },
     });
   }
@@ -211,6 +213,22 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
     field: ControllerRenderProps<TableFieldFormData, "rows" | "columns">;
     label: string;
   };
+  function toggleHeaderRow(rowIndex: number) {
+    const isHeader = headerRowIndexes.includes(rowIndex);
+    const newHeaderRows = isHeader
+      ? headerRowIndexes.filter((i) => i !== rowIndex)
+      : [...headerRowIndexes, rowIndex];
+
+    setHeaderRowIndexes(newHeaderRows);
+
+    updateElement(element.id, {
+      ...element,
+      extraAttributes: {
+        ...element.extraAttributes,
+        headerRowIndexes: newHeaderRows,
+      },
+    });
+  }
 
   function NumberInputField({ field, label }: NumberInputFieldProps) {
     const [localValue, setLocalValue] = React.useState(field.value);
@@ -312,9 +330,16 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
           </TableHeader>
           <TableBody>
             {[...Array(watchRows)].map((_, row) => (
-              <TableRow key={row}>
+              <TableRow
+                key={row}
+                className={headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""}>
+
                 {[...Array(watchColumns)].map((_, col) => (
-                  <TableCell key={col}>
+                  <TableCell
+                    key={col}
+                    className={headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""}
+                  >
+
                     <Textarea
                       className="w-full min-h-[60px] p-2 border rounded resize-y"
                       value={data?.[row]?.[col] || ""}
@@ -324,6 +349,14 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                   </TableCell>
                 ))}
                 <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => toggleHeaderRow(row)}
+                    title="Toggle header style"
+                  >
+                    🧷
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
                     ✕
                   </Button>
