@@ -85,7 +85,7 @@ export async function CreateProject(
   clientID: string
 ) {
   try {
-    const { errors, data } = await client.models.Projectt.create({
+    const { errors, data } = await client.models.Project.create({
       projectID,
       projectName,
       ClientID: clientID, // chave estrangeira para o Client
@@ -113,7 +113,7 @@ export async function CreateProject(
 
 export async function GetProjects() {
   try {
-    const { errors, data } = await client.models.Projectt.list();
+    const { errors, data } = await client.models.Project.list();
 
     if (errors) {
       console.error("Error:", errors);
@@ -203,7 +203,7 @@ export async function GetFormById(id: string) {
     let clientName = null;
 
     if (form.projID) {
-      const { data: projectData, errors: projectErrors } = await client.models.Projectt.list({
+      const { data: projectData, errors: projectErrors } = await client.models.Project.list({
         filter: { projectID: { eq: form.projID } },
       });
 
@@ -395,7 +395,7 @@ export async function SubmitForm(userId: string, formId: string, tagId: string, 
     submissions: (form.submissions || 0) + 1,
   });
 
-  const { data: formTags } = await client.models.FormTag2.list({
+  const { data: formTags } = await client.models.FormTag.list({
     filter: {
       tagID: { eq: tagId },
       formID: { eq: formId },
@@ -404,7 +404,7 @@ export async function SubmitForm(userId: string, formId: string, tagId: string, 
 
   if (!formTags.length) throw new Error("FormTag2 not found");
 
-  await client.models.FormTag2.update({
+  await client.models.FormTag.update({
     id: formTags[0].id,
     contentTest: submissionId,
   });
@@ -527,7 +527,7 @@ export async function deleteFormSubmission(id: string) {
 
 export async function deleteFormTag2(id: string) {
   try {
-    const { errors } = await client.models.FormTag2.delete({ id });
+    const { errors } = await client.models.FormTag.delete({ id });
     if (errors) {
       console.error(errors);
       throw new Error("Error deleting formTag2.");
@@ -540,7 +540,7 @@ export async function deleteFormTag2(id: string) {
 
 export async function deleteEquipmentTag2(id: string) {
   try {
-    const { errors } = await client.models.EquipmentTag2.delete({ id });
+    const { errors } = await client.models.EquipmentTag.delete({ id });
     if (errors) {
       console.error(errors);
       throw new Error("Error deleting equipmentTag2.");
@@ -553,7 +553,7 @@ export async function deleteEquipmentTag2(id: string) {
 
 export async function findFormTagBySubmissionId(submissionId: string) {
   try {
-    const { data, errors } = await client.models.FormTag2.list({
+    const { data, errors } = await client.models.FormTag.list({
       filter: {
         contentTest: { contains: submissionId },
       },
@@ -586,7 +586,7 @@ export async function GetSubmissionWithTagInfo(submissionId: string) {
     throw new Error("formId not found in submissions.");
   }
 
-  const formTagsResponse = await client.models.FormTag2.list({
+  const formTagsResponse = await client.models.FormTag.list({
     filter: {
       contentTest: { contains: submissionId },
     }
@@ -599,7 +599,7 @@ export async function GetSubmissionWithTagInfo(submissionId: string) {
 
   const formTag = formTagsResponse.data[0];
 
-  const equipmentTagResponse = await client.models.EquipmentTag2.get({
+  const equipmentTagResponse = await client.models.EquipmentTag.get({
     id: formTag.tagID ?? "",
   });
 
@@ -624,7 +624,7 @@ export async function GetFormWithSubmissionDetails(id: string) {
       return null;
     }
 
-    const { data: formTags, errors: tagErrors } = await client.models.FormTag2.list({
+    const { data: formTags, errors: tagErrors } = await client.models.FormTag.list({
       filter: { formID: { eq: form.id } },
     });
     if (tagErrors) {
@@ -649,7 +649,7 @@ export async function GetFormWithSubmissionDetails(id: string) {
           contentTestIds.includes(submission.id)
         );
 
-        const equipmentTagResponse = await client.models.EquipmentTag2.get({
+        const equipmentTagResponse = await client.models.EquipmentTag.get({
           id: tag.tagID ?? "",
         });
 
@@ -686,7 +686,7 @@ export async function GetFormWithSubmissionDetails(id: string) {
 export async function getMatchingFormSubmissions(submissionId: string) {
   try {
     // Fetch form tags where contentTest contains the submissionId
-    const { data: formSubmitted, errors } = await client.models.FormTag2.list({
+    const { data: formSubmitted, errors } = await client.models.FormTag.list({
       filter: { contentTest: { contains: submissionId } },
     });
 
@@ -705,7 +705,7 @@ export async function getMatchingFormSubmissions(submissionId: string) {
 
 export async function ResumeTest(formTagId: string) {
   try {
-    const { data: formTag, errors } = await client.models.FormTag2.get({ id: formTagId });
+    const { data: formTag, errors } = await client.models.FormTag.get({ id: formTagId });
 
     if (errors || !formTag) {
       console.error("Error fetching formTag2:", errors);
@@ -773,7 +773,7 @@ export async function GetEquipmentTagsForForm(id: string) {
 
     // Fetch equipment tags related to the form
     const { data: equipmentTags, errors: equipmentTagsErrors } =
-      await client.models.FormTag2.list({
+      await client.models.FormTag.list({
         filter: { formID: { eq: form.id } },
       });
 
@@ -791,7 +791,7 @@ export async function GetEquipmentTagsForForm(id: string) {
     const equipmentDetails = await Promise.all(
       equipmentTags.map(async (tag) => {
         // Ensure that tag.tagID is valid before making the API call
-        const equipmentTag = tag.tagID ? await client.models.EquipmentTag2.get({ id: tag.tagID }) : null;
+        const equipmentTag = tag.tagID ? await client.models.EquipmentTag.get({ id: tag.tagID }) : null;
 
         if (equipmentTag) {
           return equipmentTag;
@@ -822,7 +822,7 @@ export async function GetClientWithProjects(ClientID: string) {
 
     // Fetch all projects related to this client
     const { data: projects, errors: projectErrors } =
-      await client.models.Projectt.list({
+      await client.models.Project.list({
         filter: { ClientID: { eq: ClientID } },
       });
 
@@ -846,7 +846,7 @@ export async function GetFormsWithClient(ClientID: string) {
   try {
     // Fetch projects linked to the ClientID
     const { data: projects, errors: projectErrors } =
-      await client.models.Projectt.list({
+      await client.models.Project.list({
         filter: { ClientID: { eq: ClientID } },
       });
     //console.log("Projects Found:", projects);
@@ -861,7 +861,7 @@ export async function GetFormsWithClient(ClientID: string) {
         const { data: projectForms } = await client.models.Form.list({
           filter: { projID: { eq: project.projectID } },
         });
-        
+
         //console.log("Project ID:", project.projectID);
         //console.log(`Forms for Project ${project.projectName}:`, projectForms);
 
@@ -893,7 +893,7 @@ export async function GetFormsInformation(userId: string, group: string, company
     for (const clientItem of clientsData) {
       if (group === "viewer" && clientItem.ClientName !== company) continue;
 
-      const { errors: projectErrors, data: projectsData } = await client.models.Projectt.list({
+      const { errors: projectErrors, data: projectsData } = await client.models.Project.list({
         filter: { ClientID: { eq: clientItem.id } },
       });
 
@@ -963,7 +963,7 @@ export async function GetProjectsFromClientName(ClientName: string) {
 
     const clientInfo = clientData[0];
 
-    const { data: projects, errors: projectErrors } = await client.models.Projectt.list({
+    const { data: projects, errors: projectErrors } = await client.models.Project.list({
       filter: { ClientID: { eq: clientInfo.id } },
     });
 
@@ -993,10 +993,10 @@ export async function CreateForm(
   const projectName = fullProjectName.split(" (")[0];
 
   const { errors: projectErrors, data: projectsData } =
-    await client.models.Projectt.list({
+    await client.models.Project.list({
       filter: { projectName: { eq: projectName } },
     });
-    
+
   if (projectErrors) {
     console.error("Error fetching projects:", projectErrors);
     throw new Error("Failed to fetch projects.");
@@ -1046,7 +1046,7 @@ export const runForm = async (
 
     const form = formResp;
 
-    const existingTagResp = await client.models.EquipmentTag2.list({
+    const existingTagResp = await client.models.EquipmentTag.list({
       filter: {
         Tag: { eq: EquipTag },
         EquipmentName: { eq: EquipName },
@@ -1059,7 +1059,7 @@ export const runForm = async (
     let tagCreatedAt: string | undefined = undefined;
 
     if (existingTag) {
-      const linkedFormResp = await client.models.FormTag2.list({
+      const linkedFormResp = await client.models.FormTag.list({
         filter: {
           tagID: { eq: existingTag.id },
           formID: { eq: form.id },
@@ -1074,7 +1074,7 @@ export const runForm = async (
 
       tagID = existingTag.id;
     } else {
-      const createResp = await client.models.EquipmentTag2.create({
+      const createResp = await client.models.EquipmentTag.create({
         Tag: EquipTag,
         EquipmentName: EquipName,
       });
@@ -1088,7 +1088,7 @@ export const runForm = async (
       tagCreatedAt = new Date(createResp.data.createdAt).toISOString().split("T")[0];
     }
 
-    const formTagResp = await client.models.FormTag2.create({
+    const formTagResp = await client.models.FormTag.create({
       formID: form.id,
       tagID,
     });
@@ -1117,7 +1117,7 @@ export async function GetFormsByClientName(ClientName: string) {
   const clientID = clientData.id;
 
   // 2. Fetch all Projects with the corresponding ClientID
-  const projectsResult = await client.models.Projectt.list({
+  const projectsResult = await client.models.Project.list({
     filter: { ClientID: { eq: clientID } },
   });
 
@@ -1139,7 +1139,7 @@ export async function GetFormsByClientName(ClientName: string) {
       const formDetailsWithEquipment = await Promise.all(
         formIDs.map(async (formId) => {
           const { data: formTags, errors: formTagsErrors } =
-            await client.models.FormTag2.list({
+            await client.models.FormTag.list({
               filter: { formID: { eq: formId } },
             });
 
@@ -1156,7 +1156,7 @@ export async function GetFormsByClientName(ClientName: string) {
           const equipmentAndTags = await Promise.all(
             tagIDs.map(async (tagID) => {
               const { data: equipmentData, errors: equipmentErrors } =
-                await client.models.EquipmentTag2.list({
+                await client.models.EquipmentTag.list({
                   filter: tagID ? { id: { eq: tagID } } : undefined,
                 });
 
@@ -1222,7 +1222,7 @@ export async function SaveFormAfterTest(
   content: string,
 ) {
   try {
-    const { data: formTags, errors } = await client.models.FormTag2.list({
+    const { data: formTags, errors } = await client.models.FormTag.list({
       filter: {
         formID: { eq: FormID },
         tagID: { eq: TagID },
@@ -1241,7 +1241,7 @@ export async function SaveFormAfterTest(
       return;
     }
 
-    const updated = await client.models.FormTag2.update({
+    const updated = await client.models.FormTag.update({
       id: formTagToUpdate.id,
       contentTest: content,
     });
@@ -1283,7 +1283,7 @@ export async function SaveFormAfterTestAction(formData: FormData) {
 
 export async function GetTagIDWithFormIdandFormTagID(formId: string, formtagID: string): Promise<string | null> {
   try {
-    const { data, errors } = await client.models.FormTag2.list({
+    const { data, errors } = await client.models.FormTag.list({
       filter: {
         formID: { eq: formId },
         id: { eq: formtagID },
@@ -1312,7 +1312,7 @@ export async function getContentByFormIDandTagID(
   TagID: string,
 ) {
   try {
-    const { data: formTags, errors } = await client.models.FormTag2.list({
+    const { data: formTags, errors } = await client.models.FormTag.list({
       filter: {
         formID: { eq: FormID },
         tagID: { eq: TagID },
@@ -1346,7 +1346,7 @@ export async function getEquipmentTagID(
 ) {
   try {
     // Query to fetch equipment by its name and tag
-    const { data, errors } = await client.models.EquipmentTag2.list({
+    const { data, errors } = await client.models.EquipmentTag.list({
       filter: {
         EquipmentName: { eq: equipmentName },
         Tag: { eq: equipmentTag },
@@ -1462,5 +1462,24 @@ export async function listUsers() {
   } catch (err) {
     console.error("Error listing users:", err);
     return [];
+  }
+}
+
+
+export async function TurnEditable(formId: string) {
+  try {
+    const form = {
+      id: formId,
+      published: false,
+    };
+    const { errors } = await client.models.Form.update(form);
+
+    if (errors) {
+      console.error(errors);
+      throw new Error("Failed to turn the form editable.");
+    }
+  } catch (error) {
+    console.error("Error to turn the form editable:", error);
+    throw new Error("Failed to turn the form editable.");
   }
 }

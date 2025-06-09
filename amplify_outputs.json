@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "ap-southeast-2_acWAd62Hq",
+    "user_pool_id": "ap-southeast-2_nnbJUa3a0",
     "aws_region": "ap-southeast-2",
-    "user_pool_client_id": "2e9oidv08j5j7gaet1nnf3jil8",
-    "identity_pool_id": "ap-southeast-2:cb493276-4b04-40ec-a99f-1460118ad164",
+    "user_pool_client_id": "1eetol8s4f7pq2pvf4ltm6aqfl",
+    "identity_pool_id": "ap-southeast-2:8a7984f3-ce32-42f3-9728-f6740b97faf0",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email",
@@ -45,9 +45,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://7pl7bhimsrew7jc55evtq6tmea.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "url": "https://lrbdzmvybbddpgamr5o7mlyfxq.appsync-api.ap-southeast-2.amazonaws.com/graphql",
     "aws_region": "ap-southeast-2",
-    "api_key": "da2-nhrls654njaz3dmidhvbs7kbhi",
+    "api_key": "da2-ovnrfgabfzhr7ogvbhglmaicxe",
     "default_authorization_type": "API_KEY",
     "authorization_types": [
       "AMAZON_COGNITO_USER_POOLS",
@@ -163,7 +163,7 @@
               "name": "projects",
               "isArray": false,
               "type": {
-                "model": "Projectt"
+                "model": "Project"
               },
               "isRequired": false,
               "attributes": [],
@@ -178,7 +178,7 @@
               "name": "equipmentTAGs",
               "isArray": true,
               "type": {
-                "model": "FormTag2"
+                "model": "FormTag"
               },
               "isRequired": false,
               "attributes": [],
@@ -251,7 +251,7 @@
               "name": "projects",
               "isArray": true,
               "type": {
-                "model": "Projectt"
+                "model": "Project"
               },
               "isRequired": false,
               "attributes": [],
@@ -311,8 +311,8 @@
             "sortKeyFieldNames": []
           }
         },
-        "Projectt": {
-          "name": "Projectt",
+        "Project": {
+          "name": "Project",
           "fields": {
             "id": {
               "name": "id",
@@ -391,7 +391,7 @@
             }
           },
           "syncable": true,
-          "pluralName": "Projectts",
+          "pluralName": "Projects",
           "attributes": [
             {
               "type": "model",
@@ -421,8 +421,8 @@
             "sortKeyFieldNames": []
           }
         },
-        "EquipmentTag2": {
-          "name": "EquipmentTag2",
+        "EquipmentTag": {
+          "name": "EquipmentTag",
           "fields": {
             "id": {
               "name": "id",
@@ -449,7 +449,7 @@
               "name": "forms",
               "isArray": true,
               "type": {
-                "model": "FormTag2"
+                "model": "FormTag"
               },
               "isRequired": false,
               "attributes": [],
@@ -479,7 +479,7 @@
             }
           },
           "syncable": true,
-          "pluralName": "EquipmentTag2s",
+          "pluralName": "EquipmentTags",
           "attributes": [
             {
               "type": "model",
@@ -509,8 +509,8 @@
             "sortKeyFieldNames": []
           }
         },
-        "FormTag2": {
-          "name": "FormTag2",
+        "FormTag": {
+          "name": "FormTag",
           "fields": {
             "id": {
               "name": "id",
@@ -544,7 +544,7 @@
               "name": "equipmentTag",
               "isArray": false,
               "type": {
-                "model": "EquipmentTag2"
+                "model": "EquipmentTag"
               },
               "isRequired": false,
               "attributes": [],
@@ -588,7 +588,7 @@
             }
           },
           "syncable": true,
-          "pluralName": "FormTag2s",
+          "pluralName": "FormTags",
           "attributes": [
             {
               "type": "model",

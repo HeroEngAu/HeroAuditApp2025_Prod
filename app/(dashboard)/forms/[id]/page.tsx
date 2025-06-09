@@ -11,6 +11,7 @@ import outputs from "../../../../amplify_outputs.json"
 import { ProjectLogTable } from "../../../../components/ProjectLogTable";
 import EditFormBtn from "../../../../components/EditFormBtn";
 import DeleteFormBtn from "../../../../components/DeleteFormBtn";
+import TurnEditableBtn from "../../../../components/TurnEditableBtn";
 
 Amplify.configure(outputs)
 
@@ -65,6 +66,10 @@ async function FormDetailPage({ params }: { params: Params }) {
         <div className="flex justify-between container">
           <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
           <DeleteFormBtn id={id} />
+        </div>
+        <div className="flex justify-between container">
+          <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
+          <TurnEditableBtn id={id} />
         </div>
       </div>
 
