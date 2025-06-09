@@ -68,7 +68,6 @@ async function FormDetailPage({ params }: { params: Params }) {
           <DeleteFormBtn id={id} />
         </div>
         <div className="flex justify-between container">
-          <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
           <TurnEditableBtn id={id} />
         </div>
       </div>

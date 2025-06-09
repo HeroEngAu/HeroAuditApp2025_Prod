@@ -84,7 +84,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
 
               return (
                 <Accordion.Item key={i} value={`item-${i}`}>
-                  <Accordion.Trigger>
+                  <Accordion.Trigger className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
                     <div className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
                       <div className="flex-1 p-2 border border-border dark:border-neutral-700">
                         {s.equipmentName}
@@ -105,7 +105,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
                     </div>
 
                   </Accordion.Trigger>
-                  <Accordion.Content>
+                  <Accordion.Content className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-md space-y-4 text-foreground">
                       <div className="text-sm">
                         <SubmissionSummary submissionId={s.submissionId ?? ""} />
