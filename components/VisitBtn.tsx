@@ -46,7 +46,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
     };
 
     run();
-  }, [retryRun]);
+  }, [retryRun, shareUrl, equipmentTag, docNumber, selectedProjectId, router]);
   useEffect(() => {
     if (!isDialogOpen || !shareUrl) return;
 
