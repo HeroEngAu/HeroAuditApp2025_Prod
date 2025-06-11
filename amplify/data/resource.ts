@@ -1,60 +1,75 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 
-
 const schema = a.schema({
   Form: a
     .model({
       userId: a.string(),
-      createdAt: a.datetime(),
-      published: a.boolean().default(false),
       name: a.string(),
       description: a.string().default(""),
       content: a.string().default("[]"),
       visits: a.integer().default(0),
       submissions: a.integer().default(0),
+      published: a.boolean().default(false),
       revision: a.integer().default(0),
       shareURL: a.string(),
-      FormSubmissions: a.hasMany('FormSubmissions', 'formId'), // One-to-many relationship
-      projID: a.id(),
-      projects: a.belongsTo('Project', 'projID'),
-      equipmentTAGs: a.hasMany('FormTag', 'formID'),
+      createdAt: a.datetime(),
+
+      equipmentName: a.string(),
+      equipmentTAGs: a.hasMany("FormTag", "formID"),
+      FormSubmissions: a.hasMany("FormSubmissions", "formId"),
+
+      clientID: a.id(),
+      client: a.belongsTo("Client", "clientID"),
+
+      formProjects: a.hasMany("FormProject", "formID"),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
   Client: a
     .model({
+      id: a.id(),
       ClientName: a.string().required(),
-      //one to many - client has many projects
-      projects: a.hasMany("Project", "ClientID"),
+      projects: a.hasMany("Project", "clientID"),
+      forms: a.hasMany("Form", "clientID"),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
   Project: a
     .model({
-      projectID: a.string().required(),
+      id: a.id(),
       projectName: a.string().required(),
-      //one to many - project belongs to one client
-      ClientID: a.id(),
-      client: a.belongsTo("Client", "ClientID"),
-      //one to many - project has many forms
-      forms: a.hasMany("Form", "projID"),
+      projectCode: a.string(),
+      clientID: a.id(),
+      client: a.belongsTo("Client", "clientID"),
+      formProjects: a.hasMany("FormProject", "projectID"),
+    })
+    .authorization((allow) => [allow.publicApiKey()]),
+
+  FormProject: a
+    .model({
+      formID: a.id(),
+      projectID: a.id(),
+      form: a.belongsTo("Form", "formID"),
+      project: a.belongsTo("Project", "projectID"),
+      equipmentTags: a.hasMany("EquipmentTag", "formProjectID"),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
   EquipmentTag: a
     .model({
       Tag: a.string().required(),
-      EquipmentName: a.string().required(),
-      //many to many - equipmenttag has many forms
       forms: a.hasMany("FormTag", "tagID"),
+      formProjectID: a.id(),
+      formProject: a.belongsTo("FormProject", "formProjectID"),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
-  //many to many - equipmenttag and forms
   FormTag: a
     .model({
       formID: a.id(),
       tagID: a.id(),
+      docNumber: a.string(),
+      docNumberRevision: a.integer(),
       contentTest: a.string().default("[]"),
       equipmentTag: a.belongsTo("EquipmentTag", "tagID"),
       form: a.belongsTo("Form", "formID"),
@@ -63,19 +78,18 @@ const schema = a.schema({
 
   FormSubmissions: a
     .model({
-      formId: a.string(),
+      formId: a.id(),
       createdAt: a.datetime(),
       content: a.string(),
       form: a.belongsTo("Form", "formId"),
       userId: a.string(),
+      formRevision: a.integer(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 });
 
-// Used for code completion / highlighting when making requests from frontend
 export type Schema = ClientSchema<typeof schema>;
 
-// defines the data resource to be deployed
 export const data = defineData({
   schema,
   authorizationModes: {

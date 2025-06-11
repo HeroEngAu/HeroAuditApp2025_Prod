@@ -15,7 +15,7 @@ export default function ResumeTestBtn({ formTag2Id }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [userGroup, setUserGroup] = useState<string | null>(null);
-
+  console.log("formtagId in resumetstbtn", formTag2Id)
   useEffect(() => {
     const fetchUserGroup = async () => {
       try {

@@ -3,21 +3,74 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { View, Heading, Text, Alert, Flex, TextField } from "@aws-amplify/ui-react";
-import { runForm } from "../actions/form";
+import { GetProjectsFromShareURL, runForm } from "../actions/form";
 import { useRouter } from "next/navigation";
 import { fetchAuthSession } from "aws-amplify/auth";
+import { useTheme } from "next-themes";
+import { toast } from "./ui/use-toast";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 function VisitBtn({ shareUrl }: { shareUrl: string }) {
   const [mounted, setMounted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error] = useState<string | null>(null);
   const [success] = useState<string | null>(null);
-  const [equipmentName, setEquipName] = useState("");
+  const [docNumber, setDocNumber] = useState("");
   const [equipmentTag, setEquipTag] = useState("");
-
   const dialogRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [userGroup, setUserGroup] = useState<string | null>(null);
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const { theme } = useTheme();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [retryRun, setRetryRun] = useState(false);
+
+  useEffect(() => {
+    const run = async () => {
+      if (retryRun) {
+        const retry = await runForm(shareUrl, equipmentTag, docNumber, selectedProjectId, true);
+        if (retry.success && retry.createdTagID && retry.createdFormTagID) {
+          toast({
+            title: "New revision created",
+            description: "Same doc number found. A new revision was generated.",
+          });
+          localStorage.setItem("tagId", retry.createdTagID);
+          localStorage.setItem("formtagId", retry.createdFormTagID);
+          router.push(`${window.location.origin}${shareUrl}`);
+        } else {
+          toast({ title: "Failed to create form revision", variant: "destructive" });
+        }
+        setRetryRun(false);
+      }
+    };
+
+    run();
+  }, [retryRun]);
+  useEffect(() => {
+    if (!isDialogOpen || !shareUrl) return;
+
+    async function fetchProjects() {
+      try {
+        const { projectList } = await GetProjectsFromShareURL(shareUrl);
+        setProjects(
+          projectList
+            .filter((proj) => proj.projectCode !== null)
+            .map((proj) => ({
+              id: proj.projectCode as string,
+              name: `${proj.name} (${proj.projectCode})`,
+            }))
+        );
+      } catch (err) {
+        console.error("Erro ao buscar projetos:", err);
+        setProjects([]);
+      }
+    }
+
+    fetchProjects();
+  }, [isDialogOpen, shareUrl]);
+
+
 
   useEffect(() => {
     const fetchUserGroup = async () => {
@@ -36,43 +89,94 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
     };
     fetchUserGroup();
   }, []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const handleDialogClose = () => {
     setIsDialogOpen(false);
-    setEquipName(""); // reset state
+    setDocNumber(""); // reset state
     setEquipTag("");  // reset state
   };
-  
+
   if (!mounted) {
     return null; // avoiding window not defined error
   }
-  
-  const handleRunForm = async () => {
-    // Execute the runForm function
-    const { success, createdTagID } = await runForm(shareUrl, equipmentName, equipmentTag);
-    
-    if (success && createdTagID) {
-      // If form creation is successful, navigate to the new page
-      localStorage.setItem("tagId", createdTagID); // ou FormTag2Id se preferir
-      router.push(`${window.location.origin}${shareUrl}`);
-      
-      
-    } else {
-      alert("Failed to run the form. Please check the equipment and tag details.");
-    }
-  };
+
+const handleRunForm = async () => {
+  if (!selectedProjectId) {
+    toast({
+      title: "Please select a project",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (!docNumber.trim()) {
+    toast({
+      title: "Document number is required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (!equipmentTag.trim()) {
+    toast({
+      title: "Equipment tag is required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
+    shareUrl,
+    equipmentTag,
+    docNumber,
+    selectedProjectId,
+    false // try first without forcing
+  );
+
+  if (!success && revisionBumped) {
+    setShowConfirm(true); // wait for user to confirm
+    return;
+  }
+
+  if (success && createdTagID && createdFormTagID) {
+    localStorage.setItem("tagId", createdTagID);
+    localStorage.setItem("formtagId", createdFormTagID);
+    router.push(`${window.location.origin}${shareUrl}`);
+    return;
+  }
+
+  toast({
+    title: "Check the document number and equipment tag.",
+    variant: "destructive",
+  });
+};
+
+
+
+
   return (
     <>
+      <ConfirmDialog
+        open={showConfirm}
+        title="This document number is already being used. Create a new revision?"
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={() => {
+          setShowConfirm(false);
+          setRetryRun(true);
+        }}
+      />
       {userGroup !== "viewer" && (
-      <Button
-        className="w-[200px]"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        Visit
-      </Button>
+        <Button
+          className="w-[200px] text-md font-medium"
+          onClick={() => setIsDialogOpen(true)}
+          title="Update the form for a specific equipment TAG"
+        >
+          Update Form
+        </Button>
       )}
       {isDialogOpen && (
         <View
@@ -83,20 +187,16 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
           bottom="0"
           backgroundColor="rgba(0,0,0,0.5)"
           display="flex"
-          style={{
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 50,
-          }}
+          style={{ alignItems: "center", justifyContent: "center", zIndex: 50 }}
         >
           <View
             ref={dialogRef}
-            backgroundColor="white"
             padding="2rem"
             borderRadius="medium"
             width="90%"
             maxWidth="600px"
             boxShadow="0 4px 12px rgba(0,0,0,0.2)"
+            className="bg-white text-black dark:bg-neutral-900 dark:text-white"
           >
             <Flex
               direction="row"
@@ -104,13 +204,13 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
               alignItems="center"
               marginBottom="1rem"
             >
-              <Heading level={3}>Equipment Details</Heading>
+              <Heading className="text-foreground" level={3}>Update Details</Heading>
               <Button className="link-button" onClick={handleDialogClose}>
                 ✕
               </Button>
             </Flex>
 
-            <Text marginBottom="1rem">Add details to run your form</Text>
+            <Text className="text-foreground" marginBottom="1rem">Select the project, inform the document number and equipment tag to update the form.</Text>
 
             {error && (
               <Alert variation="error" isDismissible>
@@ -122,20 +222,54 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
                 {success}
               </Alert>
             )}
-
+            <label className="block mb-1 text-md font-medium">
+              Select the project:
+            </label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              className={`
+                w-full p-2 rounded border 
+                ${theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"}
+                max-h-48 overflow-y-auto
+              `}
+            >
+              <option value="">Select the project</option>
+              {projects.map((proj) => (
+                <option key={proj.id} value={proj.id}>
+                  {proj.name}
+                </option>
+              ))}
+            </select>
+            <label className="pt-1 block text-md font-medium">
+              Document Number:
+            </label>
             <TextField
-              label="Equipment Name"
-              value={equipmentName}
-              onChange={(e) => setEquipName(e.target.value)}
-              placeholder="Enter equipment name"
+              label=""
+              value={docNumber}
+              onChange={(e) => setDocNumber(e.target.value)}
+              placeholder="Enter the document number"
+              row={4}
+              className="pt-1 block text-md font-medium"
+              inputStyles={{
+                color: theme === "dark" ? "white" : "black",
+                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+              }}
             />
-
+            <label className="pt-1 block text-md font-medium">
+              Equipment Tag:
+            </label>
             <TextField
-              label="Equipment Tag"
+              label=""
               value={equipmentTag}
               onChange={(e) => setEquipTag(e.target.value)}
               placeholder="Enter Equipment Tag"
               row={4}
+              className="pt-1 block text-md font-medium"
+              inputStyles={{
+                color: theme === "dark" ? "white" : "black",
+                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+              }}
             />
 
             <Flex justifyContent="flex-end" marginTop="1rem">
@@ -143,7 +277,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
                 className="w-[200px]"
                 onClick={handleRunForm}
               >
-                Run Form
+                Update
               </Button>
             </Flex>
           </View>

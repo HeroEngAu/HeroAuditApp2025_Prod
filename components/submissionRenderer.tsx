@@ -17,6 +17,8 @@ interface Props {
 export default function SubmissionRenderer({ submissionID, elements, responses }: Props) {
   const [formName, setFormName] = useState<string>("Loading...");
   const [revision, setRevision] = useState<number | string>("Loading...");
+  const [docNumber, setDocNumber] = useState<string>("Loading...");
+  const [docNumberRevision, setDocNumberRevision] = useState<number | string>("Loading...");
   const [pageGroups, setPageGroups] = useState<FormElementInstance[][]>([]);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [pageSize, setPageSize] = useState<"A4" | "A3">("A4");
@@ -28,6 +30,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         const result = await GetFormNameFromSubmissionId(submissionID);
         setFormName(result.formName || "Untitled Form");
         setRevision(result.revision || "0");
+        setDocNumber(result.docNumber || "Untitled Form");
+        setDocNumberRevision(result.docNumberRevision || "0");
       } catch {
         setFormName("Unknown");
       }
@@ -72,13 +76,16 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         revision={revision}
         orientation={orientation}
         pageSize={pageSize}
+        docNumber={docNumber}
+        docNumberRevision={docNumberRevision}
       />
     ).toBlob();
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${formName}.pdf`;
+    const fileName = `${formName} REV. ${revision}_${docNumber} REV. ${docNumberRevision}.pdf`;
+    link.download = fileName;
     link.click();
     setLoading(false);
   };
@@ -125,6 +132,9 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
             </PopoverContent>
           </Popover>
         </div>
+        <div className="text-sm font-semibold text-center text-muted-foreground truncate max-w-[60%]">
+          {formName} REV. {revision} | {docNumber} REV. {docNumberRevision}
+        </div>
 
         {/* Right: Close Button */}
         <Button
@@ -144,6 +154,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         className="w-full flex flex-col gap-4 bg-background rounded-2xl p-8 pt-8 overflow-y-auto"
         style={{ paddingTop: "94px", maxHeight: "100vh" }}
       >
+
         {pageGroups.map((group, idx) => (
           <div key={idx} className="pdf-page mb-8">
             {group
@@ -162,7 +173,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
                       elementInstance={element}
                       defaultValue={value}
                       isInvalid={false}
-                      submitValue={() => {}}
+                      submitValue={() => { }}
                       readOnly={true}
                     />
                   </div>

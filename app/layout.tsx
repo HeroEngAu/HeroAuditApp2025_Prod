@@ -1,22 +1,18 @@
 'use client';
 
-import "./globals.css";
+import "./globals.css"; // Tailwind globals or your own styles
 import { ReactNode } from "react";
-import {
-  ThemeProvider as AmplifyThemeProvider,
-  Theme,
-  ColorMode,
-  Authenticator,
-  SelectField,
-} from "@aws-amplify/ui-react";
+import { ThemeProvider as AmplifyThemeProvider, Theme, ColorMode, SelectField } from "@aws-amplify/ui-react";
+import { Authenticator } from "@aws-amplify/ui-react";
 import DesignerContextProvider from "../components/context/DesignerContextProvider";
 import { ThemeProvider as NextThemeProvider } from "../components/providers/ThemeProvider";
 import { Toaster } from "../components/ui/toaster";
+//import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
-import "@aws-amplify/ui-react/styles.css";
+import "@aws-amplify/ui-react/styles.css"; 
 
 Amplify.configure(outputs);
 const inter = Inter({ subsets: ["latin"] });
@@ -27,15 +23,15 @@ const theme: Theme = {
   name: "custom-auth-theme",
   overrides: [
     {
-      colorMode: "dark",
+      colorMode: "dark", // or "light"
       tokens: {
         colors: {
           background: {
-            primary: { value: "#ffffff" },
-            secondary: { value: "#1e293b" },
+            primary: { value: "#ffffff" }, // main background
+            secondary: { value: "#1e293b" }, // card background
           },
           font: {
-            primary: { value: "#030303" },
+            primary: { value: "#030303" }, // text color
           },
         },
         components: {
@@ -51,6 +47,7 @@ const theme: Theme = {
             },
           },
         },
+
       },
     },
   ],
@@ -59,10 +56,16 @@ const theme: Theme = {
 function CustomHeader() {
   return (
     <div className="flex justify-center mb-4">
-      <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '5em' }}>hero</span>
-      <span className="text-gray-500 font-semibold" style={{ position: 'relative', fontSize: '5em' }}>
+      <span style={{ color: '#facc15', fontWeight: 'bold', marginRight: '0rem', fontSize: '5em', }}>hero</span>
+      <span className="text-gray-500 font-semibold mr-1" style={{ position: 'relative', display: 'inline-block', fontSize: '5em' }}>
         <span>au</span>
-        <sub style={{ position: 'absolute', left: 110, bottom: '0.4em', fontSize: '0.6em', color: '#6b7280' }}>
+        <sub style={{
+          position: 'absolute',
+          left: 110,
+          bottom: '0.4em',
+          fontSize: '0.6em',
+          color: '#6b7280'
+        }}>
           app
         </sub>
         <span>dit</span>
@@ -94,6 +97,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                               placeholder="Select a company"
                               isRequired={true}
                             >
+                              <option value="Hero Engineering">Hero Engineering</option>
                               <option value="29M (Golden Grove)">29M (Golden Grove)</option>
                               <option value="ABB">ABB</option>
                               <option value="AddEnergy">AddEnergy</option>

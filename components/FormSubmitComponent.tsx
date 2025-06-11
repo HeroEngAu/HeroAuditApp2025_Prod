@@ -13,11 +13,11 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const formValues = useRef<{ [key: string]: string }>({});
   const formErrors = useRef<{ [key: string]: boolean }>({});
   const [renderKey, setRenderKey] = useState(new Date().getTime());
-  const [tagId, setTagId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
+  const [formtagId, setFormtagId] = useState<string | null>(null);
 
   const validateForm = useCallback(() => {
     if (!userId) return false;
@@ -33,29 +33,28 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
 
     return Object.keys(formErrors.current).length === 0;
   }, [content, userId]);
-  
+
   const submitValue = useCallback((key: string, value: string) => {
     formValues.current[key] = value;
   }, []);
 
   useEffect(() => {
-    const storedTagId = localStorage.getItem("tagId");
-    if (storedTagId) {
-      setTagId(storedTagId);
+    const storedFormTagId = localStorage.getItem("formtagId");
+    if (storedFormTagId) {
+      setFormtagId(storedFormTagId);
     }
   }, []);
 
-  useEffect(() => {
-    if (!tagId) return;
-    console.log("tagid formsubmitcompontet", tagId);
-    const storageKey = `visited-${formUrl}-${tagId}`;
-    const alreadyVisited = sessionStorage.getItem(storageKey);
 
-    if (!alreadyVisited) {
-      updateVisitCount(formUrl);
-      sessionStorage.setItem(storageKey, "true");
-    }
-  }, [formUrl, tagId]);
+
+  useEffect(() => {
+    if (!formtagId) return;
+
+    const uniqueKey = `visited-${formUrl}-${formtagId}-${Date.now()}`;
+
+    updateVisitCount(formUrl);
+    sessionStorage.setItem(uniqueKey, "true");
+  }, [formUrl, formtagId]);
 
   const submitForm = async () => {
     formErrors.current = {};
@@ -76,12 +75,13 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       const formData = new FormData();
       formData.append("userId", userId ?? "");
       formData.append("formId", formUrl);
-      formData.append("responses", JSON.stringify(cleanData)); // valores preenchidos
-      formData.append("formContent", JSON.stringify(content)); // estrutura do formulário
+      formData.append("responses", JSON.stringify(cleanData));
+      formData.append("formContent", JSON.stringify(content));
 
-      if (tagId) {
-        formData.append("tagId", tagId);
+      if (formtagId) {
+        formData.append("formTagId", formtagId);
       }
+      console.log("formTagId on formsubmitcomponent", formtagId)
 
       await submitFormAction(formData);
       setSubmitted(true);
@@ -97,18 +97,19 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const saveProgress = useCallback(async () => {
     try {
       const cleanData = JSON.parse(JSON.stringify(formValues.current));
-      if (!tagId) {
+      if (!formtagId) {
         toast({
-          title: "Missing tag ID",
-          description: "Unable to save progress without tagId",
+          title: "Missing form tag ID",
+          description: "Unable to save progress without formtagId",
+
           variant: "destructive",
         });
         return;
       }
-
+      console.log("formtagId in component", formtagId)
       const formData = new FormData();
       formData.append("formId", formUrl);
-      formData.append("tagId", tagId);
+      formData.append("formTagId", formtagId);
       formData.append("responses", JSON.stringify(cleanData));
       formData.append("formContent", JSON.stringify(content));
 
@@ -126,24 +127,41 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
         variant: "destructive",
       });
     }
-  }, [formUrl, tagId, content, formValues]);
+  }, [formUrl, formtagId, content, formValues]);
 
   useEffect(() => {
-    if (tagId && content.length > 0) {
+    if (formtagId && content.length > 0) {
       saveProgress();
     }
-  }, [tagId, content, saveProgress]);
+  }, [formtagId, content, saveProgress]);
 
   if (submitted) {
     return (
       <div className="flex justify-center w-full h-full items-center p-8">
-        <div className="flex flex-col gap-4 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded">
-          <h1 className="text-2xl font-bold">Form submitted</h1>
-          <p className="text-muted-foreground">Thank you for submitting the form, you can close this page now.</p>
+        <div className="flex justify-center flex-col gap-6 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded">
+          <h1 className="text-3xl font-bold text-primary">Form successfully submitted!</h1>
+          <p className="text-muted-foreground text-lg">
+            Thanks for your submission. You can safely close this page, go back to the form, or return to the home page.
+          </p>
+          <div className="flex gap-4">
+            <a
+              href={`/forms/${formUrl}`}
+              className="px-5 py-2 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md"
+            >
+              Go back to form
+            </a>
+            <a
+              href="/"
+              className="px-5 py-2 rounded-full text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md"
+            >
+              Return to homepage
+            </a>
+          </div>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="flex justify-center w-full h-full items-center p-8">

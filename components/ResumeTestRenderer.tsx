@@ -66,7 +66,7 @@ function ResumeTestRenderer({
       const formData = new FormData();
       formData.append("userId", userId ?? "");
       formData.append("formId", formId);
-      formData.append("formtagID", formtag2Id);
+      formData.append("formTagId", formtag2Id);
       formData.append("responses", JSON.stringify(cleanData));
       formData.append("formContent", JSON.stringify(elements));
 
@@ -88,7 +88,7 @@ function ResumeTestRenderer({
 
       const formData = new FormData();
       formData.append("formId", formId);
-      formData.append("formtagID", formtag2Id);
+      formData.append("formTagId", formtag2Id);
       formData.append("responses", JSON.stringify(cleanData));
       formData.append("formContent", JSON.stringify(elements));
 
@@ -108,12 +108,28 @@ function ResumeTestRenderer({
     }
   };
 
-  if (submitted) {
+if (submitted) {
     return (
       <div className="flex justify-center w-full h-full items-center p-8">
-        <div className="flex flex-col gap-4 flex-grow bg-background w-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded">
-          <h1 className="text-2xl font-bold">Form submitted</h1>
-          <p className="text-muted-foreground">Thank you for submitting the form, you can close this page now.</p>
+        <div className="flex justify-center flex-col gap-6 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded">
+          <h1 className="text-3xl font-bold text-primary">Form successfully submitted!</h1>
+          <p className="text-muted-foreground text-lg">
+            Thanks for your submission. You can safely close this page, go back to the form, or return to the home page.
+          </p>
+          <div className="flex gap-4">
+            <a
+              href={`/forms/${formId}`}
+              className="px-5 py-2 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md"
+            >
+              Go back to form
+            </a>
+            <a
+              href="/"
+              className="px-5 py-2 rounded-full text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md"
+            >
+              Return to homepage
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -123,7 +139,7 @@ function ResumeTestRenderer({
     <div className="flex justify-center w-full h-full items-center p-8">
       <div
         key={renderKey}
-        className="flex flex-col gap-4 flex-grow bg-background w-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
+        className="flex flex-col gap-4 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
       >
         {Array.isArray(elements) && elements.length > 0 ? (
           elements.map((element) => {

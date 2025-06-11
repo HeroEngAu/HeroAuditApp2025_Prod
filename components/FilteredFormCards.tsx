@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
@@ -22,14 +22,13 @@ type CustomForm = {
     description?: string | null;
     published: boolean | null;
     content?: string | null;
-    clientName: string;
-    projectName: string;
-    projectID: string;
+    clientName?: string | null;
+    equipmentName?: string | null;
     createdAt?: string | null;
     visits?: number | null;
     submissions?: number | null;
+    formRevision?:number | null;
 };
-
 
 function FormCard({ form }: { form: CustomForm }) {
     const [userGroup, setUserGroup] = useState<string | null>(null);
@@ -56,7 +55,7 @@ function FormCard({ form }: { form: CustomForm }) {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 justify-between">
-                    <span className="truncate font-bold">{form.name}</span>
+                    <span className="truncate font-bold">{form.name} REV. {form.formRevision ?? 0}</span>
                     {form.published && <Badge>Published</Badge>}
                     {!form.published && <Badge variant={"destructive"}>Draft</Badge>}
                 </CardTitle>
@@ -69,9 +68,9 @@ function FormCard({ form }: { form: CustomForm }) {
                     {form.published && (
                         <span className="flex items-center gap-2">
                             <LuView className="text-muted-foreground" />
-                            <span>{form.visits ?? "[]".toLocaleString()}</span>
+                            <span>{form.visits ?? "0"}</span>
                             <FaWpforms className="text-muted-foreground" />
-                            <span>{form.submissions ?? "[]".toLocaleString()}</span>
+                            <span>{form.submissions ?? "0"}</span>
                         </span>
                     )}
                 </CardDescription>
@@ -79,24 +78,21 @@ function FormCard({ form }: { form: CustomForm }) {
             <CardContent className="h-[20px] truncate text-sm text-muted-foreground">
                 <p>Client: {form.clientName}</p>
             </CardContent>
-            <CardContent className="h-[20px] truncate text-sm text-muted-foreground text-wrap ">
-                <p>Project: {form.projectName} </p>
+            <CardContent className="h-[20px] truncate text-sm text-muted-foreground">
+                <p>Equipment Name: {form.equipmentName}</p>
             </CardContent>
-            {<CardContent className="h-[20px] truncate text-sm text-muted-foreground text-wrap">
-                <p>Project ID: {form.projectID}</p>
-            </CardContent>}
+            <CardContent className="h-[20px] truncate text-sm text-muted-foreground">
+                <p>Description: {form.description}</p>
+            </CardContent>
             <CardFooter>
                 {form.published && (
-
                     <Button asChild className="w-full mt-2 text-md gap-4">
                         <Link href={`/forms/${form.id}`}>
                             View submissions <BiRightArrowAlt />
                         </Link>
                     </Button>
-
                 )}
                 {!form.published && userGroup !== "viewer" && (
-
                     <Button asChild variant={"secondary"} className="w-full mt-2 text-md gap-4">
                         <Link href={`/builder/${form.id}`}>
                             Edit form <FaEdit />
@@ -108,29 +104,11 @@ function FormCard({ form }: { form: CustomForm }) {
     );
 }
 
-type Form = {
-    id: string;
-    name: string | null;
-    description?: string | null;
-    published?: boolean | null;
-    content?: string | null;
-    createdAt?: string | null;
-    visits?: number | null;
-    submissions?: number | null;
-};
-
-type FormInfoEntry = {
-    clientName: string;
-    projectName: string;
-    projectID: string;
-    forms: Form[];
-};
-
 export default function FilteredFormCards({ searchTerm }: { searchTerm: string }) {
-    const [formsInfo, setFormsInfo] = useState<FormInfoEntry[]>([]);
+    const [formsInfo, setFormsInfo] = useState<CustomForm[]>([]);
     const [loading, setLoading] = useState(true);
     const { attributes } = useUserAttributes();
-    const userId = attributes?.sub;
+    const userId = attributes?.sub ?? "";
     const [userGroup, setUserGroup] = useState<string | null>(null);
     const [groupChecked, setGroupChecked] = useState(false);
 
@@ -144,7 +122,6 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
                     : typeof rawGroups === "string"
                         ? [rawGroups]
                         : [];
-
                 setUserGroup(groups[0] ?? null);
             } catch (error) {
                 console.error("Failed to fetch user group", error);
@@ -163,10 +140,21 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
 
         async function fetchData() {
             try {
-                if (typeof userId === "string") {
-                    const data = await GetFormsInformation(userId, userGroup!, company!);
-                    setFormsInfo(data);
-                }
+                const data = await GetFormsInformation(userId, userGroup as string, company as string);
+
+                // 'data' é um array de clientes com um array de forms
+                // Vamos extrair todos os forms para um array plano
+                const allForms = data.flatMap(clientItem =>
+                    clientItem.forms.map((form: CustomForm) => ({
+                        ...form,
+                        clientName: clientItem.clientName,
+                        projectName: clientItem.projectName,
+                        projectID: clientItem.projectID,
+                        formRevision: form.formRevision,
+                    }))
+                );
+
+                setFormsInfo(allForms);
             } catch (err) {
                 console.error("Error loading forms", err);
             } finally {
@@ -178,39 +166,34 @@ export default function FilteredFormCards({ searchTerm }: { searchTerm: string }
     }, [userId, userGroup, groupChecked, company]);
 
 
-
     if (!userId || !groupChecked || loading) {
-        return (
-            <Loading />
-        );
+        return <Loading />;
     }
 
-    const filteredForms = formsInfo.flatMap(entry =>
-        entry.forms
-            .filter((form: { name: string | null; clientName?: string }) =>
-                (form.name && form.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                entry.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                entry.projectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                entry.projectID?.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .map((form: Form): CustomForm => ({
-                ...form,
-                published: form.published ?? null, // substitui undefined por null
-                clientName: entry.clientName,
-                projectName: entry.projectName,
-                projectID: entry.projectID,
-            }))
+    const lowerSearch = searchTerm.toLowerCase();
+
+    const filteredForms = formsInfo.filter(form =>
+    (form.name?.toLowerCase().includes(lowerSearch) ||
+        form.clientName?.toLowerCase().includes(lowerSearch) ||
+        form.equipmentName?.toLowerCase().includes(lowerSearch))
     );
+
+
+    const uniqueFormsMap = new Map<string, CustomForm>();
+    filteredForms.forEach(form => {
+        if (!uniqueFormsMap.has(form.id)) {
+            uniqueFormsMap.set(form.id, form);
+        }
+    });
+    const uniqueForms = Array.from(uniqueFormsMap.values());
+
     return (
         <>
-            {userGroup !== "viewer" && (
-                <CreateFormDialog />
-            )}
-            {filteredForms.length === 0 && <p>No forms found.</p>}
-            {filteredForms.map((form) => (
+            {userGroup !== "viewer" && <CreateFormDialog />}
+            {uniqueForms.length === 0 && <p>No forms found.</p>}
+            {uniqueForms.map(form => (
                 <FormCard key={form.id} form={form} />
             ))}
         </>
     );
 }
-

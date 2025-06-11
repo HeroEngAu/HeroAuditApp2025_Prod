@@ -37,30 +37,34 @@ async function FormDetailPage({ params }: { params: Params }) {
   const bounceRate = 100 - submissionRate;
 
   const data = await GetFormWithSubmissionDetails(id);
-  const { submissions } = data ?? { submissions: [] };
+  const { projectLog } = data ?? { projectLog: [] };
 
-  const slimSubmissions = submissions.map((s) => ({
+  const slimSubmissions = projectLog.map((s) => ({
     formID: s.formId,
-    equipmentName: s.equipmentName,
-    tag: s.tag,
+    tag: s.equipmentTag,
     submittedAt: s.submittedAt ?? undefined,
-    submissionId: s.submissionId ?? undefined,
+    submissionId: s.formSubmissionsId ?? undefined,
     formtagId: s.formtagId,
     contentTest: s.contentTest,
+    equipmentTag: s.equipmentTag,
+    projectName: s.projectName,
+    projectCode: s.projectCode,
+    docNumber: s.docNumber,
+    docRevisionNumber: s.docRevisionNumber,
   }));
 
   return (
     <>
       <div className="py-10 border-b border-muted">
         <div className="flex justify-between container">
-          <h1 className="text-4xl font-bold truncate">{form.form.name}</h1>
+          <h1 className="text-4xl font-bold truncate">{form.form.name} REV. {form.revision}</h1>
         </div>
         <div className="flex justify-between container">
           <h3 className="text-2xl font-bold truncate">{form.clientName}</h3>
           <VisitBtn shareUrl={shareUrl} />
         </div>
         <div className="flex justify-between container">
-          <h3 className="text-2xl font-bold truncate">{form.projectName}</h3>
+          <h3 className="text-2xl font-bold truncate">{form.equipmentName}</h3>
           <EditFormBtn id={id} />
         </div>
         <div className="flex justify-between container">

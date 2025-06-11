@@ -24,7 +24,7 @@ export default async function BuilderPage({
     <FormBuilder
       formID={id}
       form={cleanForm.form}
-      projectName={cleanForm.projectName}
+      equipmentName={cleanForm.equipmentName}
       clientName={cleanForm.clientName}
       formName={cleanForm.form.name ?? "Default Form Name"}
       revision={cleanForm.revision}

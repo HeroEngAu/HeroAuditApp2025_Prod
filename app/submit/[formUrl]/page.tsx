@@ -39,7 +39,7 @@ export default async function SubmitPage({
       />
     );
   }
-  console.log("formURL page", formUrl)
+  //console.log("formURL page", formUrl)
   const form = await GetFormContentByUrl(formUrl);
   if (!form) {
     throw new Error("Form not found.");

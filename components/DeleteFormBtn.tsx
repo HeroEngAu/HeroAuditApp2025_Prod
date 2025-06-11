@@ -6,6 +6,18 @@ import { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { deleteForm } from "../actions/form"; // ajuste o caminho conforme necessário
 import { useRouter } from "next/navigation";
+import { toast } from "./ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 interface DeleteFormBtnProps {
   id: string;
@@ -14,6 +26,7 @@ interface DeleteFormBtnProps {
 export default function DeleteFormBtn({ id }: DeleteFormBtnProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -34,27 +47,46 @@ export default function DeleteFormBtn({ id }: DeleteFormBtnProps) {
     checkAdmin();
   }, []);
 
-  const handleDelete = async () => {
-    const confirmDelete = confirm("Are you sure you want to delete this form?");
-    if (!confirmDelete) return;
-
+    const handleDelete = async () => {
     try {
       await deleteForm(id);
+      toast({
+        title: "Form deleted successfully!",
+        className: "bg-green-500 text-white",
+      });
       router.push("/");
     } catch (error) {
       console.error("Failed to delete form", error);
+    } finally {
+      setOpen(false);
     }
   };
 
   if (!isAdmin) return null;
-
-  return (
-    <Button
+return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+            <Button
       variant="destructive"
       className="w-[200px] mt-2 text-md gap-4"
-      onClick={handleDelete}
     >
       Delete form <FaTrash />
     </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="bg-white dark:bg-neutral-900 text-black dark:text-white opacity-100 shadow-xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this form?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action is permanent and cannot be undone.
+            <br />
+            Are you sure you want to delete it?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Yes, delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

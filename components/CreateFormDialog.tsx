@@ -16,7 +16,6 @@ import { IoIosCreate } from "react-icons/io";
 import { FaSave } from "react-icons/fa";
 import {
   GetClients,
-  GetProjectsFromClientName,
   CreateForm,
 } from "../actions/form";
 import { useTheme } from "next-themes";
@@ -31,13 +30,11 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   onFormCreated,
 }) => {
   const router = useRouter();
-
   const [clients, setClients] = useState<string[]>([]);
-  const [projects, setProjects] = useState<string[]>([]);
   const [name, setName] = useState("");
+  const [equipmentName, setEquipment] = useState("");
   const [description, setDescription] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
-  const [projID, setProjID] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -71,23 +68,10 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   useEffect(() => {
     const fetchClients = async () => {
       const clientsData = await GetClients();
-      setClients(clientsData.clientNames);
+      setClients(clientsData.map((c) => c.name));
     };
     fetchClients();
   }, []);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      if (selectedClient) {
-        const { projectList } =
-          await GetProjectsFromClientName(selectedClient);
-        setProjects(projectList);
-      } else {
-        setProjects([]);
-      }
-    };
-    fetchProjects();
-  }, [selectedClient]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -110,31 +94,34 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const handleCreateForm = async () => {
     try {
       setError(null);
-      if (!name || !description || !projID || !userId) {
+      if (!name || !description || !equipmentName || !userId || !selectedClient) {
         setError("Please fill in all fields.");
         return;
       }
 
-      const formId = await CreateForm(name, description, projID, userId);
-      if (!formId) throw new Error("Form ID not returned");
+      const form = await CreateForm(
+        name,
+        equipmentName,
+        description,
+        userId,
+        selectedClient,
+      );
 
-      const projectID = formId.projID;
+      if (!form?.formId) throw new Error("Form ID not returned");
+
       setSuccess("Form created successfully!");
       onFormCreated?.();
       setIsOpen(false);
 
       localStorage.setItem("form-data", JSON.stringify({
-        formId: formId.formId,
+        formId: form.formId,
         name,
         description,
-        projID,
-        projectID,
         client: selectedClient,
+        equipmentName,
       }));
 
-      router.push(`/builder/${formId.formId}`);
-
-
+      router.push(`/builder/${form.formId}`);
     } catch (err) {
       console.error("Error creating form:", err);
       setError(
@@ -142,6 +129,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
       );
     }
   };
+
 
   return (
     <View>
@@ -182,21 +170,22 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
             width="90%"
             maxWidth="600px"
             boxShadow="0 4px 12px rgba(0,0,0,0.2)"
-            className={`${theme === "dark" ? "bg-neutral-900 text-white" : "bg-white text-black"}`}
+            className="bg-white text-black dark:bg-neutral-900 dark:text-white"
           >
+
             <Flex
               direction="row"
               justifyContent="space-between"
               alignItems="center"
               marginBottom="1rem"
             >
-              <Heading level={3}>Create New Form</Heading>
-              <Button variation="link" onClick={() => setIsOpen(false)}>
+              <Heading className="text-foreground" level={3}>Create New Form</Heading>
+              <Button variation="link" className="link-button" onClick={() => setIsOpen(false)}>
                 ✕
               </Button>
             </Flex>
 
-            <Text marginBottom="1rem">Add details to create your form</Text>
+            <Text className="text-foreground" marginBottom="1rem">Add details to create your form</Text>
 
             {error && (
               <Alert variation="error" isDismissible>
@@ -208,8 +197,8 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
                 {success}
               </Alert>
             )}
-            <label className="block mb-1 text-sm font-medium">
-              Client
+            <label className="block mb-1 text-md font-medium">
+              Client:
             </label>
             <select
               value={selectedClient}
@@ -229,44 +218,49 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
                 </option>
               ))}
             </select>
-            <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-gray-200">
-              Project Name
+            <label className="pt-1 block text-md font-medium">
+              Form Name:
             </label>
-            <select
-              value={projID}
-              onChange={(e) => setProjID(e.target.value)}
-              className={`
-                w-full p-2 rounded border
-                bg-white text-black border-gray-300 
-                dark:bg-gray-800 dark:text-white dark:border-gray-600
-                max-h-48 overflow-y-auto
-              `}
-            >
-              <option value="" disabled>
-                Select Project
-              </option>
-              {projects.map((project, idx) => (
-                <option key={idx} value={project}>
-                  {project}
-                </option>
-              ))}
-            </select>
-
-
             <TextField
-              label="Form Name"
+              label=""
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter form name"
+              className="pt-1 block text-md font-medium text-foreground"
+              inputStyles={{
+                color: theme === "dark" ? "white" : "black",
+                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+              }}
             />
-
+            <label className="pt-1 block text-md font-medium">
+              Equipment Name:
+            </label>
+            <TextField
+              label=""
+              value={equipmentName}
+              onChange={(e) => setEquipment(e.target.value)}
+              placeholder="Enter the equipment"
+              className="pt-1 block text-md font-medium"
+              inputStyles={{
+                color: theme === "dark" ? "white" : "black",
+                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+              }}
+            />
+            <label className="pt-1 block text-md font-medium">
+              Form Description:
+            </label>
             <TextAreaField
-              label="Form Description"
+              label=""
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter description"
               rows={4}
               resize="vertical"
+              className="pt-1 block text-md font-medium"
+              inputStyles={{
+                color: theme === "dark" ? "white" : "black",
+                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+              }}
             />
 
             <Flex justifyContent="flex-end" marginTop="1rem">

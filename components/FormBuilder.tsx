@@ -26,7 +26,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
 
 type Form = Schema['Form']['type'];
 
-function FormBuilder({ formID, form, projectName, clientName, formName, revision }: { formID: string, form: Form, projectName: string, clientName: string, formName: string, revision: number }) {
+function FormBuilder({ formID, form, equipmentName, clientName, formName, revision }: { formID: string, form: Form, equipmentName: string, clientName: string, formName: string, revision: number }) {
     const { setElements, setSelectedElement } = useDesigner();
     const [isReady, setIsReady] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -143,8 +143,8 @@ function FormBuilder({ formID, form, projectName, clientName, formName, revision
                         {clientName}
                     </h2>
                     <h2 className="truncate font-medium">
-                        <span className="text-muted-foreground mr-2">Project Name:</span>
-                        {projectName}
+                        <span className="text-muted-foreground mr-2">Equipment Name:</span>
+                        {equipmentName}
                     </h2>
                     <div className="flex items-center gap-2">
                         <PreviewDialogBtn />

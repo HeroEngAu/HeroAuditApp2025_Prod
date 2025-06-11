@@ -19,7 +19,7 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
-import useUserAttributes from "./userAttributes"; 
+import useUserAttributes from "./userAttributes";
 
 function PublishFormBtn({ id }: { id: string }) {
   const { elements } = useDesigner();
@@ -64,14 +64,13 @@ function PublishFormBtn({ id }: { id: string }) {
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white dark:bg-neutral-900 text-black dark:text-white opacity-100 shadow-xl">
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Ready to publish this form?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. After publishing you will not be able to edit this form.
+            Once published, editing will no longer be possible.
             <br />
             <br />
             <span className="font-medium">
-              By publishing this form you will make it available to the public and you will be able to collect
-              submissions.
+              Publishing this form will make it publicly available and allow you to start collecting submissions.
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>

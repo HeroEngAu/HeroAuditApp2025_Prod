@@ -15,6 +15,8 @@ interface Props {
   revision: number | string;
   orientation?: 'portrait' | 'landscape';
   pageSize?: 'A3' | 'A4';
+  docNumber?: string;
+  docNumberRevision?: number | string;
 }
 const styles = StyleSheet.create({
   page: {
@@ -485,7 +487,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize }: Props) {
+export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize, docNumber, docNumberRevision }: Props) {
   const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
   const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
@@ -528,7 +530,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
           <View fixed style={styles.footerContainer}>
             <View style={styles.footerLine} />
             <View style={styles.footerContent}>
-              <Text>{formName} REV. {revision}</Text>
+              <Text>{formName} REV. {revision} | {docNumber} REV. {docNumberRevision} </Text>
               <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
             </View>
           </View>

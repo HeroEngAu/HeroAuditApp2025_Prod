@@ -8,9 +8,10 @@ function FormElementsSidebar() {
 
   return (
     <View >
-      <Text fontSize={tokens.fontSizes.small} color={tokens.colors.font.secondary}>
+      <Text className="text-sm text-gray-900 dark:text-gray-100" fontWeight="bold">
         Drag and drop elements
       </Text>
+
 
       <Separator />
 
@@ -25,10 +26,11 @@ function FormElementsSidebar() {
       >
         <Text
           fontSize={tokens.fontSizes.small}
-          color={tokens.colors.font.secondary}
+          
           fontWeight="bold"
           marginTop={tokens.space.small}
-          style = {{gridColumn:"span 2"}}
+          style={{ gridColumn: "span 2" }}
+          className="text-gray-900 dark:text-gray-100"
         >
           Layout elements
         </Text>
@@ -38,14 +40,15 @@ function FormElementsSidebar() {
         <SidebarBtnElement formElement={FormElements.SeparatorField} />
         <SidebarBtnElement formElement={FormElements.SpacerField} />
         <SidebarBtnElement formElement={FormElements.ImageField} />
-        <SidebarBtnElement formElement={FormElements.PageBreakField}/>
+        <SidebarBtnElement formElement={FormElements.PageBreakField} />
 
         <Text
           fontSize={tokens.fontSizes.small}
-          color={tokens.colors.font.secondary}
+          
           fontWeight="bold"
           marginTop={tokens.space.small}
-          style = {{gridColumn:"span 2"}}
+          style={{ gridColumn: "span 2", }}
+          className="text-gray-900 dark:text-gray-100"
         >
           Form elements
         </Text>

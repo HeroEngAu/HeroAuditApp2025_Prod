@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "ap-southeast-2_nnbJUa3a0",
+    "user_pool_id": "ap-southeast-2_VsJYOHzYs",
     "aws_region": "ap-southeast-2",
-    "user_pool_client_id": "1eetol8s4f7pq2pvf4ltm6aqfl",
-    "identity_pool_id": "ap-southeast-2:8a7984f3-ce32-42f3-9728-f6740b97faf0",
+    "user_pool_client_id": "4paiq74uqcg83rh3c4b5ur5v2e",
+    "identity_pool_id": "ap-southeast-2:293da3fc-3905-4ce7-8a80-5284d3e69a5e",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email",
@@ -45,9 +45,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://lrbdzmvybbddpgamr5o7mlyfxq.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "url": "https://rbiuy6adfvcypkptshmnommlse.appsync-api.ap-southeast-2.amazonaws.com/graphql",
     "aws_region": "ap-southeast-2",
-    "api_key": "da2-ovnrfgabfzhr7ogvbhglmaicxe",
+    "api_key": "da2-qdjdav5mwberxohaa5ffoqrmsu",
     "default_authorization_type": "API_KEY",
     "authorization_types": [
       "AMAZON_COGNITO_USER_POOLS",
@@ -70,20 +70,6 @@
               "name": "userId",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "createdAt": {
-              "name": "createdAt",
-              "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": []
-            },
-            "published": {
-              "name": "published",
-              "isArray": false,
-              "type": "Boolean",
               "isRequired": false,
               "attributes": []
             },
@@ -122,6 +108,13 @@
               "isRequired": false,
               "attributes": []
             },
+            "published": {
+              "name": "published",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
             "revision": {
               "name": "revision",
               "isArray": false,
@@ -135,6 +128,36 @@
               "type": "String",
               "isRequired": false,
               "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "equipmentName": {
+              "name": "equipmentName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "equipmentTAGs": {
+              "name": "equipmentTAGs",
+              "isArray": true,
+              "type": {
+                "model": "FormTag"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "formID"
+                ]
+              }
             },
             "FormSubmissions": {
               "name": "FormSubmissions",
@@ -152,33 +175,33 @@
                 ]
               }
             },
-            "projID": {
-              "name": "projID",
+            "clientID": {
+              "name": "clientID",
               "isArray": false,
               "type": "ID",
               "isRequired": false,
               "attributes": []
             },
-            "projects": {
-              "name": "projects",
+            "client": {
+              "name": "client",
               "isArray": false,
               "type": {
-                "model": "Project"
+                "model": "Client"
               },
               "isRequired": false,
               "attributes": [],
               "association": {
                 "connectionType": "BELONGS_TO",
                 "targetNames": [
-                  "projID"
+                  "clientID"
                 ]
               }
             },
-            "equipmentTAGs": {
-              "name": "equipmentTAGs",
+            "formProjects": {
+              "name": "formProjects",
               "isArray": true,
               "type": {
-                "model": "FormTag"
+                "model": "FormProject"
               },
               "isRequired": false,
               "attributes": [],
@@ -259,7 +282,23 @@
               "association": {
                 "connectionType": "HAS_MANY",
                 "associatedWith": [
-                  "ClientID"
+                  "clientID"
+                ]
+              }
+            },
+            "forms": {
+              "name": "forms",
+              "isArray": true,
+              "type": {
+                "model": "Form"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "clientID"
                 ]
               }
             },
@@ -286,6 +325,14 @@
             {
               "type": "model",
               "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "fields": [
+                  "id"
+                ]
+              }
             },
             {
               "type": "auth",
@@ -321,13 +368,6 @@
               "isRequired": true,
               "attributes": []
             },
-            "projectID": {
-              "name": "projectID",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
             "projectName": {
               "name": "projectName",
               "isArray": false,
@@ -335,8 +375,15 @@
               "isRequired": true,
               "attributes": []
             },
-            "ClientID": {
-              "name": "ClientID",
+            "projectCode": {
+              "name": "projectCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "clientID": {
+              "name": "clientID",
               "isArray": false,
               "type": "ID",
               "isRequired": false,
@@ -353,15 +400,15 @@
               "association": {
                 "connectionType": "BELONGS_TO",
                 "targetNames": [
-                  "ClientID"
+                  "clientID"
                 ]
               }
             },
-            "forms": {
-              "name": "forms",
+            "formProjects": {
+              "name": "formProjects",
               "isArray": true,
               "type": {
-                "model": "Form"
+                "model": "FormProject"
               },
               "isRequired": false,
               "attributes": [],
@@ -369,7 +416,7 @@
               "association": {
                 "connectionType": "HAS_MANY",
                 "associatedWith": [
-                  "projID"
+                  "projectID"
                 ]
               }
             },
@@ -392,6 +439,132 @@
           },
           "syncable": true,
           "pluralName": "Projects",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "fields": [
+                  "id"
+                ]
+              }
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "FormProject": {
+          "name": "FormProject",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "formID": {
+              "name": "formID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "projectID": {
+              "name": "projectID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "form": {
+              "name": "form",
+              "isArray": false,
+              "type": {
+                "model": "Form"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "formID"
+                ]
+              }
+            },
+            "project": {
+              "name": "project",
+              "isArray": false,
+              "type": {
+                "model": "Project"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "projectID"
+                ]
+              }
+            },
+            "equipmentTags": {
+              "name": "equipmentTags",
+              "isArray": true,
+              "type": {
+                "model": "EquipmentTag"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "formProjectID"
+                ]
+              }
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "FormProjects",
           "attributes": [
             {
               "type": "model",
@@ -438,13 +611,6 @@
               "isRequired": true,
               "attributes": []
             },
-            "EquipmentName": {
-              "name": "EquipmentName",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
             "forms": {
               "name": "forms",
               "isArray": true,
@@ -458,6 +624,28 @@
                 "connectionType": "HAS_MANY",
                 "associatedWith": [
                   "tagID"
+                ]
+              }
+            },
+            "formProjectID": {
+              "name": "formProjectID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "formProject": {
+              "name": "formProject",
+              "isArray": false,
+              "type": {
+                "model": "FormProject"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "formProjectID"
                 ]
               }
             },
@@ -530,6 +718,20 @@
               "name": "tagID",
               "isArray": false,
               "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "docNumber": {
+              "name": "docNumber",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "docNumberRevision": {
+              "name": "docNumberRevision",
+              "isArray": false,
+              "type": "Int",
               "isRequired": false,
               "attributes": []
             },
@@ -631,7 +833,7 @@
             "formId": {
               "name": "formId",
               "isArray": false,
-              "type": "String",
+              "type": "ID",
               "isRequired": false,
               "attributes": []
             },
@@ -668,6 +870,13 @@
               "name": "userId",
               "isArray": false,
               "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "formRevision": {
+              "name": "formRevision",
+              "isArray": false,
+              "type": "Int",
               "isRequired": false,
               "attributes": []
             },
