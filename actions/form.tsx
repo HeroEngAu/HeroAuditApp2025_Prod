@@ -70,14 +70,13 @@ export async function GetFormById(id: string) {
       }
     }
 
-    // Get project name from formProjects
-    let projectName = null;
+
     if (form.formProjects) {
       const formProjectsResult = await form.formProjects();
       const formProject = formProjectsResult.data?.[0];
 
       if (formProject?.projectID) {
-        const { data: projectData, errors: projectErrors } = await client.models.Project.get({
+        const { errors: projectErrors } = await client.models.Project.get({
           id: formProject.projectID,
         });
 
@@ -85,9 +84,6 @@ export async function GetFormById(id: string) {
           console.error(projectErrors);
         }
 
-        if (projectData) {
-          projectName = projectData.projectName;
-        }
       }
     }
 
@@ -303,7 +299,7 @@ export async function submitFormAction(formData: FormData) {
   const formtagId = formData.get("formTagId") as string;
   const rawResponses = formData.get("responses") as string;
   const rawFormContent = formData.get("formContent") as string;
-  console.log("formTagId on submit form action", formtagId)
+  //console.log("formTagId on submit form action", formtagId)
   const submission = {
     responses: JSON.parse(rawResponses),
     formContent: JSON.parse(rawFormContent),

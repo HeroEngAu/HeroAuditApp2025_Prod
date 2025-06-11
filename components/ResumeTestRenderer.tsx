@@ -8,6 +8,7 @@ import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { SaveFormAfterTestAction, submitFormAction } from "../actions/form";
 import useUserAttributes from "./userAttributes";
+import Link from "next/link";
 
 function ResumeTestRenderer({
   formId,
@@ -117,18 +118,18 @@ if (submitted) {
             Thanks for your submission. You can safely close this page, go back to the form, or return to the home page.
           </p>
           <div className="flex gap-4">
-            <a
+            <Link
               href={`/forms/${formId}`}
               className="px-5 py-2 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md"
             >
               Go back to form
-            </a>
-            <a
+            </Link>
+            <Link
               href="/"
               className="px-5 py-2 rounded-full text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md"
             >
               Return to homepage
-            </a>
+            </Link>
           </div>
         </div>
       </div>

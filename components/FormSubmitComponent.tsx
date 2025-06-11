@@ -8,6 +8,7 @@ import { toast } from "./ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { submitFormAction, SaveFormAfterTestAction, updateVisitCount } from "../actions/form";
 import useUserAttributes from "./userAttributes";
+import Link from "next/link";
 
 function FormSubmitComponent({ formUrl, content }: { content: FormElementInstance[]; formUrl: string }) {
   const formValues = useRef<{ [key: string]: string }>({});
@@ -81,7 +82,7 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       if (formtagId) {
         formData.append("formTagId", formtagId);
       }
-      console.log("formTagId on formsubmitcomponent", formtagId)
+      //console.log("formTagId on formsubmitcomponent", formtagId)
 
       await submitFormAction(formData);
       setSubmitted(true);
@@ -106,7 +107,7 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
         });
         return;
       }
-      console.log("formtagId in component", formtagId)
+      //console.log("formtagId in component", formtagId)
       const formData = new FormData();
       formData.append("formId", formUrl);
       formData.append("formTagId", formtagId);
@@ -144,18 +145,18 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
             Thanks for your submission. You can safely close this page, go back to the form, or return to the home page.
           </p>
           <div className="flex gap-4">
-            <a
+            <Link
               href={`/forms/${formUrl}`}
               className="px-5 py-2 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md"
             >
               Go back to form
-            </a>
-            <a
+            </Link>
+            <Link
               href="/"
               className="px-5 py-2 rounded-full text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md"
             >
               Return to homepage
-            </a>
+            </Link>
           </div>
         </div>
       </div>
