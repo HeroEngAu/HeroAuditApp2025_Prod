@@ -506,7 +506,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
 
   const imageStyle = preserveOriginalSize
     ? { width, height: "auto", objectFit: "contain", ...alignStyle }
-    : { width: 150, height, objectFit: "contain", ...alignStyle };
+    : { width, height, objectFit: "contain", ...alignStyle };
 
   return (
     <Document>

@@ -104,41 +104,87 @@ export function PropertiesComponent({
   }
 
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const label = element.extraAttributes?.label;
-    const reader = new FileReader();
+function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const label = element.extraAttributes?.label;
 
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const base64 = reader.result as string;
 
-      const img = new Image();
-      img.onload = () => {
-        setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
-        const preserveOriginalSize = form.getValues("preserveOriginalSize");
-        const width = preserveOriginalSize ? img.naturalWidth : form.getValues("width") || 200;
-        const height = preserveOriginalSize ? img.naturalHeight : (img.naturalHeight / img.naturalWidth) * width;
+    const img = new Image();
+    img.crossOrigin = "anonymous"; // evita erro de CORS
+    img.onload = () => {
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 600;
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
 
-        updateElement(element.id, {
-          ...element,
-          extraAttributes: {
-            ...element.extraAttributes,
-            imageUrl: base64,
-            preserveOriginalSize,
-            label,
-            width,
-            height,
-          },
-        });
-        form.setValue("width", width, { shouldDirty: false });
-      };
+      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        const ratio = width / height;
+        if (width > height) {
+          width = MAX_WIDTH;
+          height = Math.round(MAX_WIDTH / ratio);
+        } else {
+          height = MAX_HEIGHT;
+          width = Math.round(MAX_HEIGHT * ratio);
+        }
+      }
 
-      img.src = base64;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return;
+
+          const reader2 = new FileReader();
+          reader2.onloadend = () => {
+            const compressedBase64 = reader2.result as string;
+
+            console.log("Compressed size (bytes):", compressedBase64.length);
+
+            setNaturalSize({ width, height });
+
+            const preserveOriginalSize = form.getValues("preserveOriginalSize");
+            const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
+            const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
+
+            updateElement(element.id, {
+              ...element,
+              extraAttributes: {
+                ...element.extraAttributes,
+                imageUrl: compressedBase64,
+                preserveOriginalSize,
+                label,
+                width: finalWidth,
+                height: finalHeight,
+              },
+            });
+
+            form.setValue("width", finalWidth, { shouldDirty: false });
+          };
+
+          reader2.readAsDataURL(blob);
+        },
+        "image/jpeg",
+        0.5
+      );
     };
 
-    reader.readAsDataURL(file);
-  }
+    img.src = base64;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -238,8 +284,7 @@ export function PropertiesComponent({
             }}
           />
           <FormDescription>
-            Image shall be .png/.jpeg.
-            Image file size shall not be greater than 300KB.
+            Image shall be .png/.jpeg. 
           </FormDescription>
         </div>
 
