@@ -24,7 +24,7 @@ export const extraAttributes = {
 };
 
 export const propertiesSchema = z.object({
-  label: z.string().min(0).max(50),
+  label: z.string().min(0).max(200),
   imageUrl: z.string().url("Must be a valid URL").optional(),
   position: z.enum(["left", "center", "right"]),
   repeatOnPageBreak: z.boolean(),
