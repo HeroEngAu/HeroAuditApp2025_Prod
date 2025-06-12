@@ -212,11 +212,14 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
               <option value="" disabled>
                 Select Client
               </option>
-              {clients.map((client, idx) => (
-                <option key={idx} value={client}>
-                  {client}
-                </option>
-              ))}
+              {clients
+                .slice()
+                .sort((a, b) => a.localeCompare(b))
+                .map((client, idx) => (
+                  <option key={idx} value={client}>
+                    {client}
+                  </option>
+                ))}
             </select>
             <label className="pt-1 block text-md font-medium">
               Form Name:
