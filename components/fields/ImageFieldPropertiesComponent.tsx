@@ -174,7 +174,7 @@ function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
           reader2.readAsDataURL(blob);
         },
         "image/jpeg",
-        0.5
+        0.7
       );
     };
 
