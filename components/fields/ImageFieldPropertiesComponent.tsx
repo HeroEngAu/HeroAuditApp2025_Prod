@@ -238,7 +238,8 @@ export function PropertiesComponent({
             }}
           />
           <FormDescription>
-            Image shall be .png/.jpeg
+            Image shall be .png/.jpeg.
+            Image file size shall not be greater than 300KB.
           </FormDescription>
         </div>
 
