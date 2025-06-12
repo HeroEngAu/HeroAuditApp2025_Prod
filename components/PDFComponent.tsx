@@ -446,7 +446,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
-    case "TextField": {
+    /*case "TextField": {
       const cleanText =
         typeof value === "string" ? value.trim() : "";
 
@@ -457,7 +457,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           </Text>
         </View>
       );
-    }
+    }*/
 
     case "CameraField": {
       const imageUrl = typeof value === "string" ? value : element.extraAttributes?.content;

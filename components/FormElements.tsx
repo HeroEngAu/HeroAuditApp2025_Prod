@@ -6,7 +6,7 @@ import { SelectFieldFormElement } from "./fields/SelectField";
 import { SeparatorFieldFormElement } from "./fields/SeparatorField";
 import { SpacerFieldFormElement } from "./fields/SpacerField";
 import { TextAreaFormElement } from "./fields/TextAreaField";
-import { TextFieldFormElement } from "./fields/TextField";
+//import { TextFieldFormElement } from "./fields/TextField";
 import { TitleFieldFormElement } from "./fields/TitleField";
 import { TableFieldFormElement } from "./fields/TableField";
 import { ImageFieldFormElement } from "./fields/ImageField";
@@ -15,7 +15,7 @@ import { CameraFieldFormElement } from "./fields/CameraField";
 
 
 export type ElementsType =
-  | "TextField"
+  //| "TextField"
   | "TitleField"
   | "ParagraphField"
   | "SeparatorField"
@@ -99,7 +99,7 @@ type FormElementsType = {
   [key in ElementsType]: FormElement;
 };
 export const FormElements: FormElementsType = {
-  TextField: TextFieldFormElement,
+  //TextField: TextFieldFormElement,
   TitleField: TitleFieldFormElement,
   ParagraphField: ParagprahFieldFormElement,
   SeparatorField: SeparatorFieldFormElement,

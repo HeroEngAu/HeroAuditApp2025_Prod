@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { MdTextFields } from "react-icons/md";
 import {
@@ -58,4 +58,4 @@ export const TextFieldFormElement: FormElement = {
 
 export type CustomInstance = FormElementInstance & {
   extraAttributes: typeof extraAttributes;
-};
+};*/

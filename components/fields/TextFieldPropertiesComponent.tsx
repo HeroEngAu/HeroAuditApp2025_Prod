@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import {
   FormElementInstance,
@@ -155,4 +155,4 @@ export function PropertiesComponent({
       </form>
     </Form>
   );
-}
+}*/
