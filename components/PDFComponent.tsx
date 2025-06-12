@@ -541,18 +541,19 @@ export default function PDFDocument({ elements, responses, formName, revision, o
 
             const nextElement = group[index + 1];
             const isTitleFollowedByParagraph =
-              element.type === "TitleField" && nextElement?.type === "ParagraphField";
+              element.type === "TitleField" &&
+              (nextElement?.type === "ParagraphField" || nextElement?.type === "TableField");
 
             if (isTitleFollowedByParagraph) {
               const titleValue = responses[element.id];
-              const paraValue = responses[nextElement.id];
+              const nextValue = responses[nextElement.id];
 
               return (
                 <View key={`combo-${element.id}-${nextElement.id}`} wrap={false} style={styles.fieldContainer}>
                   <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
                   {renderFieldValue(element, titleValue)}
                   <Text style={styles.fieldTitle}>{nextElement.extraAttributes?.label}</Text>
-                  {renderFieldValue(nextElement, paraValue)}
+                  {renderFieldValue(nextElement, nextValue)}
                 </View>
               );
             }
@@ -560,7 +561,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
             if (
               index > 0 &&
               group[index - 1].type === "TitleField" &&
-              element.type === "ParagraphField"
+              (element.type === "ParagraphField" || element.type === "TableField")
             ) {
               return null;
             }
