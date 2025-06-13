@@ -27,6 +27,32 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
   const [retryRun, setRetryRun] = useState(false);
 
   useEffect(() => {
+    if (!isDialogOpen || !shareUrl) return;
+
+    async function fetchProjects() {
+      try {
+        const { projectList } = await GetProjectsFromShareURL(shareUrl);
+
+        const sortedProjects = projectList
+          .filter((proj) => proj.projectCode !== null)
+          .sort((a, b) => (b.projectCode as string).localeCompare(a.projectCode as string))
+          .map((proj) => ({
+            id: proj.projectCode as string,
+            name: `${proj.name} (${proj.projectCode})`,
+          }));
+
+        setProjects(sortedProjects);
+      } catch (err) {
+        console.error("Erro ao buscar projetos:", err);
+        setProjects([]);
+      }
+    }
+
+    fetchProjects();
+  }, [isDialogOpen, shareUrl]);
+
+
+  useEffect(() => {
     const run = async () => {
       if (retryRun) {
         const retry = await runForm(shareUrl, equipmentTag, docNumber, selectedProjectId, true);
@@ -47,29 +73,6 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
 
     run();
   }, [retryRun, shareUrl, equipmentTag, docNumber, selectedProjectId, router]);
-  useEffect(() => {
-    if (!isDialogOpen || !shareUrl) return;
-
-    async function fetchProjects() {
-      try {
-        const { projectList } = await GetProjectsFromShareURL(shareUrl);
-        setProjects(
-          projectList
-            .filter((proj) => proj.projectCode !== null)
-            .map((proj) => ({
-              id: proj.projectCode as string,
-              name: `${proj.name} (${proj.projectCode})`,
-            }))
-        );
-      } catch (err) {
-        console.error("Erro ao buscar projetos:", err);
-        setProjects([]);
-      }
-    }
-
-    fetchProjects();
-  }, [isDialogOpen, shareUrl]);
-
 
 
   useEffect(() => {
@@ -104,59 +107,56 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
     return null; // avoiding window not defined error
   }
 
-const handleRunForm = async () => {
-  if (!selectedProjectId) {
+  const handleRunForm = async () => {
+    if (!selectedProjectId) {
+      toast({
+        title: "Please select a project",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!docNumber.trim()) {
+      toast({
+        title: "Document number is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!equipmentTag.trim()) {
+      toast({
+        title: "Equipment tag is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
+      shareUrl,
+      equipmentTag,
+      docNumber,
+      selectedProjectId,
+      false // try first without forcing
+    );
+
+    if (!success && revisionBumped) {
+      setShowConfirm(true); // wait for user to confirm
+      return;
+    }
+
+    if (success && createdTagID && createdFormTagID) {
+      localStorage.setItem("tagId", createdTagID);
+      localStorage.setItem("formtagId", createdFormTagID);
+      router.push(`${window.location.origin}${shareUrl}`);
+      return;
+    }
+
     toast({
-      title: "Please select a project",
+      title: "Check the document number and equipment tag.",
       variant: "destructive",
     });
-    return;
-  }
-
-  if (!docNumber.trim()) {
-    toast({
-      title: "Document number is required",
-      variant: "destructive",
-    });
-    return;
-  }
-
-  if (!equipmentTag.trim()) {
-    toast({
-      title: "Equipment tag is required",
-      variant: "destructive",
-    });
-    return;
-  }
-
-  const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
-    shareUrl,
-    equipmentTag,
-    docNumber,
-    selectedProjectId,
-    false // try first without forcing
-  );
-
-  if (!success && revisionBumped) {
-    setShowConfirm(true); // wait for user to confirm
-    return;
-  }
-
-  if (success && createdTagID && createdFormTagID) {
-    localStorage.setItem("tagId", createdTagID);
-    localStorage.setItem("formtagId", createdFormTagID);
-    router.push(`${window.location.origin}${shareUrl}`);
-    return;
-  }
-
-  toast({
-    title: "Check the document number and equipment tag.",
-    variant: "destructive",
-  });
-};
-
-
-
+  };
 
   return (
     <>
@@ -240,6 +240,7 @@ const handleRunForm = async () => {
                   {proj.name}
                 </option>
               ))}
+
             </select>
             <label className="pt-1 block text-md font-medium">
               Document Number:

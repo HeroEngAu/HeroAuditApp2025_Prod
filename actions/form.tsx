@@ -819,7 +819,7 @@ export async function GetProjectsFromShareURL(shareURL: string) {
     if (!form.clientID) {
       throw new Error("Form does not have a clientID.");
     }
-/*
+
     // 2. Buscar client pelo clientID do form
     const { data: clients, errors: clientErrors } = await client.models.Client.list({
       filter: { id: { eq: form.clientID } },
@@ -833,10 +833,10 @@ export async function GetProjectsFromShareURL(shareURL: string) {
     if (!clientData.id) {
       throw new Error("Client ID is null.");
     }
-*/
+
     // 3. Buscar projects pelo clientID
     const { data: projects, errors: projectErrors } = await client.models.Project.list({
-      filter: { clientID: { eq: form.clientID } }
+      filter: { clientID: { eq: clientData.id } }
     });
     if (projectErrors) {
       console.error("Error fetching projects:", JSON.stringify(projectErrors, null, 2));
