@@ -13,7 +13,7 @@ const schema = a.schema({
       revision: a.integer().default(0),
       shareURL: a.string(),
       createdAt: a.datetime(),
-
+      firstPublishedAt: a.datetime(),
       equipmentName: a.string(),
       equipmentTAGs: a.hasMany("FormTag", "formID"),
       FormSubmissions: a.hasMany("FormSubmissions", "formId"),

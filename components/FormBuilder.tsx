@@ -22,14 +22,12 @@ import Link from "next/link";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { type Schema } from '../amplify/data/resource';
 import PreviewPDFDialogBtn from "./PreviewPDFDialogBtn";
-import { fetchAuthSession } from "aws-amplify/auth";
 
 type Form = Schema['Form']['type'];
 
 function FormBuilder({ formID, form, equipmentName, clientName, formName, revision }: { formID: string, form: Form, equipmentName: string, clientName: string, formName: string, revision: number }) {
     const { setElements, setSelectedElement } = useDesigner();
     const [isReady, setIsReady] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
     const mouseSensor = useSensor(MouseSensor, {
         activationConstraint: { distance: 10 },
     });
@@ -37,25 +35,6 @@ function FormBuilder({ formID, form, equipmentName, clientName, formName, revisi
         activationConstraint: { delay: 300, tolerance: 5 },
     });
     const sensors = useSensors(mouseSensor, touchSensor);
-
-    useEffect(() => {
-        async function checkAdmin() {
-            try {
-                const session = await fetchAuthSession();
-                const rawGroups = session.tokens?.accessToken.payload["cognito:groups"];
-                const groups: string[] = Array.isArray(rawGroups)
-                    ? rawGroups.filter((g): g is string => typeof g === "string")
-                    : typeof rawGroups === "string"
-                        ? [rawGroups]
-                        : [];
-                setIsAdmin(groups.includes("admin"));
-            } catch (error) {
-                console.error("Failed to fetch user groups", error);
-            }
-        }
-
-        checkAdmin();
-    }, []);
 
     useEffect(() => {
         if (!isReady) {
@@ -77,10 +56,8 @@ function FormBuilder({ formID, form, equipmentName, clientName, formName, revisi
 
     //const shareUrl = `${window.location.origin}/submit/${formID}`;
     const useURL = `${window.location.origin}/forms/${formID}`
-    if (form.published && isAdmin !== true && isAdmin !== false) {
-        return null;
-    }
-    if (form.published && !isAdmin) {
+
+    if (form.published) {
         return (
             <div className="flex flex-col items-center justify-center h-full w-full">
                 <div className="max-w-md">

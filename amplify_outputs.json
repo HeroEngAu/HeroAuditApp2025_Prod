@@ -136,6 +136,13 @@
               "isRequired": false,
               "attributes": []
             },
+            "firstPublishedAt": {
+              "name": "firstPublishedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
             "equipmentName": {
               "name": "equipmentName",
               "isArray": false,

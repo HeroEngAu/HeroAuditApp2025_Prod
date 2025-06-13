@@ -9,9 +9,10 @@ import { TbArrowBounce } from "react-icons/tb";
 import { Amplify } from "aws-amplify"
 import outputs from "../../../../amplify_outputs.json"
 import { ProjectLogTable } from "../../../../components/ProjectLogTable";
-import EditFormBtn from "../../../../components/EditFormBtn";
 import DeleteFormBtn from "../../../../components/DeleteFormBtn";
 import TurnEditableBtn from "../../../../components/TurnEditableBtn";
+import ViewFormClient from "../../../../components/previewFormDialog";
+import FormViewer from "../../../../components/previewDialogForm";
 
 Amplify.configure(outputs)
 
@@ -65,20 +66,23 @@ async function FormDetailPage({ params }: { params: Params }) {
         </div>
         <div className="flex justify-between container">
           <h3 className="text-2xl font-bold truncate">{form.equipmentName}</h3>
-          <EditFormBtn id={id} />
+          <FormViewer content={form.content ?? ""} />
         </div>
         <div className="flex justify-between container">
           <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
-          <DeleteFormBtn id={id} />
-        </div>
-        <div className="flex justify-between container">
           <TurnEditableBtn id={id} />
         </div>
+
+
       </div>
 
       <div className="py-4 border-b border-muted">
         <div className="container flex gap-2 items-center justify-between">
           <FormLinkShare shareUrl={shareUrl} />
+        </div>
+                <div className="flex justify-between container">
+          <DeleteFormBtn id={id} />
+
         </div>
       </div>
       <div className="w-full pt-8 gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 container">

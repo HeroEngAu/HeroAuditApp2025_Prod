@@ -101,6 +101,7 @@ export async function GetFormById(id: string) {
       submissions: form.submissions ?? 0,
       FormDescription: form.description,
       revision: form.revision ?? 0,
+      content: form.content,
     };
   } catch (error) {
     console.error("Error fetching form by ID:", error);
@@ -146,10 +147,8 @@ export async function PublishForm(userId: string, id: string, content: string, s
       console.error(fetchErrors);
       throw new Error("Failed to fetch current form.");
     }
-
-    const currentRevision = currentForm.revision ?? 0;
-    const newRevision =
-      currentRevision === 0 && !currentForm.published ? 0 : currentRevision + 1;
+    const isFirstPublish = !currentForm.firstPublishedAt;
+    const newRevision = isFirstPublish ? 0 : (currentForm.revision ?? 0) + 1;
 
     const form = {
       id: id,
@@ -158,7 +157,12 @@ export async function PublishForm(userId: string, id: string, content: string, s
       userId: userId,
       published: true,
       revision: newRevision,
+      firstPublishedAt: currentForm.firstPublishedAt, // Preserve the firstPublishedAt if it exists
     };
+
+    if (isFirstPublish) {
+      form.firstPublishedAt = new Date().toISOString();
+    }
 
     const { data: updatedForm, errors } = await client.models.Form.update(form);
 
@@ -919,7 +923,7 @@ export async function GetNextFormName(clientId: string) {
     },
   });
 
-    if (formErrors) {
+  if (formErrors) {
     console.error("Error creating form:", formErrors);
     throw new Error("Something went wrong while creating the form");
   }
