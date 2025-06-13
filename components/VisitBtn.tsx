@@ -55,16 +55,12 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
         const { projectList } = await GetProjectsFromShareURL(shareUrl);
         setProjects(
           projectList
-            .filter((proj) => proj?.name) // remove só os sem nome
-            .sort((a, b) => (a.name < b.name ? -1 : 1))
+            .filter((proj) => proj.projectCode !== null)
             .map((proj) => ({
-              id: proj.projectCode || proj.name, // fallback se projectCode estiver ausente
-              name: proj.projectCode
-                ? `${proj.name} (${proj.projectCode})`
-                : proj.name,
+              id: proj.projectCode as string,
+              name: `${proj.name} (${proj.projectCode})`,
             }))
         );
-
       } catch (err) {
         console.error("Erro ao buscar projetos:", err);
         setProjects([]);
@@ -108,56 +104,56 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
     return null; // avoiding window not defined error
   }
 
-  const handleRunForm = async () => {
-    if (!selectedProjectId) {
-      toast({
-        title: "Please select a project",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!docNumber.trim()) {
-      toast({
-        title: "Document number is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!equipmentTag.trim()) {
-      toast({
-        title: "Equipment tag is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
-      shareUrl,
-      equipmentTag,
-      docNumber,
-      selectedProjectId,
-      false // try first without forcing
-    );
-
-    if (!success && revisionBumped) {
-      setShowConfirm(true); // wait for user to confirm
-      return;
-    }
-
-    if (success && createdTagID && createdFormTagID) {
-      localStorage.setItem("tagId", createdTagID);
-      localStorage.setItem("formtagId", createdFormTagID);
-      router.push(`${window.location.origin}${shareUrl}`);
-      return;
-    }
-
+const handleRunForm = async () => {
+  if (!selectedProjectId) {
     toast({
-      title: "Check the document number and equipment tag.",
+      title: "Please select a project",
       variant: "destructive",
     });
-  };
+    return;
+  }
+
+  if (!docNumber.trim()) {
+    toast({
+      title: "Document number is required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (!equipmentTag.trim()) {
+    toast({
+      title: "Equipment tag is required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
+    shareUrl,
+    equipmentTag,
+    docNumber,
+    selectedProjectId,
+    false // try first without forcing
+  );
+
+  if (!success && revisionBumped) {
+    setShowConfirm(true); // wait for user to confirm
+    return;
+  }
+
+  if (success && createdTagID && createdFormTagID) {
+    localStorage.setItem("tagId", createdTagID);
+    localStorage.setItem("formtagId", createdFormTagID);
+    router.push(`${window.location.origin}${shareUrl}`);
+    return;
+  }
+
+  toast({
+    title: "Check the document number and equipment tag.",
+    variant: "destructive",
+  });
+};
 
 
 
