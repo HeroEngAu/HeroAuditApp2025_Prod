@@ -919,6 +919,11 @@ export async function GetNextFormName(clientId: string) {
     },
   });
 
+    if (formErrors) {
+    console.error("Error creating form:", formErrors);
+    throw new Error("Something went wrong while creating the form");
+  }
+
   const count = existingForms?.length ?? 0;
   const paddedNumber = count.toString().padStart(4, "0");
 
