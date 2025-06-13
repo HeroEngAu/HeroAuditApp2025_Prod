@@ -11,7 +11,6 @@ import outputs from "../../../../amplify_outputs.json"
 import { ProjectLogTable } from "../../../../components/ProjectLogTable";
 import DeleteFormBtn from "../../../../components/DeleteFormBtn";
 import TurnEditableBtn from "../../../../components/TurnEditableBtn";
-import ViewFormClient from "../../../../components/previewFormDialog";
 import FormViewer from "../../../../components/previewDialogForm";
 
 Amplify.configure(outputs)
