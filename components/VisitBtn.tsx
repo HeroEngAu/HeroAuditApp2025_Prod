@@ -55,10 +55,10 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
         const { projectList } = await GetProjectsFromShareURL(shareUrl);
         setProjects(
           projectList
-            .filter((proj) => proj.projectCode !== null)
-            .sort((a, b) => (b.projectCode! > a.projectCode! ? 1 : -1))
+            .filter((proj) => proj?.projectCode && proj?.name)
+            .sort((a, b) => (a.projectCode! < b.projectCode! ? -1 : 1))
             .map((proj) => ({
-              id: proj.projectCode as string,
+              id: proj.projectCode!,
               name: `${proj.name} (${proj.projectCode})`,
             }))
         );
