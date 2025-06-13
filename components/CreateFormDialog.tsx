@@ -17,6 +17,7 @@ import { FaSave } from "react-icons/fa";
 import {
   GetClients,
   CreateForm,
+  GetNextFormName,
 } from "../actions/form";
 import { useTheme } from "next-themes";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -26,27 +27,32 @@ interface CreateFormDialogProps {
   onFormCreated?: () => void;
 }
 
+type ClientData = {
+  id: string;
+  name: string;
+  code: string;
+};
+
 const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   onFormCreated,
 }) => {
   const router = useRouter();
-  const [clients, setClients] = useState<string[]>([]);
+  const [clients, setClients] = useState<ClientData[]>([]);
+  const [selectedClient, setSelectedClient] = useState("");
+
   const [name, setName] = useState("");
   const [equipmentName, setEquipment] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedClient, setSelectedClient] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { theme } = useTheme();
-
   const dialogRef = useRef<HTMLDivElement>(null);
-
   const [userGroup, setUserGroup] = useState<string | null>(null);
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
 
-  useEffect(() => {
+    useEffect(() => {
     if (!userId) return;
     const fetchUserGroup = async () => {
       try {
@@ -66,12 +72,34 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   }, [userId]);
 
   useEffect(() => {
+    const fetchFormNamePreview = async () => {
+      if (!selectedClient) return;
+      try {
+        const preview = await GetNextFormName(selectedClient);
+        setName(preview);
+      } catch (err) {
+        console.error("Failed to generate form name:", err);
+      }
+    };
+
+    fetchFormNamePreview();
+  }, [selectedClient]);
+
+
+  useEffect(() => {
     const fetchClients = async () => {
       const clientsData = await GetClients();
-      setClients(clientsData.map((c) => c.name));
+      setClients(clientsData);
     };
     fetchClients();
   }, []);
+
+  useEffect(() => {
+    const selected = clients.find((c) => c.id === selectedClient);
+    if (selected?.code && name.trim() === "") {
+      setName(`${selected.code} - `);
+    }
+  }, [selectedClient, clients, name]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -94,13 +122,13 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const handleCreateForm = async () => {
     try {
       setError(null);
-      if (!name || !description || !equipmentName || !userId || !selectedClient) {
+      if (!description || !equipmentName || !userId || !selectedClient) {
         setError("Please fill in all fields.");
         return;
       }
 
       const form = await CreateForm(
-        name,
+        "", // deixar vazio ou prefixado se necessário
         equipmentName,
         description,
         userId,
@@ -115,7 +143,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
 
       localStorage.setItem("form-data", JSON.stringify({
         formId: form.formId,
-        name,
+        name: form.name, // vem do back-end agora
         description,
         client: selectedClient,
         equipmentName,
@@ -129,6 +157,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
       );
     }
   };
+
 
 
   return (
@@ -209,15 +238,13 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
               max-h-48 overflow-y-auto
               `}
             >
-              <option value="" disabled>
-                Select Client
-              </option>
+              <option value="" disabled>Select Client</option>
               {clients
                 .slice()
-                .sort((a, b) => a.localeCompare(b))
+                .sort((a, b) => a.name.localeCompare(b.name))
                 .map((client, idx) => (
-                  <option key={idx} value={client}>
-                    {client}
+                  <option key={idx} value={client.id}>
+                    {client.name}
                   </option>
                 ))}
             </select>
@@ -227,12 +254,12 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
             <TextField
               label=""
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter form name"
-              className="pt-1 block text-md font-medium text-foreground"
+              isReadOnly
+              className="pt-1 block text-md font-medium"
               inputStyles={{
-                color: theme === "dark" ? "white" : "black",
-                backgroundColor: theme === "dark" ? "#1f2937" : "white",
+                color: theme === "dark" ? "gray" : "gray",
+                backgroundColor: theme === "dark" ? "#1f2937" : "#f0f0f0",
+
               }}
             />
             <label className="pt-1 block text-md font-medium">

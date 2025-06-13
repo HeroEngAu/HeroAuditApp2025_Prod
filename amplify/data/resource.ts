@@ -31,6 +31,7 @@ const schema = a.schema({
       ClientName: a.string().required(),
       projects: a.hasMany("Project", "clientID"),
       forms: a.hasMany("Form", "clientID"),
+      ClientCode: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 

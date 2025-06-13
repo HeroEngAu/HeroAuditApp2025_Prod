@@ -34,7 +34,12 @@ export async function GetClients() {
       throw new Error("Failed to fetch clients.");
     }
 
-    return clients.map(({ id, ClientName }) => ({ id, name: ClientName }));
+    return clients.map((c) => ({
+      id: c.id ?? "",
+      name: c.ClientName ?? "",
+      code: c.ClientCode ?? "",
+    }));
+
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -850,44 +855,36 @@ export async function GetProjectsFromShareURL(shareURL: string) {
 
 
 export async function CreateForm(
-  name: string,
+  _name: string, // o name enviado pode ser vazio ou prefixado (ex: ABCFRM-)
   equipmentName: string,
   description: string,
   userId: string,
-  clientName: string,
+  clientID: string,
 ) {
-  const { data: clients, errors: clientErrors } = await client.models.Client.list();
-
-  if (clientErrors || !clients) {
-    console.error("Error fetching clients:", clientErrors);
-    throw new Error("Failed to retrieve clients.");
-  }
-
-  const matchedClient = clients.find((client) => client.ClientName === clientName);
-
-  if (!matchedClient) {
-    throw new Error(`Client with name "${clientName}" not found.`);
-  }
-
-  const clientID = matchedClient.id;
-
-  const { data: existingForms, errors: formCheckErrors } = await client.models.Form.list({
+  // Fetch all forms for the client
+  const { data: clientForms, errors: clientFormErrors } = await client.models.Form.list({
     filter: {
-      name: { eq: name },
-      clientID: { eq: clientID ?? undefined },
+      clientID: { eq: clientID },
     },
   });
 
-  if (formCheckErrors) {
-    console.error("Error checking for existing forms:", formCheckErrors);
-    throw new Error("Error checking for existing forms.");
+  if (clientFormErrors) {
+    console.error("Error fetching client forms:", clientFormErrors);
+    throw new Error("Error fetching existing forms.");
   }
 
-  if (existingForms && existingForms.length > 0) {
-    throw new Error(`A form with name "${name}" already exists for client "${clientName}".`);
-  }
+  // Get the client to retrieve the code
+  const { data: clients } = await client.models.Client.list();
+  const matchedClient = clients?.find((c) => c.id === clientID);
+  const clientCode = matchedClient?.ClientCode ?? "XXX";
 
-  const { errors: formerrors, data: form } = await client.models.Form.create({
+  // Calculate the next sequence number
+  const formCount = clientForms?.length ?? 0;
+  const sequenceNumber = formCount.toString().padStart(4, "0");
+  const name = `${clientCode}FRM-${sequenceNumber}`;
+
+  // Create the form
+  const { errors: formErrors, data: form } = await client.models.Form.create({
     equipmentName,
     name,
     description,
@@ -895,15 +892,37 @@ export async function CreateForm(
     clientID,
   });
 
-  if (formerrors) {
-    console.error("Error creating form:", formerrors);
+  if (formErrors) {
+    console.error("Error creating form:", formErrors);
     throw new Error("Something went wrong while creating the form");
   }
 
   return {
     formId: form?.id,
     equipmentName,
+    name,
   };
+}
+
+export async function GetNextFormName(clientId: string) {
+  const { data: clients, errors: clientErrors } = await client.models.Client.list();
+  if (clientErrors || !clients) throw new Error("Failed to fetch clients.");
+
+  const matchedClient = clients.find(c => c.id === clientId);
+  if (!matchedClient) throw new Error("Client not found");
+
+  const code = matchedClient.ClientCode ?? "XXX";
+
+  const { data: existingForms, errors: formErrors } = await client.models.Form.list({
+    filter: {
+      clientID: { eq: clientId }
+    },
+  });
+
+  const count = existingForms?.length ?? 0;
+  const paddedNumber = count.toString().padStart(4, "0");
+
+  return `${code}FRM-${paddedNumber}`;
 }
 
 
@@ -1188,18 +1207,18 @@ import {
   ListUsersCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { fromEnv } from "@aws-sdk/credential-providers";
- 
+
 const clients = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION!,
   credentials: fromEnv(),
 });
- 
+
 export async function listUsers() {
   const command = new ListUsersCommand({
     UserPoolId: process.env.COGNITO_USER_POOL_ID!,
     Limit: 50,
   });
- 
+
   try {
     const { Users } = await clients.send(command);
     return Users?.map(user => {

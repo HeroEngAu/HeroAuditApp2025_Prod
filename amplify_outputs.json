@@ -302,6 +302,13 @@
                 ]
               }
             },
+            "ClientCode": {
+              "name": "ClientCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
