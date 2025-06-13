@@ -798,11 +798,15 @@ export async function GetFormsInformation(
 }
 
 
-
-
-
-/*const formsInfo = await GetFormsInformation()
-console.log('Form Info:', formsInfo);*/
+type Project = {
+  id: string | null;
+  projectCode: string | null;
+  projectName: string;
+  clientID: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  __typename?: string;
+};
 
 export async function GetProjectsFromShareURL(shareURL: string) {
   try {
@@ -810,45 +814,67 @@ export async function GetProjectsFromShareURL(shareURL: string) {
     const { data: forms, errors: formErrors } = await client.models.Form.list({
       filter: { shareURL: { eq: shareURL } },
     });
+
     if (formErrors || !forms || forms.length === 0) {
       console.error("Form not found or error:", formErrors);
       throw new Error("Form not found.");
     }
-    const form = forms[0];
 
+    const form = forms[0];
     if (!form.clientID) {
       throw new Error("Form does not have a clientID.");
     }
 
-    // 2. Buscar client pelo clientID do form
+    // 2. Buscar client pelo clientID
     const { data: clients, errors: clientErrors } = await client.models.Client.list({
       filter: { id: { eq: form.clientID } },
     });
+
     if (clientErrors || !clients || clients.length === 0) {
       console.error("Client not found or error:", clientErrors);
       throw new Error("Client not found.");
     }
-    const clientData = clients[0];
 
+    const clientData = clients[0];
     if (!clientData.id) {
       throw new Error("Client ID is null.");
     }
 
-    // 3. Buscar projects pelo clientID
-    const { data: projects, errors: projectErrors } = await client.models.Project.list({
-      filter: { clientID: { eq: clientData.id } }
-    });
-    if (projectErrors) {
-      console.error("Error fetching projects:", JSON.stringify(projectErrors, null, 2));
-      throw new Error(`Error fetching projects: ${projectErrors[0]?.message || 'unknown error'}`);
-    }
-    // 4. Mapear para lista que pode ser usada no dropdown
-    // retornando id e nome separado para facilitar
-    const projectList = projects.map(project => ({
-      projectCode: project.projectCode,
-      name: project.projectName,
-    }));
+    // 3. Buscar todos os projects com paginação
+    const allProjects: Project[] = [];
+    let nextToken: string | undefined;
 
+    do {
+      const {
+        data: projectsPage,
+        nextToken: newNextToken,
+        errors: projectErrors,
+      }: {
+        data: Project[];
+        nextToken?: string | null;
+        errors?: unknown;
+      } = await client.models.Project.list({
+        filter: { clientID: { eq: clientData.id } },
+        nextToken,
+      });
+
+      if (projectErrors) {
+        console.error("Error fetching projects:", JSON.stringify(projectErrors, null, 2));
+        throw new Error("Error fetching projects");
+      }
+
+      allProjects.push(...projectsPage);
+      nextToken = newNextToken ?? undefined;
+    } while (nextToken);
+
+    // 4. Filtrar e ordenar por código decrescente
+const projectList = allProjects
+  .filter((p) => p.projectCode && p.id && p.clientID)
+  .sort((a, b) => b.projectCode!.localeCompare(a.projectCode!))
+  .map((project) => ({
+    projectCode: project.projectCode!,
+    name: project.projectName,
+  }));
 
     return { projectList };
   } catch (error) {
@@ -856,6 +882,7 @@ export async function GetProjectsFromShareURL(shareURL: string) {
     throw error;
   }
 }
+
 
 
 export async function CreateForm(
