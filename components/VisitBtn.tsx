@@ -55,13 +55,16 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
         const { projectList } = await GetProjectsFromShareURL(shareUrl);
         setProjects(
           projectList
-            .filter((proj) => proj?.projectCode && proj?.name)
-            .sort((a, b) => (a.projectCode! < b.projectCode! ? -1 : 1))
+            .filter((proj) => proj?.name) // remove só os sem nome
+            .sort((a, b) => (a.name < b.name ? -1 : 1))
             .map((proj) => ({
-              id: proj.projectCode!,
-              name: `${proj.name} (${proj.projectCode})`,
+              id: proj.projectCode || proj.name, // fallback se projectCode estiver ausente
+              name: proj.projectCode
+                ? `${proj.name} (${proj.projectCode})`
+                : proj.name,
             }))
         );
+
       } catch (err) {
         console.error("Erro ao buscar projetos:", err);
         setProjects([]);
