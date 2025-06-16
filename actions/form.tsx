@@ -25,26 +25,51 @@ const client = generateClient<Schema>();
 // UserNotFoundErr class for custom error handling
 //class UserNotFoundErr extends Error { }
 
+type Client = {
+  id: string | null;
+  ClientName: string | null;
+  ClientCode: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  __typename?: string;
+};
+
 export async function GetClients() {
   try {
-    const { errors, data: clients } = await client.models.Client.list();
+    const allClients: Client[] = [];
+    let nextToken: string | undefined;
 
-    if (errors || !clients) {
-      console.error("Error:", errors);
-      throw new Error("Failed to fetch clients.");
-    }
+    do {
+      const {
+        data: clientsPage,
+        nextToken: newNextToken,
+        errors,
+      }: {
+        data: Client[];
+        nextToken?: string | null;
+        errors?: unknown;
+      } = await client.models.Client.list({ nextToken });
 
-    return clients.map((c) => ({
+      if (errors || !clientsPage) {
+        console.error("Error fetching clients:", errors);
+        throw new Error("Failed to fetch clients.");
+      }
+
+      allClients.push(...clientsPage);
+      nextToken = newNextToken ?? undefined;
+    } while (nextToken);
+
+    return allClients.map((c) => ({
       id: c.id ?? "",
       name: c.ClientName ?? "",
       code: c.ClientCode ?? "",
     }));
-
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error in GetClients:", error);
     throw error;
   }
 }
+
 
 export async function GetFormById(id: string) {
   try {
@@ -363,11 +388,10 @@ export async function deleteFormSubmissionCascade(formSubmissionId: string) {
     await deleteFormTag(formTag2Id);
 
     if (tagID) {
-      // Verifica se existem outras FormTags usando esse tagID
       const { data: otherTags, errors } = await client.models.FormTag.list({
         filter: {
           tagID: { eq: tagID },
-          id: { ne: formTag2Id }, // Ignora o que será deletado agora
+          id: { ne: formTag2Id },
         },
       });
 
@@ -378,7 +402,6 @@ export async function deleteFormSubmissionCascade(formSubmissionId: string) {
 
       const stillUsed = otherTags && otherTags.length > 0;
 
-      // Só deleta o tag se ele não for mais usado
       if (!stillUsed) {
         await deleteEquipmentTag(tagID);
       }
@@ -398,16 +421,13 @@ export async function deleteFormProject(id: string) {
 
 export async function deleteForm(id: string) {
   try {
-    // 1. Deletar todas as FormSubmissions associadas ao form
     const { data: submissions } = await client.models.FormSubmissions.list({
       filter: { formId: { eq: id } },
     });
 
     for (const sub of submissions ?? []) {
-      await deleteFormSubmissionCascade(sub.id); // já cuida dos FormTags e EquipmentTags
+      await deleteFormSubmissionCascade(sub.id);
     }
-
-    // 2. Deletar todos os FormProject relacionados
     const { data: formProjects } = await client.models.FormProject.list({
       filter: { formID: { eq: id } },
     });
@@ -415,7 +435,6 @@ export async function deleteForm(id: string) {
     for (const fp of formProjects ?? []) {
       const formProjectId = fp.id;
 
-      // 3. Deletar EquipmentTags relacionados ao formProjectId
       const { data: equipmentTags } = await client.models.EquipmentTag.list({
         filter: { formProjectID: { eq: formProjectId } },
       });
@@ -424,11 +443,8 @@ export async function deleteForm(id: string) {
         await deleteEquipmentTag(tag.id);
       }
 
-      // 4. Deletar o FormProject em si
       await deleteFormProject(formProjectId);
     }
-
-    // 5. Finalmente, deletar o próprio Form
     const { errors } = await client.models.Form.delete({ id });
 
     if (errors) {
@@ -501,48 +517,74 @@ export async function findFormTagBySubmissionId(submissionId: string) {
   }
 }
 
+
 export async function GetFormWithSubmissionDetails(id: string) {
   try {
     const { data: form, errors: formErrors } = await client.models.Form.get({ id });
+
     if (formErrors || !form) {
       console.error(formErrors || "Form not found.");
       return null;
     }
 
-    const [formTagsResp, submissionsResp] = await Promise.all([
-      client.models.FormTag.list({ filter: { formID: { eq: form.id } } }),
-      client.models.FormSubmissions.list({ filter: { formId: { eq: form.id } } }),
-    ]);
+    // Paginar FormTags
+    const allFormTags: any[] = [];
+    let nextFormTagToken: string | undefined;
 
-    if (formTagsResp.errors || submissionsResp.errors) {
-      console.error(formTagsResp.errors || submissionsResp.errors);
-      return null;
-    }
+    do {
+      const { data, nextToken, errors } = await client.models.FormTag.list({
+        filter: { formID: { eq: form.id } },
+        nextToken: nextFormTagToken,
+      });
 
-    const formTags = formTagsResp.data || [];
-    const submissions = submissionsResp.data || [];
+      if (errors || !data) {
+        console.error("Error fetching form tags:", errors);
+        return null;
+      }
 
-    const submissionDetails = await Promise.all(
-      formTags.map(async (tag) => {
+      allFormTags.push(...data);
+      nextFormTagToken = nextToken ?? undefined;
+    } while (nextFormTagToken);
+
+    // Paginar Submissions
+    const allSubmissions: any[] = [];
+    let nextSubmissionToken: string | undefined;
+
+    do {
+      const { data, nextToken, errors } = await client.models.FormSubmissions.list({
+        filter: { formId: { eq: form.id } },
+        nextToken: nextSubmissionToken,
+      });
+
+      if (errors || !data) {
+        console.error("Error fetching submissions:", errors);
+        return null;
+      }
+
+      allSubmissions.push(...data);
+      nextSubmissionToken = nextToken ?? undefined;
+    } while (nextSubmissionToken);
+
+    const projectLog = await Promise.all(
+      allFormTags.map(async (tag) => {
         const rawContentTest = tag.contentTest?.trim() ?? "";
-        const contentTestIds = rawContentTest === "[]" || rawContentTest === ""
-          ? []
-          : rawContentTest.split(",").map((s) => s.trim());
+        const contentTestIds =
+          rawContentTest === "[]" || rawContentTest === ""
+            ? []
+            : rawContentTest.split(",").map((s: string) => s.trim());
 
-        const matchedSubmission = submissions.find((sub) =>
-          contentTestIds.includes(sub.id)
+        const matchedSubmission = allSubmissions.find((s) =>
+          contentTestIds.includes(s.id)
         );
 
-        // Get EquipmentTag
         const { data: equipmentTag } = await client.models.EquipmentTag.get({
           id: tag.tagID ?? "",
         });
 
-        // Get FormProject from EquipmentTag
-        const formProjectID = equipmentTag?.formProjectID;
         let projectName = "Unknown";
         let projectCode = "Unknown";
 
+        const formProjectID = equipmentTag?.formProjectID;
         if (formProjectID) {
           const { data: formProject } = await client.models.FormProject.get({
             id: formProjectID,
@@ -572,20 +614,18 @@ export async function GetFormWithSubmissionDetails(id: string) {
           projectCode,
           docRevisionNumber: tag.docNumberRevision ?? "0",
         };
-
       })
     );
 
     return {
       form,
-      projectLog: submissionDetails,
+      projectLog,
     };
   } catch (error) {
     console.error("Error fetching form with submission details:", error);
     throw new Error("Failed to fetch form and submission details.");
   }
 }
-
 
 
 export async function getMatchingFormSubmissions(submissionId: string) {
@@ -660,60 +700,6 @@ export async function GetFormSubmissionById(submissionId: string) {
   }
 }
 
-
-export async function GetEquipmentTagsForForm(id: string) {
-  try {
-    // Fetch the form data
-    const { data: form, errors } = await client.models.Form.get({ id });
-
-    if (errors) {
-      console.error("Error fetching form:", errors);
-      return null;
-    }
-
-    if (!form) {
-      throw new Error("Form not found.");
-    }
-
-    // Fetch equipment tags related to the form
-    const { data: equipmentTags, errors: equipmentTagsErrors } =
-      await client.models.FormTag.list({
-        filter: { formID: { eq: form.id } },
-      });
-
-    if (equipmentTagsErrors) {
-      console.error("Error fetching equipment tags:", equipmentTagsErrors);
-      return null;
-    }
-
-    if (!equipmentTags || equipmentTags.length === 0) {
-      //console.log("No equipment tags found.");
-      return { form, equipmentTags: [] };
-    }
-
-    // Fetch related equipment details for each tag
-    const equipmentDetails = await Promise.all(
-      equipmentTags.map(async (tag) => {
-        // Ensure that tag.tagID is valid before making the API call
-        const equipmentTag = tag.tagID ? await client.models.EquipmentTag.get({ id: tag.tagID }) : null;
-
-        if (equipmentTag) {
-          return equipmentTag;
-        } else {
-          console.error("Invalid tagID:", tag.tagID);
-          return null;
-        }
-      })
-    );
-
-    return { form, equipmentTags: equipmentDetails.filter(tag => tag !== null) };
-
-  } catch (error) {
-    console.error("Error fetching equipment tags for form:", error);
-    return null;
-  }
-}
-
 type RawForm = {
   id: string;
   name: string | null;
@@ -741,27 +727,61 @@ export async function GetFormsInformation(
   company: string
 ): Promise<ClientFormData[]> {
   try {
-    const { data: clientsData, errors: clientErrors } = await client.models.Client.list();
-    if (clientErrors) throw new Error("Failed to fetch clients.");
+    const allClients: any[] = [];
+    let nextClientToken: string | undefined;
 
-    const { data: userSubmissions, errors: submissionErrors } = await client.models.FormSubmissions.list({
-      filter: { userId: { eq: userId } },
-    });
-    if (submissionErrors) throw new Error("Failed to fetch form submissions.");
+    do {
+      const { data, nextToken, errors } = await client.models.Client.list({
+        nextToken: nextClientToken,
+      });
+      if (errors || !data) {
+        console.error("Error fetching clients:", errors);
+        throw new Error("Failed to fetch clients.");
+      }
+      allClients.push(...data);
+      nextClientToken = nextToken ?? undefined;
+    } while (nextClientToken);
 
-    const submittedFormIds = new Set(userSubmissions.map(sub => sub.formId));
+    const allUserSubmissions: any[] = [];
+    let nextSubmissionToken: string | undefined;
+
+    do {
+      const { data, nextToken, errors } = await client.models.FormSubmissions.list({
+        filter: { userId: { eq: userId } },
+        nextToken: nextSubmissionToken,
+      });
+      if (errors || !data) {
+        console.error("Error fetching form submissions:", errors);
+        throw new Error("Failed to fetch form submissions.");
+      }
+      allUserSubmissions.push(...data);
+      nextSubmissionToken = nextToken ?? undefined;
+    } while (nextSubmissionToken);
+
+    const submittedFormIds = new Set(allUserSubmissions.map((sub) => sub.formId));
 
     const results: ClientFormData[] = [];
 
-    for (const clientItem of clientsData) {
+    for (const clientItem of allClients) {
       if (group === "viewer" && clientItem.ClientName !== company) continue;
 
-      const { data: formsData, errors: formErrors } = await client.models.Form.list({
-        filter: { clientID: { eq: clientItem.id ?? undefined } },
-      });
-      if (formErrors) throw new Error("Failed to fetch forms.");
+      const allForms: any[] = [];
+      let nextFormToken: string | undefined;
 
-      const visibleForms = formsData.filter(form => {
+      do {
+        const { data, nextToken, errors } = await client.models.Form.list({
+          filter: { clientID: { eq: clientItem.id ?? undefined } },
+          nextToken: nextFormToken,
+        });
+        if (errors || !data) {
+          console.error("Error fetching forms:", errors);
+          throw new Error("Failed to fetch forms.");
+        }
+        allForms.push(...data);
+        nextFormToken = nextToken ?? undefined;
+      } while (nextFormToken);
+
+      const visibleForms = allForms.filter((form) => {
         if (group === "admin") return true;
         if (group === "user") return form.userId === userId || submittedFormIds.has(form.id);
         if (group === "viewer") return form.published === true;
@@ -773,7 +793,7 @@ export async function GetFormsInformation(
           clientName: clientItem.ClientName,
           projectName: null,
           projectID: null,
-          forms: visibleForms.map(form => ({
+          forms: visibleForms.map((form) => ({
             id: form.id,
             name: form.name,
             description: form.description,
@@ -810,7 +830,6 @@ type Project = {
 
 export async function GetProjectsFromShareURL(shareURL: string) {
   try {
-    // 1. Buscar o form pelo shareURL
     const { data: forms, errors: formErrors } = await client.models.Form.list({
       filter: { shareURL: { eq: shareURL } },
     });
@@ -825,7 +844,6 @@ export async function GetProjectsFromShareURL(shareURL: string) {
       throw new Error("Form does not have a clientID.");
     }
 
-    // 2. Buscar client pelo clientID
     const { data: clients, errors: clientErrors } = await client.models.Client.list({
       filter: { id: { eq: form.clientID } },
     });
@@ -840,7 +858,6 @@ export async function GetProjectsFromShareURL(shareURL: string) {
       throw new Error("Client ID is null.");
     }
 
-    // 3. Buscar todos os projects com paginação
     const allProjects: Project[] = [];
     let nextToken: string | undefined;
 
@@ -867,14 +884,13 @@ export async function GetProjectsFromShareURL(shareURL: string) {
       nextToken = newNextToken ?? undefined;
     } while (nextToken);
 
-    // 4. Filtrar e ordenar por código decrescente
-const projectList = allProjects
-  .filter((p) => p.projectCode && p.id && p.clientID)
-  .sort((a, b) => b.projectCode!.localeCompare(a.projectCode!))
-  .map((project) => ({
-    projectCode: project.projectCode!,
-    name: project.projectName,
-  }));
+    const projectList = allProjects
+      .filter((p) => p.projectCode && p.id && p.clientID)
+      .sort((a, b) => b.projectCode!.localeCompare(a.projectCode!))
+      .map((project) => ({
+        projectCode: project.projectCode!,
+        name: project.projectName,
+      }));
 
     return { projectList };
   } catch (error) {
@@ -886,7 +902,7 @@ const projectList = allProjects
 
 
 export async function CreateForm(
-  _name: string, // o name enviado pode ser vazio ou prefixado (ex: ABCFRM-)
+  _name: string,
   equipmentName: string,
   description: string,
   userId: string,
@@ -936,30 +952,75 @@ export async function CreateForm(
 }
 
 export async function GetNextFormName(clientId: string) {
-  const { data: clients, errors: clientErrors } = await client.models.Client.list();
-  if (clientErrors || !clients) throw new Error("Failed to fetch clients.");
+  // Paginar clientes para garantir que achamos o clientId
+  const allClients: Client[] = [];
+  let nextClientToken: string | undefined;
 
-  const matchedClient = clients.find(c => c.id === clientId);
+  do {
+    const {
+      data: clientsPage,
+      nextToken: newNextToken,
+      errors: clientErrors,
+    } = (await client.models.Client.list({ nextToken: nextClientToken })) as {
+      data: Client[];
+      nextToken?: string | null;
+      errors?: unknown;
+    };
+
+    if (clientErrors || !clientsPage) {
+      console.error("Error fetching clients:", clientErrors);
+      throw new Error("Failed to fetch clients.");
+    }
+
+    allClients.push(...clientsPage);
+    nextClientToken = newNextToken ?? undefined;
+  } while (nextClientToken);
+
+  const matchedClient = allClients.find((c) => c.id === clientId);
   if (!matchedClient) throw new Error("Client not found");
 
   const code = matchedClient.ClientCode ?? "XXX";
 
-  const { data: existingForms, errors: formErrors } = await client.models.Form.list({
-    filter: {
-      clientID: { eq: clientId }
-    },
-  });
+  // Paginar forms para contar todos os formulários do cliente
+  type Form = {
+    id: string;
+    clientID: string | null;
+    // outras propriedades necessárias
+  };
 
-  if (formErrors) {
-    console.error("Error creating form:", formErrors);
-    throw new Error("Something went wrong while creating the form");
-  }
+  const allForms: Form[] = [];
+  let nextFormToken: string | undefined;
 
-  const count = existingForms?.length ?? 0;
+  do {
+    const {
+      data: formsPage,
+      nextToken: newNextToken,
+      errors: formErrors,
+    } = (await client.models.Form.list({
+      filter: { clientID: { eq: clientId } },
+      nextToken: nextFormToken,
+    })) as {
+      data: Form[];
+      nextToken?: string | null;
+      errors?: unknown;
+    };
+
+    if (formErrors || !formsPage) {
+      console.error("Error fetching forms:", formErrors);
+      throw new Error("Failed to fetch forms.");
+    }
+
+    allForms.push(...formsPage);
+    nextFormToken = newNextToken ?? undefined;
+  } while (nextFormToken);
+
+  const count = allForms.length;
   const paddedNumber = count.toString().padStart(4, "0");
 
   return `${code}FRM-${paddedNumber}`;
 }
+
+
 
 
 
