@@ -250,6 +250,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 ]}
                 wrap={false}
               >
+                
                 {Array.from({ length: columns }).map((_, colIndex) => {
                   const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                   const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
@@ -284,6 +285,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                         styles.tableCell,
                         { width: columnWidths[colIndex] },
                       ]}
+                      wrap={false}
                     >
                       {isImage && imageBase64 ? (
                         <Image
@@ -548,8 +550,10 @@ export default function PDFDocument({ elements, responses, formName, revision, o
               const titleValue = responses[element.id];
               const nextValue = responses[nextElement.id];
 
+              const isBigContent = ["ParagraphField", "TableField", "ImageField"].includes(nextElement?.type);
               return (
-                <View key={`combo-${element.id}-${nextElement.id}`} wrap={false} style={styles.fieldContainer}>
+                <View key={`combo-${element.id}-${nextElement.id}`} wrap={!isBigContent} style={styles.fieldContainer}>
+
                   <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
                   {renderFieldValue(element, titleValue)}
                   <Text style={styles.fieldTitle}>{nextElement.extraAttributes?.label}</Text>
@@ -569,7 +573,7 @@ export default function PDFDocument({ elements, responses, formName, revision, o
             const value = responses[element.id];
 
             return (
-              <View key={element.id} wrap={false} style={styles.fieldContainer}>
+              <View key={element.id} style={styles.fieldContainer}>
                 {element.type !== "SeparatorField" && element.type !== "CheckboxField" && (
                   <Text style={styles.fieldTitle}>{element.extraAttributes?.label}</Text>
                 )}
