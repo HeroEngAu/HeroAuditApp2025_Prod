@@ -19,8 +19,8 @@ import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
 
 const propertiesSchema = z.object({
-  label: z.string().min(2).max(50),
-  helperText: z.string().max(200),
+  label: z.string().min(2).max(500),
+  helperText: z.string().max(500),
   required: z.boolean().default(false).optional(),
 });
 

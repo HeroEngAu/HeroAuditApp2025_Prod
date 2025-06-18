@@ -250,7 +250,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 ]}
                 wrap={false}
               >
-                
+
                 {Array.from({ length: columns }).map((_, colIndex) => {
                   const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                   const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
@@ -342,22 +342,46 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
-    case "CheckboxField": {
-      const checked = Boolean(value);
-      const label = element.extraAttributes?.label ?? "";
+case "CheckboxField": {
+  const checked = Boolean(value);
+  const label = element.extraAttributes?.label ?? "";
+  const helperText = element.extraAttributes?.helperText ?? "";
 
-      return (
-        <View style={{ padding: 2, borderWidth: 1, borderRadius: 4, flexDirection: "row", alignItems: "center" }} wrap={false}>
-          <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
-            {checked ? "☑" : "☐"}
-          </Text>
-          <Text style={{ fontSize: 10, fontFamily: 'DejaVuSans' }}>
-            {label}
-          </Text>
-        </View>
-      );
-    }
+  return (
+    <View
+      style={{
+        padding: 2,
+        borderWidth: 1,
+        borderRadius: 4,
+        flexDirection: "row",
+        alignItems: "flex-start",
+      }}
+      wrap={false}
+    >
+      <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
+        {checked ? "☑" : "☐"}
+      </Text>
 
+      <View style={{ flexDirection: "column", flexShrink: 1 }}>
+        <Text style={{ fontSize: 10, fontFamily: 'DejaVuSans' }}>
+          {label}
+        </Text>
+        {helperText ? (
+          <Text
+            style={{
+              fontSize: 8,
+              fontFamily: 'DejaVuSans',
+              color: "#666",
+              marginTop: 2,
+            }}
+          >
+            {helperText}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
     case "TitleField": {
       const {
         title,
