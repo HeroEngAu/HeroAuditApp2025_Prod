@@ -308,6 +308,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                             <Text
                               style={{
                                 fontFamily: 'DejaVuSans',
+                                fontSize: 9,
                                 textAlign: isCenteredCell || isHeaderRow ? "center" : "justify",
                                 fontWeight: isHeaderRow || isSpecial ? 600 : undefined,
                                 color: cellText === "PASS"
