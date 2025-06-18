@@ -185,14 +185,14 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         const maxCharPerColumn = Array(columnCount).fill(0);
 
         const allRows = [columnHeaders.slice(0, columnCount), ...tableData];
-
+        
         allRows.forEach((row) => {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
             const length = parsed.length;
-            const lengthWithMin = Math.max(length, parsed.length + 10);
+            const lengthWithMin = Math.max(length + 13 , parsed.length + 13);
             let px = 13;
-            if (/^[A-Z0-9]+$/.test(parsed)) {
+            if (/^[A-Z0-9\s\W]+$/.test(parsed)) {
               px = 15;
             } else if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
               px = 19;
@@ -207,7 +207,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           });
         });
 
-        const minWidth = 60;
+        const minWidth = 70;
         const maxWidth = 1200;
 
         return maxCharPerColumn.map((w) =>
