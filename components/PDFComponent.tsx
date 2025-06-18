@@ -146,6 +146,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           if (trimmed === "[checkbox:false]") return "✖";
           return "☐";
         }
+        if (trimmed === "[PASS]") return "PASS";
+        if (trimmed === "[FAIL]") return "FAIL";
+        if (trimmed === "[SUMMARY]") return "SUMMARY";
 
         if (trimmed.startsWith("[select")) {
           const match = trimmed.match(/^\[select:"(.*?)":/);
@@ -187,7 +190,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
             const length = parsed.length;
-            const lengthWithMin = Math.max(length, parsed.length + 4);
+            const lengthWithMin = Math.max(length, parsed.length + 10);
             let px = 13;
             if (/^[A-Z0-9]+$/.test(parsed)) {
               px = 15;
@@ -204,7 +207,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           });
         });
 
-        const minWidth = 50;
+        const minWidth = 60;
         const maxWidth = 1200;
 
         return maxCharPerColumn.map((w) =>
@@ -297,19 +300,28 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                           }}
                         />
                       ) : (
-                        <Text
-                          style={{
-                            fontFamily: 'DejaVuSans',
-                            textAlign: isCenteredCell ? "center" : "justify",
-                            ...(isHeaderRow && {
-                              textAlign: "center",
-                              fontWeight: 600,
-                              color: "#000",
-                            }),
-                          }}
-                        >
-                          {cellText}
-                        </Text>
+                        (() => {
+                          const displayValue = cellText === "SUMMARY" ? "-" : cellText;
+                          const isSpecial = cellText === "PASS" || cellText === "FAIL";
+
+                          return (
+                            <Text
+                              style={{
+                                fontFamily: 'DejaVuSans',
+                                textAlign: isCenteredCell || isHeaderRow ? "center" : "justify",
+                                fontWeight: isHeaderRow || isSpecial ? 600 : undefined,
+                                color: cellText === "PASS"
+                                  ? "green"
+                                  : cellText === "FAIL"
+                                    ? "red"
+                                    : "#000",
+                              }}
+                            >
+                              {displayValue}
+                            </Text>
+                          );
+                        })()
+
                       )}
                     </View>
                   );
@@ -342,46 +354,46 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         </View>
       );
     }
-case "CheckboxField": {
-  const checked = Boolean(value);
-  const label = element.extraAttributes?.label ?? "";
-  const helperText = element.extraAttributes?.helperText ?? "";
+    case "CheckboxField": {
+      const checked = Boolean(value);
+      const label = element.extraAttributes?.label ?? "";
+      const helperText = element.extraAttributes?.helperText ?? "";
 
-  return (
-    <View
-      style={{
-        padding: 2,
-        borderWidth: 1,
-        borderRadius: 4,
-        flexDirection: "row",
-        alignItems: "flex-start",
-      }}
-      wrap={false}
-    >
-      <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
-        {checked ? "☑" : "☐"}
-      </Text>
-
-      <View style={{ flexDirection: "column", flexShrink: 1 }}>
-        <Text style={{ fontSize: 10, fontFamily: 'DejaVuSans' }}>
-          {label}
-        </Text>
-        {helperText ? (
-          <Text
-            style={{
-              fontSize: 8,
-              fontFamily: 'DejaVuSans',
-              color: "#666",
-              marginTop: 2,
-            }}
-          >
-            {helperText}
+      return (
+        <View
+          style={{
+            padding: 2,
+            borderWidth: 1,
+            borderRadius: 4,
+            flexDirection: "row",
+            alignItems: "flex-start",
+          }}
+          wrap={false}
+        >
+          <Text style={{ fontSize: 10, marginRight: 8, fontFamily: 'DejaVuSans' }}>
+            {checked ? "☑" : "☐"}
           </Text>
-        ) : null}
-      </View>
-    </View>
-  );
-}
+
+          <View style={{ flexDirection: "column", flexShrink: 1 }}>
+            <Text style={{ fontSize: 10, fontFamily: 'DejaVuSans' }}>
+              {label}
+            </Text>
+            {helperText ? (
+              <Text
+                style={{
+                  fontSize: 8,
+                  fontFamily: 'DejaVuSans',
+                  color: "#666",
+                  marginTop: 2,
+                }}
+              >
+                {helperText}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      );
+    }
     case "TitleField": {
       const {
         title,

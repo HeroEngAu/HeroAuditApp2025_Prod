@@ -19,6 +19,7 @@ import React, { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { CustomInstance } from "./TableField";
 import { CameraCell } from "../CameraCell"
+import { Textarea } from "../ui/textarea";
 
 export function FormComponent({
   elementInstance,
@@ -422,10 +423,11 @@ export function FormComponent({
                       </div>
 
                     ) : !readOnly && editableCells[row][col] ? (
-                      <Input
+                      <Textarea
+                        className="w-full min-h-[60px] p-2 border rounded resize-y"
                         value={cellValue}
-                        className={"table-cell-wrap"}
                         onChange={(e) => handleCellChange(row, col, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
                       />
                     ) : (
                       <div className="whitespace-pre-wrap break-words">{cellValue}</div>
