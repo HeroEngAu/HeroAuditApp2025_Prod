@@ -16,6 +16,8 @@ interface Props {
 
 export default function SubmissionRenderer({ submissionID, elements, responses }: Props) {
   const [formName, setFormName] = useState<string>("Loading...");
+  const [equipmentName, setEquipmentName] = useState<string>("Loading...");
+  const [equipmentTag, setEquipmentTag] = useState<string>("Loading...");
   const [revision, setRevision] = useState<number | string>("Loading...");
   const [docNumber, setDocNumber] = useState<string>("Loading...");
   const [docNumberRevision, setDocNumberRevision] = useState<number | string>("Loading...");
@@ -32,6 +34,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         setRevision(result.revision || "0");
         setDocNumber(result.docNumber || "Untitled Form");
         setDocNumberRevision(result.docNumberRevision || "0");
+        setEquipmentName(result.equipmentName || "Untitled Equipment");
+        setEquipmentTag(result.equipmentTag || "Untitled Tag");
       } catch {
         setFormName("Unknown");
       }
@@ -78,6 +82,8 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
         pageSize={pageSize}
         docNumber={docNumber}
         docNumberRevision={docNumberRevision}
+        equipmentName={equipmentName}
+        equipmentTag={equipmentTag}
       />
     ).toBlob();
 

@@ -1240,7 +1240,6 @@ export async function getContentByFormIDandTagID(
 
 export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
   try {
-    // 1. Buscar o FormTag onde o contentTest === FormSubmissionsId
     const { data: formTags, errors } = await client.models.FormTag.list({
       filter: { contentTest: { eq: FormSubmissionsId } },
     });
@@ -1253,9 +1252,11 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
     const formId = formTag.formID;
     const docNumber = formTag.docNumber;
     const docNumberRevision = formTag.docNumberRevision;
+    const tagID = formTag.tagID;
 
-    // 2. Buscar a própria submissão para pegar a revisão usada na época
-    const { data: submission, errors: submissionErrors } = await client.models.FormSubmissions.get({ id: FormSubmissionsId });
+    const { data: submission, errors: submissionErrors } = await client.models.FormSubmissions.get({
+      id: FormSubmissionsId,
+    });
 
     if (submissionErrors || !submission) {
       throw new Error("Submission not found.");
@@ -1263,7 +1264,6 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
 
     const formRevision = submission.formRevision ?? 0;
 
-    // 3. Buscar o nome do formulário
     const { data: forms, errors: formErrors } = await client.models.Form.list({
       filter: { id: { eq: formId ?? undefined } },
     });
@@ -1274,8 +1274,27 @@ export async function GetFormNameFromSubmissionId(FormSubmissionsId: string) {
 
     const form = forms[0];
     const formName = form.name ?? null;
+    const equipmentName = form.equipmentName ?? null;
 
-    return { formName, revision: formRevision, docNumber, docNumberRevision };
+    let equipmentTag: string | null = null;
+    if (tagID) {
+      const { data: equipmentTagData, errors: equipmentTagErrors } = await client.models.EquipmentTag.get({
+        id: tagID,
+      });
+
+      if (!equipmentTagErrors && equipmentTagData?.Tag) {
+        equipmentTag = equipmentTagData.Tag;
+      }
+    }
+
+    return {
+      formName,
+      revision: formRevision,
+      docNumber,
+      docNumberRevision,
+      equipmentTag,
+      equipmentName,
+    };
   } catch (error) {
     console.error("Error:", error);
     throw error;

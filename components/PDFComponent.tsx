@@ -17,6 +17,8 @@ interface Props {
   pageSize?: 'A3' | 'A4';
   docNumber?: string;
   docNumberRevision?: number | string;
+  equipmentName?: string;
+  equipmentTag?: string;
 }
 const styles = StyleSheet.create({
   page: {
@@ -84,6 +86,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     fontSize: 10,
+    color: 'grey',
+  },
+  headerContainer: {
+    position: 'absolute',
+    top: 5,
+    left: 20,
+    right: 20,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    fontSize: 8,
     color: 'grey',
   },
 });
@@ -185,12 +199,12 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         const maxCharPerColumn = Array(columnCount).fill(0);
 
         const allRows = [columnHeaders.slice(0, columnCount), ...tableData];
-        
+
         allRows.forEach((row) => {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
             const length = parsed.length;
-            const lengthWithMin = Math.max(length + 13 , parsed.length + 13);
+            const lengthWithMin = Math.max(length + 13, parsed.length + 13);
             let px = 13;
             if (/^[A-Z0-9\s\W]+$/.test(parsed)) {
               px = 15;
@@ -526,7 +540,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
   }
 }
 
-export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize, docNumber, docNumberRevision }: Props) {
+export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize, docNumber, docNumberRevision, equipmentName, equipmentTag }: Props) {
   const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
   const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
@@ -563,6 +577,12 @@ export default function PDFDocument({ elements, responses, formName, revision, o
                 </View>
               );
             })}
+          </View>
+          {/* Header */}
+          <View fixed style={styles.headerContainer}>
+            <View style={styles.headerContent}>
+              <Text>{equipmentName} | {equipmentTag}</Text>
+            </View>
           </View>
 
           {/* Footer */}
