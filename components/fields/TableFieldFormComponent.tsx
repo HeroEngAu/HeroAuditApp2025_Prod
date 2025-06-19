@@ -223,6 +223,8 @@ export function FormComponent({
   }
 
   const CustomInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(DatePickerInput);
+  // ← fora do return
+  const occupiedMap: Record<number, Record<number, boolean>> = {};
 
 
   return (
@@ -252,8 +254,30 @@ export function FormComponent({
                 const isDate = cellValue.startsWith("[date:");
                 const dateValue = isDate ? cellValue.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
                 const isPassFailOrSummary = cellValue === "[PASS]" || cellValue === "[FAIL]" || cellValue === "[SUMMARY]"
+
                 let isSelectValue = "";
                 let isSelectOptionsArray: string[] = [];
+                if (occupiedMap[row]?.[col]) {
+                  return null; // já está coberta, pula render
+                }
+                // Extrai span se existir
+                const mergeMatch = cellValue.match(/^\[merge:(right|down):(\d+)\](.*)/);
+                const direction = mergeMatch?.[1];
+                const span = mergeMatch ? parseInt(mergeMatch[2]) : 1;
+                const content = mergeMatch ? mergeMatch[3] : cellValue;
+                const rowSpan = direction === "down" ? span : 1;
+                const colSpan = direction === "right" ? span : 1;
+
+                // Salva a célula que cobre outras
+                if (mergeMatch) {
+                  for (let r = row; r < row + rowSpan; r++) {
+                    for (let c = col; c < col + colSpan; c++) {
+                      if (r === row && c === col) continue;
+                      if (!occupiedMap[r]) occupiedMap[r] = {};
+                      occupiedMap[r][c] = true;
+                    }
+                  }
+                }
 
                 if (isSelect) {
                   try {
@@ -271,7 +295,7 @@ export function FormComponent({
                   }
                 }
                 return (
-                  <TableCell key={col} className="justify-center items-center table-cell-wrap break-words whitespace-normal">
+                  <TableCell key={col} rowSpan={rowSpan} colSpan={colSpan} className="justify-center items-center table-cell-wrap break-words whitespace-normal">
                     {isCheckbox ? (
                       <div
                         onClick={() => {
@@ -425,12 +449,12 @@ export function FormComponent({
                     ) : !readOnly && editableCells[row][col] ? (
                       <Textarea
                         className="w-full min-h-[60px] p-2 border rounded resize-y"
-                        value={cellValue}
+                        value={content}
                         onChange={(e) => handleCellChange(row, col, e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      <div className="whitespace-pre-wrap break-words">{cellValue}</div>
+                      <div className="whitespace-pre-wrap break-words">{content}</div>
                     )}
                   </TableCell>
                 );

@@ -294,7 +294,10 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
               Use <code>[number:]</code> to display a number input field.<br />
               Use <code>[date:]</code> to display a date picker.<br />
               Use <code>[camera]</code> to open the camera and make register of the process performed.<br />
-              Use <code>[SUMMARY]</code> to display buttons to select the overall result of the table.
+              Use <code>[SUMMARY]</code> to display buttons to select the overall result of the table.<br />
+              Use <code>[merge:right:#]"TEXT"</code> to merge the current cell with the next # cells on the right and place "TEXT" inside the merged cell.<br />
+              Use <code>[merge:down:#]"TEXT"</code> to merge the current cell with the next # cells below and place "TEXT" inside the merged cell.<br />
+              Use <code>" "</code> (a single space) to create a non-editable empty cell.<br />
               For a regular editable text field, leave the cell blank.
             </FormDescription>
           </div>

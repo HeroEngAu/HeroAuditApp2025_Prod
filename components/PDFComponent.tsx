@@ -154,6 +154,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       const parseCell = (cellValue: string): string => {
         const trimmed = cellValue?.trim() || "";
+        const withoutMerge = trimmed
+          .replace(/^\[merge:(right|down):\d+\]/, "") // remove o prefixo
+          .trim();
         if (trimmed === "[camera]") return "No picture was taken";
         if (trimmed.startsWith("[checkbox")) {
           if (trimmed === "[checkbox:true]") return "✔";
@@ -187,9 +190,18 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           return `${day}.${month}.${year}`;
         }
 
-        return trimmed || "";
+        return withoutMerge || "";
       };
-
+      const isMergedDown = (value: string) => /^\[merge:down:(\d+)\]/.test(value.trim());
+      const getMergeDownSpan = (value: string) => {
+        const match = value.trim().match(/^\[merge:down:(\d+)\]/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+      const isMergedRight = (value: string) => /^\[merge:right:(\d+)\]/.test(value.trim());
+      const getMergeRightSpan = (value: string) => {
+        const match = value.trim().match(/^\[merge:right:(\d+)\]/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
       // Get the column widths based on the content
       const estimateColumnWidths = (
         tableData: string[][],
@@ -269,8 +281,66 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
               >
 
                 {Array.from({ length: columns }).map((_, colIndex) => {
-                  const cellText = parseCell(tableData[rowIndex]?.[colIndex] || "");
                   const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                  const cellText = parseCell(rawCellValue);
+
+                  let isMergedBelow = false;
+                  for (let i = 0; i < rowIndex; i++) {
+                    const upperValue = tableData[i]?.[colIndex]?.trim() || "";
+                    if (isMergedDown(upperValue)) {
+                      const span = getMergeDownSpan(upperValue);
+                      if (i + span > rowIndex) {
+                        isMergedBelow = true;
+                        break;
+                      }
+                    }
+                  }
+                  let isMergedRightFromLeft = false;
+                  for (let j = 0; j < colIndex; j++) {
+                    const leftValue = tableData[rowIndex]?.[j]?.trim() || "";
+                    if (isMergedRight(leftValue)) {
+                      const span = getMergeRightSpan(leftValue);
+                      if (j + span > colIndex) {
+                        isMergedRightFromLeft = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  const mergeDownMatch = rawCellValue.match(/^\[merge:down:(\d+)\]/);
+                  const removeBottomBorder = !!mergeDownMatch;
+                  if (isMergedBelow) {
+                    return (
+                      <View
+                        key={colIndex}
+                        style={{
+                          width: columnWidths[colIndex],
+                          borderLeft: "1pt solid black",
+                          borderTop: "none",
+                          borderRight: "none",
+                          borderBottom: "none",
+                        }}
+                        wrap={false}
+                      />
+                    );
+                  }
+                  const mergeRightMatch = rawCellValue.match(/^\[merge:right:(\d+)\]/);
+                  const removeRightBorder = !!mergeRightMatch;
+                  if (isMergedRightFromLeft) {
+                    return (
+                      <View
+                        key={colIndex}
+                        style={{
+                          width: columnWidths[colIndex],
+                          borderTop: "none",
+                          borderBottom: "none",
+                          borderRight: "none",
+                          borderLeft: "none",
+                        }}
+                        wrap={false}
+                      />
+                    );
+                  }
                   const rawTrimmed = rawCellValue.trim();
                   const isEuropeanNumber =
                     /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
@@ -300,7 +370,14 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       key={colIndex}
                       style={[
                         styles.tableCell,
-                        { width: columnWidths[colIndex] },
+                        {
+                          width: columnWidths[colIndex],
+                          borderLeft: "1pt solid black",
+                          borderRight: removeRightBorder ? "none" : "1pt solid black",
+                          borderTop: "1pt solid black",
+                          borderBottom: removeBottomBorder ? "none" : "1pt solid black",
+                          justifyContent: "center",
+                        },
                       ]}
                       wrap={false}
                     >
