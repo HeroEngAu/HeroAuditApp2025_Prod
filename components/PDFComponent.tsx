@@ -247,25 +247,47 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         <View style={styles.table} >
           {/* Header */}
           <View style={styles.tableRow} wrap={false}>
-            {Array.from({ length: columns }).map((_, colIndex) => (
-              <View
-                key={colIndex}
-                style={[
-                  styles.tableCell,
-                  {
-                    backgroundColor: "#eee",
-                    width: columnWidths[colIndex],
-                    flexShrink: 0,
-                  },
-                ]}
-                wrap={false}
-              >
-                <Text style={{ fontSize: 10, textAlign: "center" }}>
-                  {columnHeaders[colIndex] || `Col ${colIndex + 1}`}
-                </Text>
-              </View>
-            ))}
+            {(() => {
+              const headerCells = [];
+              let colIndex = 0;
+
+              while (colIndex < columns) {
+                const raw = columnHeaders[colIndex] || "";
+                const trimmed = raw.trim();
+                const match = trimmed.match(/^\[merge:right:(\d+)\](.*)$/);
+                const span = match ? parseInt(match[1], 10) : 1; // default span is 1
+                const text = match ? match[2].trim() : parseCell(raw);
+                const mergedWidth = columnWidths
+                  .slice(colIndex, colIndex + span)
+                  .reduce((sum, w) => sum + w, 0);
+
+                headerCells.push(
+                  <View
+                    key={`header-${colIndex}`}
+                    style={{
+                      backgroundColor: "#eee",
+                      width: mergedWidth,
+                      border: "1pt solid black",
+                      padding: 3,
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                    wrap={false}
+                  >
+                    <Text style={{ fontSize: 10, textAlign: "center", fontWeight: 600 }}>
+                      {text}
+                    </Text>
+                  </View>
+                );
+
+                colIndex += span;
+
+              }
+
+              return headerCells;
+            })()}
           </View>
+
 
           {/* Body */}
           {Array.from({ length: rows }).map((_, rowIndex) => {

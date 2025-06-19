@@ -233,11 +233,35 @@ export function FormComponent({
       <Table className="max-w-[100%]">
         <TableHeader>
           <TableRow>
-            {Array.from({ length: columns }, (_, col) => (
-              <TableHead key={col} className="bg-gray-100 whitespace-pre-wrap break-words" style={{ minWidth: "50px" }}>{columnHeaders[col] || `Col ${col + 1}`}</TableHead>
-            ))}
+            {(() => {
+              const occupiedCols: Set<number> = new Set();
+              return Array.from({ length: columns }, (_, col) => {
+                if (occupiedCols.has(col)) return null;
+
+                const headerValue = columnHeaders[col] || `Col ${col + 1}`;
+                const match = headerValue.match(/^\[merge:right:(\d+)\](.*)/);
+                const span = match ? parseInt(match[1], 10) : 1;
+                const text = match ? match[2].trim() : headerValue;
+
+                for (let i = 1; i < span; i++) {
+                  occupiedCols.add(col + i);
+                }
+
+                return (
+                  <TableHead
+                    key={col}
+                    colSpan={span}
+                    className="bg-gray-100 whitespace-pre-wrap break-words"
+                    style={{ minWidth: "50px" }}
+                  >
+                    {text}
+                  </TableHead>
+                );
+              });
+            })()}
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {Array.from({ length: rows }, (_, row) => (
             <TableRow
