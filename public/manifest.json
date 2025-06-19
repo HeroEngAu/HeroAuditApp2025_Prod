@@ -4,7 +4,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "lang": "en",
   "background_color": "#ffffff",
   "theme_color": "#facc15",
