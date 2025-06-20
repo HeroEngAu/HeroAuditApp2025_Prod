@@ -365,20 +365,6 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
                   if (isMergedRightFromLeft) {
                     let showRightBorder = false;
-                    let showBottomBorder = false;
-                    for (let i = rowIndex + 1; i < rows; i++) {
-                      const cellBelow = tableData[i]?.[colIndex]?.trim() || "";
-                      if (!cellBelow || isMergedRight(cellBelow)) {
-                        continue;
-                      } else {
-                        showBottomBorder = true;
-                        break;
-                      }
-                    }
-                    if (rowIndex === rows - 1) {
-                      showBottomBorder = true;
-                    }
-
 
                     for (let startCol = 0; startCol < colIndex; startCol++) {
                       const leftValue = tableData[rowIndex]?.[startCol]?.trim() || "";
@@ -391,6 +377,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                         }
                       }
                     }
+
                     return (
                       <View
                         key={colIndex}
@@ -405,6 +392,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       />
                     );
                   }
+
                   const isEuropeanNumber =
                     /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(cleanedValue) ||
                     /^[0-9]+,[0-9]+$/.test(cleanedValue) ||
@@ -437,7 +425,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       bottomBorder = "none";
                     }
                   }
-                  
+
                   return (
                     <View
                       key={colIndex}
