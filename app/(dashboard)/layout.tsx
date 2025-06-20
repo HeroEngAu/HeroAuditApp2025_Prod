@@ -93,7 +93,7 @@ function Layout({ children }: { children: ReactNode }) {
                 <div ref={dropdownRef} className="relative">
                   <Avatar
                     alt={user?.username || 'User'}
-                    size="small"
+                    size="large"
                     className="cursor-pointer select-none hover:bg-gray-200 hover:shadow-md transition duration-200 rounded-full"
 
                     onClick={() => setDropdownOpen(!dropdownOpen)}

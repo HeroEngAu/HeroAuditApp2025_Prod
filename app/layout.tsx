@@ -77,7 +77,7 @@ function CustomHeader() {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <title>HeroAudit App</title>
+      <title>HeroAuditApp</title>
       <meta name="theme-color" content="#facc15" />
       <link rel="manifest" href="/manifest.json" />
       <link rel="apple-touch-icon" href="/icon-192x192.png" />

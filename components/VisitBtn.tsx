@@ -131,7 +131,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
       });
       return;
     }
-
+    console.log("Running form with params:", { shareUrl, equipmentTag, docNumber, selectedProjectId });
     const { success, createdTagID, revisionBumped, createdFormTagID } = await runForm(
       shareUrl,
       equipmentTag,
@@ -139,6 +139,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
       selectedProjectId,
       false // try first without forcing
     );
+    console.log("Returned param form runForm:", { success, createdTagID, revisionBumped, createdFormTagID });
 
     if (!success && revisionBumped) {
       setShowConfirm(true); // wait for user to confirm

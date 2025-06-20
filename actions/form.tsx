@@ -1038,79 +1038,157 @@ export const runForm = async (
   createdFormTagID?: string;
 }> => {
   try {
-    // 1. Get form
-    const formResp = await client.models.Form.list({
-      filter: { shareURL: { eq: shareUrl } },
-    });
-    const form = formResp.data?.[0];
+    let form: any = null;
+    let token: string | undefined = undefined;
+
+    // 1. Get form (pagination)
+    do {
+      const response: {
+        data?: any[];
+        nextToken?: string | null;
+      } = await client.models.Form.list({
+        filter: { shareURL: { eq: shareUrl } },
+        nextToken: token,
+      });
+
+      const data = response.data;
+      const newToken = response.nextToken ?? undefined;
+
+      if (data && data.length > 0) {
+        form = data[0];
+        break;
+      }
+
+      token = newToken;
+    } while (token);
+
     if (!form) return { success: false };
 
-    // 2. Get project
-    const projectResp = await client.models.Project.list({
-      filter: { projectCode: { eq: projectCode } },
-    });
-    const project = projectResp.data?.[0];
+    // 2. Get project (pagination)
+    let project: any = null;
+    token = undefined;
+    do {
+      const response: {
+        data?: any[];
+        nextToken?: string | null;
+      } = await client.models.Project.list({
+        filter: { projectCode: { eq: projectCode } },
+        nextToken: token,
+      });
+
+      const data = response.data;
+      const newToken = response.nextToken ?? undefined;
+
+      if (data && data.length > 0) {
+        project = data[0];
+        break;
+      }
+
+      token = newToken;
+    } while (token);
+
     if (!project) return { success: false };
 
-    // 3. Get or create FormProject
-    const existingFormProjectResp = await client.models.FormProject.list({
-      filter: {
-        formID: { eq: form.id },
-        projectID: { eq: project.id ?? undefined },
-      },
-    });
+    // 3. Get or create FormProject (pagination)
+    let formProject: any = null;
+    token = undefined;
+    do {
+      const response: {
+        data?: any[];
+        nextToken?: string | null;
+      } = await client.models.FormProject.list({
+        filter: {
+          formID: { eq: form.id },
+          projectID: { eq: project.id },
+        },
+        nextToken: token,
+      });
 
-    let formProject = existingFormProjectResp.data?.[0];
+      const data = response.data;
+      const newToken = response.nextToken ?? undefined;
+
+      if (data && data.length > 0) {
+        formProject = data[0];
+        break;
+      }
+
+      token = newToken;
+    } while (token);
+
     if (!formProject) {
-      const createdFormProject = await client.models.FormProject.create({
+      const created = await client.models.FormProject.create({
         formID: form.id,
         projectID: project.id,
       });
-      if (!createdFormProject.data) return { success: false };
-      formProject = createdFormProject.data;
+      if (!created.data) return { success: false };
+      formProject = created.data;
     }
 
-    // 4. Get or create EquipmentTag
-    const existingTagResp = await client.models.EquipmentTag.list({
-      filter: {
-        formProjectID: { eq: formProject.id },
-        Tag: { eq: equipmentTag },
-      },
-    });
+    // 4. Get or create EquipmentTag (pagination)
+    let equipTag: any = null;
+    token = undefined;
+    do {
+      const response: {
+        data?: any[];
+        nextToken?: string | null;
+      } = await client.models.EquipmentTag.list({
+        filter: {
+          formProjectID: { eq: formProject.id },
+          Tag: { eq: equipmentTag },
+        },
+        nextToken: token,
+      });
 
-    let equipTag = existingTagResp.data?.[0];
+      const data = response.data;
+      const newToken = response.nextToken ?? undefined;
+
+      if (data && data.length > 0) {
+        equipTag = data[0];
+        break;
+      }
+
+      token = newToken;
+    } while (token);
+
     if (!equipTag) {
-      const createdEquipTag = await client.models.EquipmentTag.create({
+      const created = await client.models.EquipmentTag.create({
         Tag: equipmentTag,
         formProjectID: formProject.id,
       });
-      if (!createdEquipTag.data) return { success: false };
-      equipTag = createdEquipTag.data;
+      if (!created.data) return { success: false };
+      equipTag = created.data;
     }
 
-    // 5. Check if FormTag with same docNumber already exists
-    const existingFormTagResp = await client.models.FormTag.list({
-      filter: {
-        docNumber: { eq: docNumber },
-      },
-    });
+    // 5. Check if FormTag exists (pagination)
+    const existingFormTags: any[] = [];
+    token = undefined;
+    do {
+      const response: {
+        data?: any[];
+        nextToken?: string | null;
+      } = await client.models.FormTag.list({
+        filter: { docNumber: { eq: docNumber } },
+        nextToken: token,
+      });
 
-    const existingFormTags = existingFormTagResp.data ?? [];
+      const data = response.data;
+      const newToken = response.nextToken ?? undefined;
+
+      if (data) existingFormTags.push(...data);
+      token = newToken;
+    } while (token);
+
     const revisionBumped = existingFormTags.length > 0;
 
-    // Early return if duplicate found and not forcing revision
     if (revisionBumped && !forceRevision) {
-      return {
-        success: false,
-        revisionBumped: true,
-      };
+      return { success: false, revisionBumped: true };
     }
 
     const nextRevision = revisionBumped
-      ? Math.max(...existingFormTags.map(f => f.docNumberRevision ?? 0)) + 1
+      ? Math.max(...existingFormTags.map((f) => f.docNumberRevision ?? 0)) + 1
       : 0;
 
-    // 6. Create new FormTag with updated revision
+    // 6. Create FormTag
     const formTagResp = await client.models.FormTag.create({
       formID: form.id,
       tagID: equipTag.id,

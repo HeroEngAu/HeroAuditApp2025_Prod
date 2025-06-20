@@ -9,7 +9,9 @@ import { ImSpinner2 } from "react-icons/im";
 import { SaveFormAfterTestAction, submitFormAction } from "../actions/form";
 import useUserAttributes from "./userAttributes";
 import Link from "next/link";
-
+import ThemeSwitcher from "./ThemeSwitcher";
+import Logo from "./Logo";
+import { useRouter } from "next/navigation";
 function ResumeTestRenderer({
   formId,
   elements,
@@ -28,7 +30,7 @@ function ResumeTestRenderer({
   const [pending, startTransition] = useTransition();
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
-  
+  const router = useRouter();
   const validateForm = useCallback(() => {
     if (!userId) return false;
 
@@ -108,8 +110,16 @@ function ResumeTestRenderer({
       });
     }
   };
+  const handleSaveAndGoHome = async () => {
+    await saveProgress();
+    router.push("/");
+  };
 
-if (submitted) {
+  const handleSaveAndGoToForm = async () => {
+    await saveProgress();
+    router.push(`/forms/${formId}`);
+  };
+  if (submitted) {
     return (
       <div className="flex justify-center w-full h-full items-center p-8">
         <div className="flex justify-center flex-col gap-6 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded">
@@ -138,6 +148,48 @@ if (submitted) {
 
   return (
     <div className="flex justify-center w-full h-full items-center p-8">
+      <div className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 dark:bg-background px-6 py-3 flex justify-between items-center shadow-md">
+        {/* Logo + Back */}
+        <div className="flex gap-3">
+          <button onClick={handleSaveAndGoHome}>
+            <Logo />
+          </button>
+          <button
+            onClick={handleSaveAndGoToForm}
+            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium"
+          >
+            Back to Form
+          </button>
+        </div>
+
+        {/* Submit + Save + ThemeSwitcher */}
+        <div className="flex gap-3">
+          <Button onClick={() => startTransition(submitForm)} disabled={pending}>
+            {!pending ? (
+              <>
+                <HiCursorClick className="mr-2" />
+                Submit
+              </>
+            ) : (
+              <ImSpinner2 className="animate-spin" />
+            )}
+          </Button>
+
+          <Button onClick={saveProgress} disabled={pending} variant="outline">
+            {!pending ? (
+              <>
+                <HiCursorClick className="mr-2" />
+                Save
+              </>
+            ) : (
+              <ImSpinner2 className="animate-spin" />
+            )}
+          </Button>
+
+          <ThemeSwitcher />
+        </div>
+      </div>
+
       <div
         key={renderKey}
         className="flex flex-col gap-4 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
@@ -160,32 +212,7 @@ if (submitted) {
             No form elements to display.
           </div>
         )}
-
-
-
-        <div className="flex justify-center gap-4 mt-8">
-          <Button onClick={() => startTransition(submitForm)} disabled={pending}>
-            {!pending ? (
-              <>
-                <HiCursorClick className="mr-2" />
-                Submit
-              </>
-            ) : (
-              <ImSpinner2 className="animate-spin" />
-            )}
-          </Button>
-
-          <Button onClick={saveProgress} disabled={pending}>
-            {!pending ? (
-              <>
-                <HiCursorClick className="mr-2" />
-                Save
-              </>
-            ) : (
-              <ImSpinner2 className="animate-spin" />
-            )}
-          </Button>
-        </div>
+        
       </div>
     </div>
   );

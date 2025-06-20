@@ -9,6 +9,9 @@ import { ImSpinner2 } from "react-icons/im";
 import { submitFormAction, SaveFormAfterTestAction, updateVisitCount } from "../actions/form";
 import useUserAttributes from "./userAttributes";
 import Link from "next/link";
+import Logo from "./Logo";
+import ThemeSwitcher from "./ThemeSwitcher";
+import { useRouter } from "next/navigation";
 
 function FormSubmitComponent({ formUrl, content }: { content: FormElementInstance[]; formUrl: string }) {
   const formValues = useRef<{ [key: string]: string }>({});
@@ -19,7 +22,7 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const { attributes } = useUserAttributes();
   const userId = attributes?.sub;
   const [formtagId, setFormtagId] = useState<string | null>(null);
-
+  const router = useRouter();
   const validateForm = useCallback(() => {
     if (!userId) return false;
 
@@ -135,7 +138,15 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       saveProgress();
     }
   }, [formtagId, content, saveProgress]);
+  const handleSaveAndGoHome = async () => {
+    await saveProgress();
+    router.push("/");
+  };
 
+  const handleSaveAndGoToForm = async () => {
+    await saveProgress();
+    router.push(`/forms/${formUrl}`);
+  };
   if (submitted) {
     return (
       <div className="flex justify-center w-full h-full items-center p-8">
@@ -166,6 +177,54 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
 
   return (
     <div className="flex justify-center w-full h-full items-center p-8">
+      {/* Top action bar */}
+      <div className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 dark:bg-background px-6 py-3 flex justify-between items-center shadow-md">
+
+        <div className="flex gap-3">
+          <button onClick={handleSaveAndGoHome}>
+            <Logo />
+          </button>
+          <button
+            onClick={handleSaveAndGoToForm}
+            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium"
+          >
+            Back to Form
+          </button>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            onClick={() => startTransition(submitForm)}
+            disabled={pending}
+          >
+            {!pending ? (
+              <>
+                <HiCursorClick className="mr-2" />
+                Submit
+              </>
+            ) : (
+              <ImSpinner2 className="animate-spin" />
+            )}
+          </Button>
+          <Button
+            onClick={saveProgress}
+            disabled={pending}
+            variant="outline"
+          >
+            {!pending ? (
+              <>
+                <HiCursorClick className="mr-2" />
+                Save
+              </>
+            ) : (
+              <ImSpinner2 className="animate-spin" />
+            )}
+          </Button>
+          <ThemeSwitcher />
+
+
+        </div>
+      </div>
       <div
         key={renderKey}
         className="flex flex-col gap-4 flex-grow bg-background w-full h-full p-8 overflow-y-auto border shadow-xl shadow-blue-700 rounded"
@@ -182,37 +241,6 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
             />
           );
         })}
-        <div className="flex justify-center gap-4 mt-8">
-          <Button
-            onClick={() => {
-              startTransition(submitForm);
-            }}
-            disabled={pending}
-          >
-            {!pending ? (
-              <>
-                <HiCursorClick className="mr-2" />
-                Submit
-              </>
-            ) : (
-              <ImSpinner2 className="animate-spin" />
-            )}
-          </Button>
-
-          <Button
-            onClick={saveProgress}
-            disabled={pending}
-          >
-            {!pending ? (
-              <>
-                <HiCursorClick className="mr-2" />
-                Save
-              </>
-            ) : (
-              <ImSpinner2 className="animate-spin" />
-            )}
-          </Button>
-        </div>
 
       </div>
     </div>
