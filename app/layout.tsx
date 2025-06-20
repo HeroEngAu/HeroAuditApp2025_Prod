@@ -13,6 +13,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
+import RouteLoader from "../components/RouteLoader"; 
 
 Amplify.configure(outputs);
 const inter = Inter({ subsets: ["latin"] });
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <link rel="icon" type="image/png" href="/icon-192x192.png" />
       <body className={inter.className}>
         <NextTopLoader />
+        <RouteLoader />
         <AmplifyThemeProvider theme={theme} colorMode={colorMode}>
           <DesignerContextProvider>
             <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>

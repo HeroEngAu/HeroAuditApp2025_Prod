@@ -1,25 +1,26 @@
 "use client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 function Logo() {
   const router = useRouter();
 
+  const handleClick = () => {
+    router.push("/"); // Navega normalmente sem forçar estado de loading
+  };
+
   return (
-    <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
-      <span style={{ color: '#facc15', fontWeight: 'bold', marginRight: '0rem', fontSize: '2em' }}>hero</span>
-      <span className="text-gray-500 font-semibold mr-1" style={{ position: 'relative', display: 'inline-block', fontSize: '2em' }}>
-        <span>au</span>
-        <sub style={{
-          position: 'absolute',
-          left: 43,
-          bottom: '0.3em',
-          fontSize: '0.6em',
-          color: '#6b7280'
-        }}>
-          app
-        </sub>
-        <span>dit</span>
-      </span>
+    <div
+      className="flex items-center cursor-pointer min-h-[70px] min-w-[150px]"
+      onClick={handleClick}
+    >
+      <Image
+        src="/logo.png"
+        alt="HeroAudit Logo"
+        width={150}
+        height={70}
+        priority
+      />
     </div>
   );
 }

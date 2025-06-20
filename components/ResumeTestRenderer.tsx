@@ -29,6 +29,7 @@ function ResumeTestRenderer({
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
   const { attributes } = useUserAttributes();
+  const [submitting, setSubmitting] = useState(false);
   const userId = attributes?.sub;
   const router = useRouter();
   const validateForm = useCallback(() => {
@@ -62,27 +63,30 @@ function ResumeTestRenderer({
       });
       return;
     }
+    setSubmitting(true); // show spinner right away
+    startTransition(async () => {
+      try {
+        const cleanData = JSON.parse(JSON.stringify(formValues.current));
+        const formData = new FormData();
+        formData.append("userId", userId ?? "");
+        formData.append("formId", formId);
+        formData.append("formTagId", formtag2Id);
+        formData.append("responses", JSON.stringify(cleanData));
+        formData.append("formContent", JSON.stringify(elements));
 
-    try {
-      const cleanData = JSON.parse(JSON.stringify(formValues.current));
-
-      const formData = new FormData();
-      formData.append("userId", userId ?? "");
-      formData.append("formId", formId);
-      formData.append("formTagId", formtag2Id);
-      formData.append("responses", JSON.stringify(cleanData));
-      formData.append("formContent", JSON.stringify(elements));
-
-      await submitFormAction(formData);
-      setSubmitted(true);
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Error",
-        description: "Something went wrong",
-        variant: "destructive",
-      });
-    }
+        await submitFormAction(formData);
+        setSubmitted(true);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
+      } finally {
+        setSubmitting(false); // hide spinner
+      }
+    });
   };
 
   const saveProgress = async () => {
@@ -150,13 +154,16 @@ function ResumeTestRenderer({
     <div className="flex justify-center w-full h-full items-center p-8">
       <div className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 dark:bg-background px-6 py-3 flex justify-between items-center shadow-md">
         {/* Logo + Back */}
-        <div className="flex gap-3">
-          <button onClick={handleSaveAndGoHome}>
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={handleSaveAndGoHome}
+            className="flex items-center h-10"
+          >
             <Logo />
           </button>
           <button
             onClick={handleSaveAndGoToForm}
-            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium"
+            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium h-10"
           >
             Back to Form
           </button>
@@ -164,8 +171,8 @@ function ResumeTestRenderer({
 
         {/* Submit + Save + ThemeSwitcher */}
         <div className="flex gap-3">
-          <Button onClick={() => startTransition(submitForm)} disabled={pending}>
-            {!pending ? (
+          <Button onClick={submitForm} disabled={submitting}>
+            {!submitting ? (
               <>
                 <HiCursorClick className="mr-2" />
                 Submit
@@ -174,6 +181,7 @@ function ResumeTestRenderer({
               <ImSpinner2 className="animate-spin" />
             )}
           </Button>
+
 
           <Button onClick={saveProgress} disabled={pending} variant="outline">
             {!pending ? (
@@ -212,7 +220,7 @@ function ResumeTestRenderer({
             No form elements to display.
           </div>
         )}
-        
+
       </div>
     </div>
   );

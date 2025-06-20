@@ -15,6 +15,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import Loading from "../app/(dashboard)/forms/[id]/loading";
 import useUserAttributes from "./userAttributes";
 import CreateFormDialog from "./CreateFormDialog";
+import { useRouter } from "next/navigation";
 
 type CustomForm = {
     id: string;
@@ -27,11 +28,12 @@ type CustomForm = {
     createdAt?: string | null;
     visits?: number | null;
     submissions?: number | null;
-    formRevision?:number | null;
+    formRevision?: number | null;
 };
 
 function FormCard({ form }: { form: CustomForm }) {
     const [userGroup, setUserGroup] = useState<string | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUserGroup = async () => {
@@ -51,20 +53,35 @@ function FormCard({ form }: { form: CustomForm }) {
         fetchUserGroup();
     }, []);
 
+    const handleCardClick = () => {
+        if (form.published) {
+            router.push(`/forms/${form.id}`);
+        } else if (userGroup !== "viewer") {
+            router.push(`/builder/${form.id}`);
+        }
+    };
+
     return (
-        <Card>
+        <Card
+            onClick={handleCardClick}
+            className="cursor-pointer hover:shadow-lg transition-shadow duration-200 hover:ring-2 ring-yellow-400"
+        >
+
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 justify-between">
-                    <span className="truncate font-bold">{form.name} REV. {form.formRevision ?? 0}</span>
-                    {form.published && <Badge>Published</Badge>}
-                    {!form.published && <Badge variant={"destructive"}>Draft</Badge>}
+                    <span className="truncate font-bold">
+                        {form.name} REV. {form.formRevision ?? 0}
+                    </span>
+                    {form.published ? (
+                        <Badge>Published</Badge>
+                    ) : (
+                        <Badge variant="destructive">Draft</Badge>
+                    )}
                 </CardTitle>
                 <CardDescription className="flex items-center justify-between text-muted-foreground text-sm">
-                    {form.createdAt ? (
-                        formatDistance(new Date(form.createdAt), new Date(), { addSuffix: true })
-                    ) : (
-                        "No date"
-                    )}
+                    {form.createdAt
+                        ? formatDistance(new Date(form.createdAt), new Date(), { addSuffix: true })
+                        : "No date"}
                     {form.published && (
                         <span className="flex items-center gap-2">
                             <LuView className="text-muted-foreground" />
@@ -75,6 +92,7 @@ function FormCard({ form }: { form: CustomForm }) {
                     )}
                 </CardDescription>
             </CardHeader>
+
             <CardContent className="h-[20px] truncate text-sm text-muted-foreground">
                 <p>Client: {form.clientName}</p>
             </CardContent>
@@ -84,21 +102,21 @@ function FormCard({ form }: { form: CustomForm }) {
             <CardContent className="h-[20px] truncate text-sm text-muted-foreground">
                 <p>Description: {form.description}</p>
             </CardContent>
-            <CardFooter>
-                {form.published && (
+
+            <CardFooter onClick={(e) => e.stopPropagation()}>
+                {form.published ? (
                     <Button asChild className="w-full mt-2 text-md gap-4">
                         <Link href={`/forms/${form.id}`}>
                             View submissions <BiRightArrowAlt />
                         </Link>
                     </Button>
-                )}
-                {!form.published && userGroup !== "viewer" && (
-                    <Button asChild variant={"secondary"} className="w-full mt-2 text-md gap-4">
+                ) : userGroup !== "viewer" ? (
+                    <Button asChild variant="secondary" className="w-full mt-2 text-md gap-4">
                         <Link href={`/builder/${form.id}`}>
                             Edit form <FaEdit />
                         </Link>
                     </Button>
-                )}
+                ) : null}
             </CardFooter>
         </Card>
     );

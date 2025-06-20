@@ -180,13 +180,16 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
       {/* Top action bar */}
       <div className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 dark:bg-background px-6 py-3 flex justify-between items-center shadow-md">
 
-        <div className="flex gap-3">
-          <button onClick={handleSaveAndGoHome}>
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={handleSaveAndGoHome}
+            className="flex items-center h-10"
+          >
             <Logo />
           </button>
           <button
             onClick={handleSaveAndGoToForm}
-            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium"
+            className="px-4 py-1 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium h-10"
           >
             Back to Form
           </button>
