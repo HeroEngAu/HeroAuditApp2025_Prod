@@ -341,7 +341,9 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                 {[...Array(watchColumns)].map((_, col) => (
                   <TableCell
                     key={col}
-                    className={headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""}
+                    className={`min-w-[150px] align-top ${
+    headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""
+  }`}
                   >
 
                     <Textarea
