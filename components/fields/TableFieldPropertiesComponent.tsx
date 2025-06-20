@@ -314,63 +314,62 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
           />
         </div>
         <div className="w-full overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {[...Array(watchColumns)].map((_, col) => (
-                <TableHead key={col}>
-                  <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
-                    ✕
-                  </Button>
-                  <Textarea
-                    className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize-y overflow-hidden relative"
-                    value={columnHeaders[col] || ""}
-                    onChange={(e) => handleHeaderChange(col, e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...Array(watchRows)].map((_, row) => (
-              <TableRow
-                key={row}
-                className={headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""}>
-
+          <Table>
+            <TableHeader>
+              <TableRow>
                 {[...Array(watchColumns)].map((_, col) => (
-                  <TableCell
-                    key={col}
-                    className={`min-w-[150px] align-top ${
-    headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""
-  }`}
-                  >
-
+                  <TableHead key={col}>
+                    <Button variant="ghost" size="icon" onClick={() => deleteColumn(col)}>
+                      ✕
+                    </Button>
                     <Textarea
-                      className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize overflow-hidden relative"
-                      value={data?.[row]?.[col] || ""}
-                      onChange={(e) => handleCellChange(row, col, e.target.value)}
+                      className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize-y overflow-hidden relative"
+                      value={columnHeaders[col] || ""}
+                      onChange={(e) => handleHeaderChange(col, e.target.value)}
                       onKeyDown={(e) => e.stopPropagation()}
                     />
-                  </TableCell>
+                  </TableHead>
                 ))}
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => toggleHeaderRow(row)}
-                    title="Toggle header style"
-                  >
-                    🧷
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
-                    ✕
-                  </Button>
-                </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {[...Array(watchRows)].map((_, row) => (
+                <TableRow
+                  key={row}
+                  className={headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""}>
+
+                  {[...Array(watchColumns)].map((_, col) => (
+                    <TableCell
+                      key={col}
+                      className={`min-w-[150px] align-top ${headerRowIndexes.includes(row) ? "bg-muted text-muted-foreground font-medium" : ""
+                        }`}
+                    >
+
+                      <Textarea
+                        className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize overflow-hidden relative"
+                        value={data?.[row]?.[col] || ""}
+                        onChange={(e) => handleCellChange(row, col, e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleHeaderRow(row)}
+                      title="Toggle header style"
+                    >
+                      🧷
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteRow(row)}>
+                      ✕
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </form>
     </Form>

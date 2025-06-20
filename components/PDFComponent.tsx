@@ -306,17 +306,6 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                   const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
                   const cellText = parseCell(rawCellValue);
 
-                  let isMergedBelow = false;
-                  for (let i = 0; i < rowIndex; i++) {
-                    const upperValue = tableData[i]?.[colIndex]?.trim() || "";
-                    if (isMergedDown(upperValue)) {
-                      const span = getMergeDownSpan(upperValue);
-                      if (i + span > rowIndex) {
-                        isMergedBelow = true;
-                        break;
-                      }
-                    }
-                  }
                   let isMergedRightFromLeft = false;
                   for (let j = 0; j < colIndex; j++) {
                     const leftValue = tableData[rowIndex]?.[j]?.trim() || "";
