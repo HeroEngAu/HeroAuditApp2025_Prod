@@ -271,28 +271,18 @@ export function FormComponent({
             >
               {Array.from({ length: columns }, (_, col) => {
                 const cellValue = editableData[row]?.[col] || "";
-                const isCheckbox = cellValue.startsWith("[checkbox");
-                const isSelect = cellValue.startsWith("[select");
-                const isNumber = cellValue.startsWith("[number");
-                const numberValue = isNumber ? cellValue.match(/^\[number:(.*?)\]$/)?.[1] ?? "" : "";
-                const isDate = cellValue.startsWith("[date:");
-                const dateValue = isDate ? cellValue.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
-                const isPassFailOrSummary = cellValue === "[PASS]" || cellValue === "[FAIL]" || cellValue === "[SUMMARY]"
-
                 let isSelectValue = "";
                 let isSelectOptionsArray: string[] = [];
                 if (occupiedMap[row]?.[col]) {
-                  return null; // já está coberta, pula render
+                  return null;
                 }
-                // Extrai span se existir
+
                 const mergeMatch = cellValue.match(/^\[merge:(right|down):(\d+)\](.*)/);
                 const direction = mergeMatch?.[1];
                 const span = mergeMatch ? parseInt(mergeMatch[2]) : 1;
                 const content = mergeMatch ? mergeMatch[3] : cellValue;
                 const rowSpan = direction === "down" ? span : 1;
                 const colSpan = direction === "right" ? span : 1;
-
-                // Salva a célula que cobre outras
                 if (mergeMatch) {
                   for (let r = row; r < row + rowSpan; r++) {
                     for (let c = col; c < col + colSpan; c++) {
@@ -302,6 +292,15 @@ export function FormComponent({
                     }
                   }
                 }
+                const rawContent = content.trim();
+                const isCheckbox = rawContent.startsWith("[checkbox");
+                const isSelect = rawContent.startsWith("[select");
+                const isNumber = rawContent.startsWith("[number");
+                const numberValue = isNumber ? rawContent.match(/^\[number:(.*?)\]$/)?.[1] ?? "" : "";
+                const isDate = rawContent.startsWith("[date:");
+                const dateValue = isDate ? rawContent.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
+                const isPassFailOrSummary = ["[PASS]", "[FAIL]", "[SUMMARY]"].includes(rawContent);
+                const isOnlyMergeTag = mergeMatch && content.trim() === "";
 
                 if (isSelect) {
                   try {
@@ -470,7 +469,7 @@ export function FormComponent({
                         </button>
                       </div>
 
-                    ) : !readOnly && editableCells[row][col] ? (
+                    ) : (!readOnly && (editableCells[row][col] || isOnlyMergeTag)) ? (
                       <Textarea
                         className="w-full min-h-[60px] p-2 border rounded resize-y"
                         value={content}

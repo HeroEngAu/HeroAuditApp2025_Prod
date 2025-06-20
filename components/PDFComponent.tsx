@@ -155,9 +155,14 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       const parseCell = (cellValue: string): string => {
         const trimmed = cellValue?.trim() || "";
         const withoutMerge = trimmed
-          .replace(/^\[merge:(right|down):\d+\]/, "") // remove o prefixo
+          .replace(/^\[merge:(right|down):\d+\]/, "")
           .trim();
         if (trimmed === "[camera]") return "No picture was taken";
+        if (withoutMerge.startsWith("[checkbox")) {
+          if (withoutMerge === "[checkbox:true]") return "✔";
+          if (withoutMerge === "[checkbox:false]") return "✖";
+          return "☐";
+        }
         if (trimmed.startsWith("[checkbox")) {
           if (trimmed === "[checkbox:true]") return "✔";
           if (trimmed === "[checkbox:false]") return "✖";
@@ -305,6 +310,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 {Array.from({ length: columns }).map((_, colIndex) => {
                   const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
                   const cellText = parseCell(rawCellValue);
+                  const rawTrimmed = rawCellValue.trim();
+                  const mergePrefixMatch = rawTrimmed.match(/^\[merge:(right|down):\d+\](.*)/);
+                  const cleanedValue = mergePrefixMatch ? mergePrefixMatch[2]?.trim() : rawTrimmed;
 
                   let isMergedRightFromLeft = false;
                   for (let j = 0; j < colIndex; j++) {
@@ -343,7 +351,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                           width: columnWidths[colIndex],
                           borderLeft: "1pt solid black",
                           borderTop: "none",
-                          borderRight: "none",
+                          borderRight: "1pt solid black",
                           borderBottom: showBottomBorder ? "1pt solid black" : "none",
                         }}
                         wrap={false}
@@ -357,6 +365,20 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
                   if (isMergedRightFromLeft) {
                     let showRightBorder = false;
+                    let showBottomBorder = false;
+                    for (let i = rowIndex + 1; i < rows; i++) {
+                      const cellBelow = tableData[i]?.[colIndex]?.trim() || "";
+                      if (!cellBelow || isMergedRight(cellBelow)) {
+                        continue;
+                      } else {
+                        showBottomBorder = true;
+                        break;
+                      }
+                    }
+                    if (rowIndex === rows - 1) {
+                      showBottomBorder = true;
+                    }
+
 
                     for (let startCol = 0; startCol < colIndex; startCol++) {
                       const leftValue = tableData[rowIndex]?.[startCol]?.trim() || "";
@@ -369,14 +391,13 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                         }
                       }
                     }
-
                     return (
                       <View
                         key={colIndex}
                         style={{
                           width: columnWidths[colIndex],
-                          borderTop: "none",
-                          borderBottom: "none",
+                          borderTop: "1pt solid black",
+                          borderBottom: "1pt solid black",
                           borderLeft: "none",
                           borderRight: showRightBorder ? "1pt solid black" : "none",
                         }}
@@ -384,33 +405,31 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       />
                     );
                   }
-
-                  const rawTrimmed = rawCellValue.trim();
                   const isEuropeanNumber =
-                    /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
-                    /^[0-9]+,[0-9]+$/.test(rawTrimmed) ||
-                    /^[0-9]+,[0-9]{3}$/.test(rawTrimmed) ||
-                    /^-?\d+(?:\.\d{3})*,\d+$/.test(rawTrimmed);
-                  const isImage = rawTrimmed.startsWith("[image:");
-                  const imageBase64 = rawTrimmed.match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
+                    /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(cleanedValue) ||
+                    /^[0-9]+,[0-9]+$/.test(cleanedValue) ||
+                    /^[0-9]+,[0-9]{3}$/.test(cleanedValue) ||
+                    /^-?\d+(?:\.\d{3})*,\d+$/.test(cleanedValue);
+                  const isImage = cleanedValue.startsWith("[image:");
+                  const imageBase64 = cleanedValue.match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
                   const isCenteredCell =
-                    ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(rawTrimmed) ||
-                    rawTrimmed.startsWith("[select") ||
-                    rawTrimmed.startsWith("[number:") ||
-                    rawTrimmed.startsWith("[date:") ||
-                    !isNaN(Number(rawTrimmed)) ||
+                    ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(cleanedValue) ||
+                    cleanedValue.startsWith("[select") ||
+                    cleanedValue.startsWith("[number:") ||
+                    cleanedValue.startsWith("[date:") ||
+                    !isNaN(Number(cleanedValue)) ||
                     isEuropeanNumber ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                    /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                    /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                    /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(rawTrimmed) ||
-                    !isNaN(Number(rawTrimmed)) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawTrimmed) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawTrimmed) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawTrimmed);
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                    /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                    /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                    /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                    !isNaN(Number(cleanedValue)) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(cleanedValue) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(cleanedValue) ||
+                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(cleanedValue);
+
                   let bottomBorder = "1pt solid black";
 
-                  // Se for merge:down inicial, verifica se é a última linha do merge
                   if (isMergedDown(rawCellValue)) {
                     const span = getMergeDownSpan(rawCellValue);
                     const endRow = rowIndex + span - 1;
@@ -418,6 +437,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                       bottomBorder = "none";
                     }
                   }
+                  
                   return (
                     <View
                       key={colIndex}
