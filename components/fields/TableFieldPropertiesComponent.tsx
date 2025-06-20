@@ -295,15 +295,15 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
               Use <code>[date:]</code> to display a date picker.<br />
               Use <code>[camera]</code> to open the camera and make register of the process performed.<br />
               Use <code>[SUMMARY]</code> to display buttons to select the overall result of the table.<br />
-              Use <code>[merge:right:#]"TEXT"</code> to merge the current cell with the next # cells on the right and place "TEXT" inside the merged cell.<br />
-              Use <code>[merge:down:#]"TEXT"</code> to merge the current cell with the next # cells below and place "TEXT" inside the merged cell.<br />
+              Use <code>[merge:right:#]Text</code> to merge with # cells to the right.<br />
+              Use <code>[merge:down:#]Text</code> to merge with # cells below.<br />
               Use <code>" "</code> (a single space) to create a non-editable empty cell.<br />
               For a regular editable text field, leave the cell blank.
             </FormDescription>
           </div>
 
 
-          <Button type="button" onClick={handleImportClick}>
+          <Button type="button" size={"sm"} onClick={handleImportClick}>
             Import Excel
           </Button>
           <input
@@ -313,6 +313,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
             ref={fileInputRef}
           />
         </div>
+        <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -322,7 +323,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                     ✕
                   </Button>
                   <Textarea
-                    className="w-full min-h-[40px] p-1 text-sm resize-y"
+                    className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize-y overflow-hidden relative"
                     value={columnHeaders[col] || ""}
                     onChange={(e) => handleHeaderChange(col, e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
@@ -344,10 +345,10 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
                   >
 
                     <Textarea
-                      className="w-full min-h-[60px] p-2 border rounded resize-y"
+                      className="w-full min-h-[60px] p-2 pr-6 pb-6 border rounded resize overflow-hidden relative"
                       value={data?.[row]?.[col] || ""}
                       onChange={(e) => handleCellChange(row, col, e.target.value)}
-                      onKeyDown={(e) => e.stopPropagation()} // evita efeitos colaterais do Enter
+                      onKeyDown={(e) => e.stopPropagation()}
                     />
                   </TableCell>
                 ))}
@@ -368,6 +369,7 @@ export function PropertiesComponent({ elementInstance }: { elementInstance: Form
             ))}
           </TableBody>
         </Table>
+        </div>
       </form>
     </Form>
   );

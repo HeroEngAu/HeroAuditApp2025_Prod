@@ -329,9 +329,24 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     }
                   }
 
-                  const mergeDownMatch = rawCellValue.match(/^\[merge:down:(\d+)\]/);
-                  const removeBottomBorder = !!mergeDownMatch;
-                  if (isMergedBelow) {
+                  let skipRendering = false;
+                  let showBottomBorder = false;
+
+                  for (let startRow = 0; startRow < rowIndex; startRow++) {
+                    const cellAbove = tableData[startRow]?.[colIndex]?.trim() || "";
+                    if (isMergedDown(cellAbove)) {
+                      const span = getMergeDownSpan(cellAbove);
+                      const endRow = startRow + span - 1;
+
+                      if (rowIndex <= endRow) {
+                        skipRendering = true;
+                        showBottomBorder = rowIndex === endRow;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (skipRendering) {
                     return (
                       <View
                         key={colIndex}
@@ -340,15 +355,32 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                           borderLeft: "1pt solid black",
                           borderTop: "none",
                           borderRight: "none",
-                          borderBottom: "none",
+                          borderBottom: showBottomBorder ? "1pt solid black" : "none",
                         }}
                         wrap={false}
                       />
                     );
                   }
-                  const mergeRightMatch = rawCellValue.match(/^\[merge:right:(\d+)\]/);
-                  const removeRightBorder = !!mergeRightMatch;
+                  let rightBorder = "1pt solid black";
+                  if (isMergedRight(rawCellValue)) {
+                    rightBorder = "none";
+                  }
+
                   if (isMergedRightFromLeft) {
+                    let showRightBorder = false;
+
+                    for (let startCol = 0; startCol < colIndex; startCol++) {
+                      const leftValue = tableData[rowIndex]?.[startCol]?.trim() || "";
+                      if (isMergedRight(leftValue)) {
+                        const span = getMergeRightSpan(leftValue);
+                        const endCol = startCol + span - 1;
+                        if (colIndex <= endCol) {
+                          showRightBorder = colIndex === endCol;
+                          break;
+                        }
+                      }
+                    }
+
                     return (
                       <View
                         key={colIndex}
@@ -356,13 +388,14 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                           width: columnWidths[colIndex],
                           borderTop: "none",
                           borderBottom: "none",
-                          borderRight: "none",
                           borderLeft: "none",
+                          borderRight: showRightBorder ? "1pt solid black" : "none",
                         }}
                         wrap={false}
                       />
                     );
                   }
+
                   const rawTrimmed = rawCellValue.trim();
                   const isEuropeanNumber =
                     /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(rawTrimmed) ||
@@ -386,7 +419,16 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(rawTrimmed) ||
                     /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(rawTrimmed) ||
                     /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(rawTrimmed);
+                  let bottomBorder = "1pt solid black";
 
+                  // Se for merge:down inicial, verifica se é a última linha do merge
+                  if (isMergedDown(rawCellValue)) {
+                    const span = getMergeDownSpan(rawCellValue);
+                    const endRow = rowIndex + span - 1;
+                    if (endRow !== rowIndex + span - 1 || rowIndex !== rows - 1) {
+                      bottomBorder = "none";
+                    }
+                  }
                   return (
                     <View
                       key={colIndex}
@@ -395,9 +437,9 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                         {
                           width: columnWidths[colIndex],
                           borderLeft: "1pt solid black",
-                          borderRight: removeRightBorder ? "none" : "1pt solid black",
+                          borderRight: rightBorder,
                           borderTop: "1pt solid black",
-                          borderBottom: removeBottomBorder ? "none" : "1pt solid black",
+                          borderBottom: bottomBorder,
                           justifyContent: "center",
                         },
                       ]}
