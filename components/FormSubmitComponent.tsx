@@ -23,6 +23,30 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const userId = attributes?.sub;
   const [formtagId, setFormtagId] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      saveProgress();
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+
   const validateForm = useCallback(() => {
     if (!userId) return false;
 

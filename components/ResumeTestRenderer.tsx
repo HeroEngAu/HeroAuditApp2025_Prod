@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useTransition } from "react";
+import { useState, useRef, useCallback, useTransition, useEffect } from "react";
 import { FormElementInstance, FormElements } from "./FormElements";
 import { Button } from "./ui/button";
 import { HiCursorClick } from "react-icons/hi";
@@ -32,6 +32,29 @@ function ResumeTestRenderer({
   const [submitting, setSubmitting] = useState(false);
   const userId = attributes?.sub;
   const router = useRouter();
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      saveProgress();
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   const validateForm = useCallback(() => {
     if (!userId) return false;
 

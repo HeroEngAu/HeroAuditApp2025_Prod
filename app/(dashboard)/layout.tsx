@@ -13,11 +13,14 @@ import { fetchUserAttributes, signOut } from 'aws-amplify/auth';
 Amplify.configure(outputs);
 
 function getInitials(name: string) {
-  return name.trim().slice(0, 2).toUpperCase();
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+
 function Layout({ children }: { children: ReactNode }) {
-  const [userName, setUserName] = useState('User');
+  const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,7 +75,7 @@ function Layout({ children }: { children: ReactNode }) {
     };
   }, [dropdownOpen]);
 
-  const userInitials = getInitials(userName);
+  const userInitials = userName ? getInitials(userName) : "";
 
   return (
     <div className="flex flex-col min-h-screen min-w-full bg-background max-h-screen">
@@ -91,15 +94,16 @@ function Layout({ children }: { children: ReactNode }) {
                 }}
               >
                 <div ref={dropdownRef} className="relative">
-                  <Avatar
-                    alt={user?.username || 'User'}
-                    size="large"
-                    className="cursor-pointer select-none hover:bg-gray-200 hover:shadow-md transition duration-200 rounded-full"
-
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    {userInitials}
-                  </Avatar>
+                  {userInitials && (
+                    <Avatar
+                      alt={user?.username || 'User'}
+                      size="large"
+                      className="cursor-pointer select-none hover:bg-gray-200 hover:shadow-md transition duration-200 rounded-full"
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                      {userInitials}
+                    </Avatar>
+                  )}
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-100 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded shadow-lg z-50 text-sm text-gray-800 dark:text-gray-100">
                       <div className="px-4 py-2 border-b border-gray-200 dark:border-zinc-700">
