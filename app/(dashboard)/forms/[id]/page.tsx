@@ -12,6 +12,7 @@ import { ProjectLogTable } from "../../../../components/ProjectLogTable";
 import DeleteFormBtn from "../../../../components/DeleteFormBtn";
 import TurnEditableBtn from "../../../../components/TurnEditableBtn";
 import FormViewer from "../../../../components/previewDialogForm";
+import { Separator } from "../../../../components/ui/separator";
 
 Amplify.configure(outputs)
 
@@ -57,34 +58,32 @@ async function FormDetailPage({ params }: { params: Params }) {
     <>
       <div className="py-10 border-b border-muted">
         <div className="flex justify-between container">
-          <h1 className="text-4xl font-bold truncate">{form.form.name} REV. {form.revision}</h1>
+          <h1 className="text-2xl md:text-4xl font-bold truncate">
+            {form.form.name} REV. {form.revision}
+          </h1>
         </div>
         <div className="flex justify-between container">
-          <h3 className="text-2xl font-bold truncate">{form.clientName}</h3>
+          <h3 className="text-lg md:text-2xl font-bold truncate">{form.clientName}</h3>
           <VisitBtn shareUrl={shareUrl} />
         </div>
         <div className="flex justify-between container">
-          <h3 className="text-2xl font-bold truncate">{form.equipmentName}</h3>
+          <h3 className="text-lg md:text-2xl font-bold truncate">{form.equipmentName}</h3>
           <FormViewer content={form.content ?? ""} />
         </div>
         <div className="flex justify-between container">
-          <h3 className="text-sm text-muted-foreground text-wrap max-w-[500px]">{form.FormDescription}</h3>
+          <h3 className="text-xs md:text-sm text-muted-foreground text-wrap max-w-[500px]">
+            {form.FormDescription}
+          </h3>
           <TurnEditableBtn id={id} />
         </div>
-
-
-      </div>
-
-      <div className="py-4 border-b border-muted">
         <div className="container flex gap-2 items-center justify-between">
           <FormLinkShare shareUrl={shareUrl} />
         </div>
-                <div className="flex justify-between container">
+        <div className="flex justify-between container">
           <DeleteFormBtn id={id} />
-
         </div>
       </div>
-      <div className="w-full pt-8 gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 container">
+      <div className="hidden md:grid w-full pt-8 gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 container">
         <StatsCard
           title="Total visits"
           icon={<LuView className="text-blue-600" />}
@@ -121,6 +120,7 @@ async function FormDetailPage({ params }: { params: Params }) {
           className="shadow-md shadow-red-600"
         />
       </div>
+
 
       <div className="container pt-10">
         <div className="container pt-10">

@@ -70,9 +70,9 @@ export default function EditFormBtn({ id }: TurnFormEditableBtnProps) {
       <AlertDialogTrigger asChild>
         <Button
           variant="secondary"
-          className="w-[200px] mt-2 text-sm gap-4 bg-yellow-400 hover:bg-yellow-500 text-black"
+          className="w-[140px] md:w-[200px] text-sm md:text-md font-medium mt-2 gap-4 bg-yellow-400 hover:bg-yellow-500 text-black "
         >
-          <>Turn form Editable <FaEdit /></>
+          <><FaEdit className="w-5 h-5 md:w-5 md:h-5" />Turn form Editable </>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white dark:bg-neutral-900 text-black dark:text-white opacity-100 shadow-xl">

@@ -68,9 +68,9 @@ return (
       <AlertDialogTrigger asChild>
             <Button
       variant="destructive"
-      className="w-[200px] mt-2 text-md gap-4"
+      className="w-[140px] md:w-[200px] text-sm md:text-md mt-2 gap-2"
     >
-      Delete form <FaTrash />
+      <FaTrash /> Delete form 
     </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white dark:bg-neutral-900 text-black dark:text-white opacity-100 shadow-xl">

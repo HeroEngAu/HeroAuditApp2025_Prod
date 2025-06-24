@@ -71,7 +71,7 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-[250px]">
+        <Button className="w-[140px] md:w-[200px] text-sm md:text-md mt-2 gap-2 ">
           <ImShare className="mr-2 h-4 w-4" />
           Share link
         </Button>

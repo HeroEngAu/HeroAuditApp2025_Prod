@@ -14,7 +14,7 @@ export default function FormViewer({ content }: FormViewerProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={"outline"} className="w-[200px] mt-2 text-sm gap-4">
+        <Button variant={"outline"} className="w-[140px] md:w-[200px] text-sm md:text-md font-medium mt-2 gap-2">
           <MdPreview className="h-6 w-6" />
           Preview
         </Button>

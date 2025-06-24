@@ -172,12 +172,13 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
       />
       {userGroup !== "viewer" && (
         <Button
-          className="w-[200px] text-md font-medium"
+          className="w-[140px] md:w-[200px] text-sm md:text-md font-medium"
           onClick={() => setIsDialogOpen(true)}
           title="Update the form for a specific equipment TAG"
         >
           Update Form
         </Button>
+
       )}
       {isDialogOpen && (
         <View

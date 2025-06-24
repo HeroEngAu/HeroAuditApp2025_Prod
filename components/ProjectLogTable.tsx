@@ -15,6 +15,7 @@ import { SubmissionSummary } from "./generateTableSummary";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { toast } from "./ui/use-toast";
 import clsx from "clsx";
+import { MdSearch } from "react-icons/md";
 
 type SubmissionEntry = {
   formID: string;
@@ -32,7 +33,7 @@ type SubmissionEntry = {
 export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[] }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -62,12 +63,32 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
       console.error("Failed to delete form", error);
     }
   };
+
+  const filteredSubmissions = submissions.filter((s) => {
+    const text = `${s.projectName} ${s.projectCode} ${s.docNumber} ${s.docRevisionNumber} ${s.equipmentTag} ${s.submittedAt || "Not Submitted"}`.toLowerCase();
+    return text.includes(searchTerm.toLowerCase());
+  });
+
   return (
     <div>
-      <h1 className="text-2xl font-bold my-4 text-foreground">Project Log</h1>
+      <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
+        <h1 className="text-2xl font-bold text-foreground">Project Log</h1>
+
+        {/* Search input with icon inside */}
+        <div className="relative w-full md:w-80">
+          <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+          <input
+            type="text"
+            placeholder="Search project, doc, tag..."
+            className="pl-10 pr-4 py-2 border border-border dark:border-neutral-700 bg-background dark:bg-neutral-800 text-foreground rounded-md w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
       {/* Header */}
-      <div className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white font-semibold border-y border-border dark:border-neutral-700">
+      <div className="hidden md:flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white font-semibold border-y border-border dark:border-neutral-700">
         <div className="flex-1 p-2 text-center uppercase border-r dark:border-neutral-700">Project</div>
         <div className="flex-1 p-2 text-center uppercase border-r dark:border-neutral-700">Project Code</div>
         <div className="flex-[1.5] p-2 text-center uppercase border-r dark:border-neutral-700">Doc Number</div>
@@ -78,49 +99,58 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
 
       {/* Accordion */}
       <Accordion.Container>
-        {submissions.length > 0 ? (
-          [...submissions]
+        {filteredSubmissions.length > 0 ? (
+          filteredSubmissions
             .sort((a, b) => {
-
               if (!a.submittedAt && b.submittedAt) return -1;
               if (a.submittedAt && !b.submittedAt) return 1;
-
               return (b.projectCode ?? "").localeCompare(a.projectCode ?? "");
             })
             .map((s, i) => {
               const wasSubmitted = !!s.submittedAt;
               return (
-                <Accordion.Item key={i} value={`item-${i}`}>
+                <Accordion.Item
+                  key={i}
+                  value={`item-${i}`}
+                  className="data-[state=open]:border-yellow-400 data-[state=open]:border-2 rounded-md"
+                >
                   <Accordion.Trigger
                     className={clsx(
-                      "flex w-full border-y border-border bg-muted text-foreground dark:bg-neutral-800 dark:text-white",
+                      "flex flex-col md:flex-row w-full border-y border-border bg-muted text-foreground dark:bg-neutral-800 dark:text-white",
                       "data-[state=open]:bg-gray-200 dark:data-[state=open]:bg-neutral-700"
                     )}
                   >
-                    <div className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
-                      <div className="text-center flex-1 p-2 border border-border dark:border-neutral-700">
-                        {s.projectName}
+                    <div className="w-full flex flex-col md:grid md:grid-cols-[1fr_1fr_1.5fr_1fr_1fr_2rem] border-y border-border bg-muted text-foreground dark:bg-neutral-800 dark:text-white dark:border-neutral-700">
+
+                      <div className="p-2 border border-border dark:border-neutral-700 md:block">
+                        <span className="block md:hidden text-xs font-semibold uppercase text-muted-foreground">Project</span>
+                        <span>{s.projectName}</span>
                       </div>
-                      <div className="text-center flex-1 p-2 border border-border dark:border-neutral-700">
-                        {s.projectCode}
+                      <div className="p-2 border border-border dark:border-neutral-700 md:block">
+                        <span className="block md:hidden text-xs font-semibold uppercase text-muted-foreground">Project Code</span>
+                        <span>{s.projectCode}</span>
                       </div>
-                      <div className="text-center flex-[1.5] p-2 border border-border dark:border-neutral-700">
-                        {s.docNumber} REV. {s.docRevisionNumber}
+                      <div className="p-2 border border-border dark:border-neutral-700 md:block">
+                        <span className="block md:hidden text-xs font-semibold uppercase text-muted-foreground">Doc Number</span>
+                        <span>{s.docNumber} REV. {s.docRevisionNumber}</span>
                       </div>
-                      <div className="text-center flex-1 p-2 border border-border dark:border-neutral-700">
-                        {s.equipmentTag}
+                      <div className="p-2 border border-border dark:border-neutral-700 md:block">
+                        <span className="block md:hidden text-xs font-semibold uppercase text-muted-foreground">Equipment Tag</span>
+                        <span>{s.equipmentTag}</span>
                       </div>
-                      <div className="text-center flex-1 p-2 border border-border dark:border-neutral-700">
-                        {s.submittedAt
-                          ? formatDistance(new Date(s.submittedAt), new Date(), {
-                            addSuffix: true,
-                          })
-                          : "Not Submitted"}
+                      <div className="p-2 border border-border dark:border-neutral-700 md:block">
+                        <span className="block md:hidden text-xs font-semibold uppercase text-muted-foreground">Submitted At</span>
+                        <span>
+                          {s.submittedAt
+                            ? formatDistance(new Date(s.submittedAt), new Date(), { addSuffix: true })
+                            : "Not Submitted"}
+                        </span>
                       </div>
-                      <div className="w-8 p-2 border border-border dark:border-neutral-700 text-center">
+                      <div className="p-2 border border-border dark:border-neutral-700 text-center">
                         <Accordion.Icon />
                       </div>
                     </div>
+
                   </Accordion.Trigger>
                   <Accordion.Content className="flex w-full bg-muted text-foreground dark:bg-neutral-800 dark:text-white border-y border-border dark:border-neutral-700">
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-md space-y-4 text-foreground">
@@ -190,7 +220,7 @@ export function ProjectLogTable({ submissions }: { submissions: SubmissionEntry[
               );
             })
         ) : (
-          <p className="text-center p-4 text-muted-foreground">No submissions yet</p>
+          <p className="text-center p-4 text-muted-foreground">No submissions found</p>
         )}
       </Accordion.Container>
     </div>
