@@ -6,8 +6,10 @@ export const storage = defineStorage({
   name: 'HeroAuditAppDrive',
   access: (allow) => ({
     'uploads/*': [
-      allow.groups(['admin', 'user']).to(['read', 'write']),
-      allow.groups(['viewer']).to(['read']),
+      allow.groups(['admin']).to(['read', 'write']),
+      allow.groups(['user']).to(['read', 'write']),
+      allow.guest.to(['read']),
     ],
   }),
 });
+
