@@ -23,6 +23,9 @@ import { Upload } from "lucide-react";
 import { CustomInstance, propertiesSchema } from "./ImageField";
 import { z } from "zod";
 import { Input } from "../ui/input";
+import React from 'react';
+import { uploadData, getUrl } from 'aws-amplify/storage';
+
 
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 export function PropertiesComponent({
@@ -104,53 +107,57 @@ export function PropertiesComponent({
   }
 
 
-function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const label = element.extraAttributes?.label;
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const base64 = reader.result as string;
+    const label = element.extraAttributes?.label;
 
     const img = new Image();
-    img.crossOrigin = "anonymous"; // evita erro de CORS
-    img.onload = () => {
-      const MAX_WIDTH = 800;
-      const MAX_HEIGHT = 600;
-      let width = img.naturalWidth;
-      let height = img.naturalHeight;
+    const reader = new FileReader();
 
-      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-        const ratio = width / height;
-        if (width > height) {
-          width = MAX_WIDTH;
-          height = Math.round(MAX_WIDTH / ratio);
-        } else {
-          height = MAX_HEIGHT;
-          width = Math.round(MAX_HEIGHT * ratio);
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+
+      img.onload = async () => {
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 600;
+        let width = img.naturalWidth;
+        let height = img.naturalHeight;
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          const ratio = width / height;
+          if (width > height) {
+            width = MAX_WIDTH;
+            height = Math.round(MAX_WIDTH / ratio);
+          } else {
+            height = MAX_HEIGHT;
+            width = Math.round(MAX_HEIGHT * ratio);
+          }
         }
-      }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
 
-      ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
 
-      canvas.toBlob(
-        (blob) => {
+        canvas.toBlob(async (blob) => {
           if (!blob) return;
 
-          const reader2 = new FileReader();
-          reader2.onloadend = () => {
-            const compressedBase64 = reader2.result as string;
+          try {
+            const key = `images/${Date.now()}-${file.name}`;
+            await uploadData({
+              path: `picture-submissions/${file.name}`,
+              data: file,
+              options: {
+                contentType: file.type,
+              },
+            });
 
-            console.log("Compressed size (bytes):", compressedBase64.length);
-
-            setNaturalSize({ width, height });
+            const { url } = await getUrl({ path: key });
 
             const preserveOriginalSize = form.getValues("preserveOriginalSize");
             const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
@@ -160,7 +167,7 @@ function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
               ...element,
               extraAttributes: {
                 ...element.extraAttributes,
-                imageUrl: compressedBase64,
+                imageUrl: url.toString(),
                 preserveOriginalSize,
                 label,
                 width: finalWidth,
@@ -169,20 +176,17 @@ function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
             });
 
             form.setValue("width", finalWidth, { shouldDirty: false });
-          };
+          } catch (err) {
+            console.error("S3 Upload Error", err);
+          }
+        }, "image/jpeg", 0.7);
+      };
 
-          reader2.readAsDataURL(blob);
-        },
-        "image/jpeg",
-        0.7
-      );
+      img.src = base64;
     };
 
-    img.src = base64;
-  };
-
-  reader.readAsDataURL(file);
-}
+    reader.readAsDataURL(file);
+  }
 
 
 
@@ -284,7 +288,7 @@ function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
             }}
           />
           <FormDescription>
-            Image shall be .png/.jpeg. 
+            Image shall be .png/.jpeg.
           </FormDescription>
         </div>
 
@@ -357,8 +361,8 @@ function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
                     }
                   }}
                   style={{
-                    width: "50%",  
-                    height: "10px", 
+                    width: "50%",
+                    height: "10px",
                     cursor: "pointer",
                   }}
                 />
