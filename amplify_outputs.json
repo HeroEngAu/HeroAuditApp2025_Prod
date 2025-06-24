@@ -939,5 +939,34 @@
       "nonModels": {}
     }
   },
+  "storage": {
+    "aws_region": "ap-southeast-2",
+    "bucket_name": "amplify-amplifyvitereactt-heroauditappdrivebucketa-qlqfyanpa3ox",
+    "buckets": [
+      {
+        "name": "HeroAuditAppDrive",
+        "bucket_name": "amplify-amplifyvitereactt-heroauditappdrivebucketa-qlqfyanpa3ox",
+        "aws_region": "ap-southeast-2",
+        "paths": {
+          "uploads/*": {
+            "groupsadmin": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsuser": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsviewer": [
+              "get",
+              "list"
+            ]
+          }
+        }
+      }
+    ]
+  },
   "version": "1.4"
 }

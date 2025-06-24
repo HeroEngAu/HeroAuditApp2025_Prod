@@ -106,92 +106,61 @@ export function PropertiesComponent({
     });
   }
 
+async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const label = element.extraAttributes?.label;
+  const img = new Image();
+  const reader = new FileReader();
 
-    const label = element.extraAttributes?.label;
+  reader.onloadend = async () => {
+    img.onload = async () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
 
-    const img = new Image();
-    const reader = new FileReader();
+      try {
+        const key = `uploads/${Date.now()}-${file.name}`;
 
-    reader.onloadend = async () => {
-      const base64 = reader.result as string;
+        // Upload the original file directly
+        await uploadData({
+          path: key,
+          data: file,
+          options: {
+            contentType: file.type,
+          },
+        }).result;
 
-      img.onload = async () => {
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 600;
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
+        const { url } = await getUrl({ path: key });
 
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          const ratio = width / height;
-          if (width > height) {
-            width = MAX_WIDTH;
-            height = Math.round(MAX_WIDTH / ratio);
-          } else {
-            height = MAX_HEIGHT;
-            width = Math.round(MAX_HEIGHT * ratio);
-          }
-        }
+        const preserveOriginalSize = form.getValues("preserveOriginalSize");
+        const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
+        const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
 
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        updateElement(element.id, {
+          ...element,
+          extraAttributes: {
+            ...element.extraAttributes,
+            imageUrl: url.toString(),
+            preserveOriginalSize,
+            label,
+            width: finalWidth,
+            height: finalHeight,
+          },
+        });
 
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(async (blob) => {
-          if (!blob) return;
-
-          try {
-            const key = `images/${Date.now()}-${file.name}`;
-            await uploadData({
-              path: `picture-submissions/${file.name}`,
-              data: file,
-              options: {
-                contentType: file.type,
-              },
-            });
-
-            const { url } = await getUrl({ path: key });
-
-            const preserveOriginalSize = form.getValues("preserveOriginalSize");
-            const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
-            const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
-
-            updateElement(element.id, {
-              ...element,
-              extraAttributes: {
-                ...element.extraAttributes,
-                imageUrl: url.toString(),
-                preserveOriginalSize,
-                label,
-                width: finalWidth,
-                height: finalHeight,
-              },
-            });
-
-            form.setValue("width", finalWidth, { shouldDirty: false });
-          } catch (err) {
-            console.error("S3 Upload Error", err);
-          }
-        }, "image/jpeg", 0.7);
-      };
-
-      img.src = base64;
+        form.setValue("width", finalWidth, { shouldDirty: false });
+      } catch (err) {
+        console.error("S3 Upload Error", err);
+      }
     };
 
-    reader.readAsDataURL(file);
-  }
+    img.src = reader.result as string;
+  };
 
-
-
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  reader.readAsDataURL(file);
+}
+ const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleUploadClick() {
     fileInputRef.current?.click();
