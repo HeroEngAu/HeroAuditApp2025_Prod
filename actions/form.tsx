@@ -4,6 +4,7 @@ import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
+
 //import { getCurrentUser } from "aws-amplify/auth"; // Ensure getCurrentUser is imported correctly
 //import { FormDescription } from "../components/ui/form";
 ///import { vi } from "date-fns/locale";
@@ -24,6 +25,8 @@ const client = generateClient<Schema>();
 
 // UserNotFoundErr class for custom error handling
 //class UserNotFoundErr extends Error { }
+// /pages/api/presign.ts (Next.js example)
+
 
 type Client = {
   id: string | null;
