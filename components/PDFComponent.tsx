@@ -462,7 +462,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                                 fontFamily: 'DejaVuSans',
                                 fontSize: 9,
                                 textAlign: isCenteredCell || isHeaderRow ? "center" : "justify",
-                                fontWeight: isHeaderRow || isSpecial ? 600 : undefined,
+                                fontWeight: isHeaderRow ? 600 : isSpecial ? 600 : undefined,
                                 color: cellText === "PASS"
                                   ? "green"
                                   : cellText === "FAIL"
