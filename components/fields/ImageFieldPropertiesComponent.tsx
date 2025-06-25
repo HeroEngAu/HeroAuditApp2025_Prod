@@ -47,7 +47,7 @@ export function PropertiesComponent({
       repeatOnPageBreak: element.extraAttributes.repeatOnPageBreak,
       preserveOriginalSize: element.extraAttributes.preserveOriginalSize,
       label: element.extraAttributes.label,
-      width: element.extraAttributes.width || 200,
+      width: element.extraAttributes.width ,
     },
   });
 

@@ -1,34 +1,70 @@
 "use client";
 
+import useDesigner from "../hooks/useDesigner";
 import { FormElementInstance } from "../FormElements";
 import { Label } from "../ui/label";
 import { CustomInstance } from "./ImageField";
-import { useRef } from "react";
-import { StorageImage } from '@aws-amplify/ui-react-storage';
+import { useEffect, useRef, useCallback } from "react";
+import { StorageImage } from "@aws-amplify/ui-react-storage";
+
 export function DesignerComponent({
   elementInstance,
 }: {
   elementInstance: FormElementInstance;
 }) {
+  const { updateElement } = useDesigner();
   const element = elementInstance as CustomInstance;
+
   const {
     preserveOriginalSize,
     label,
     position,
     width,
     height,
+    imageUrl,
   } = element.extraAttributes;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const updateHeight = useCallback(() => {
+    if (containerRef.current) {
+      const newHeight = containerRef.current.offsetHeight;
+      if (element.height !== newHeight) {
+        updateElement(element.id, {
+          ...element,
+          height: newHeight,
+        });
+      }
+    }
+  }, [element, updateElement]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, [updateHeight]);
+
+  const justifyClass =
+    position === "left"
+      ? "justify-start"
+      : position === "right"
+      ? "justify-end"
+      : "justify-center";
 
   return (
     <div ref={containerRef} className="flex flex-col gap-2 w-full items-start">
       <Label>{label}</Label>
 
-      {element.extraAttributes.imageUrl ? (
-        <div className={`w-full flex ${position === "left" ? "justify-start" : position === "right" ? "justify-end" : "justify-center"}`}>
+      {imageUrl ? (
+        <div className={`w-full flex ${justifyClass}`}>
           <StorageImage
-            path={element.extraAttributes.imageUrl}
+            path={imageUrl}
             alt={label}
             className="rounded-md border shadow object-contain"
             style={{

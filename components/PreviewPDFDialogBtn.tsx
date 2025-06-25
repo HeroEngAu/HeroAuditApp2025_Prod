@@ -13,6 +13,7 @@ import {
   SelectItem,
 } from "./ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { prepareResolvedElements } from "./prepareResolvedElements";
 
 function PreviewPDFDialogBtn({ formName, revision }: { formName: string; revision: number }) {
   const { elements, setSelectedElement } = useDesigner();
@@ -20,49 +21,53 @@ function PreviewPDFDialogBtn({ formName, revision }: { formName: string; revisio
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [pageSize, setPageSize] = useState<"A4" | "A3">("A4");
 
-  const generateAndOpenPDF = async () => {
-    setSelectedElement(null);
-    setLoading(true);
+const generateAndOpenPDF = async () => {
+  setSelectedElement(null);
+  setLoading(true);
 
-    const groups: FormElementInstance[][] = [];
-    const repeatables: FormElementInstance[] = [];
-    let current: FormElementInstance[] = [];
-    let firstPage = true;
+  const groups: FormElementInstance[][] = [];
+  const repeatables: FormElementInstance[] = [];
+  let current: FormElementInstance[] = [];
+  let firstPage = true;
 
-    elements.forEach((el) => {
-      if (el.type === "PageBreakField") {
-        if (current.length > 0) {
-          groups.push(firstPage ? [...current] : [...repeatables, ...current]);
-          current = [];
-          firstPage = false;
-        }
-      } else {
-        if (el.extraAttributes?.repeatOnPageBreak && firstPage) {
-          repeatables.push(el);
-        }
-        current.push(el);
+  elements.forEach((el) => {
+    if (el.type === "PageBreakField") {
+      if (current.length > 0) {
+        groups.push(firstPage ? [...current] : [...repeatables, ...current]);
+        current = [];
+        firstPage = false;
       }
-    });
-
-    if (current.length > 0) {
-      groups.push(firstPage ? [...current] : [...repeatables, ...current]);
+    } else {
+      if (el.extraAttributes?.repeatOnPageBreak && firstPage) {
+        repeatables.push(el);
+      }
+      current.push(el);
     }
+  });
 
-    const blob = await pdf(
-      <PDFDocument
-        elements={groups}
-        responses={{}}
-        formName={formName || "Unknown Document Number"}
-        revision={revision}
-        orientation={orientation}
-        pageSize={pageSize}
-      />
-    ).toBlob();
+  if (current.length > 0) {
+    groups.push(firstPage ? [...current] : [...repeatables, ...current]);
+  }
 
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-    setLoading(false);
-  };
+  // 🔧 resolve image URLs *before* passing to the component
+  const resolvedGroups = await prepareResolvedElements(groups);
+
+  const blob = await pdf(
+    <PDFDocument
+      elements={resolvedGroups} // já resolvido!
+      responses={{}}
+      formName={formName || "Unknown Document Number"}
+      revision={revision}
+      orientation={orientation}
+      pageSize={pageSize}
+    />
+  ).toBlob();
+
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setLoading(false);
+};
+
 
   return (
     <Popover>

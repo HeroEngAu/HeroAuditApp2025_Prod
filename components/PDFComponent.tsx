@@ -2,8 +2,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
 import { FormElementInstance } from "./FormElements";
 import { renderHtmlToPDFElements } from "./converthtmlreact";
-import { resolveImageFields } from "./resolveImageFields";
-import { useEffect, useState } from "react";
 
 Font.register({
   family: 'DejaVuSans',
@@ -682,22 +680,12 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 }
 
 export default function PDFDocument({ elements, responses, formName, revision, orientation, pageSize, docNumber, docNumberRevision, equipmentName, equipmentTag }: Props) {
-  const [resolvedElements, setResolvedElements] = useState<FormElementInstance[][]>([]);
-  const repeatablesInOrder = resolvedElements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
+  const repeatablesInOrder = elements[0]?.filter(el => el.extraAttributes?.repeatOnPageBreak) || [];
   const repeatHeaderImage = repeatablesInOrder.find(el => el.type === "ImageField");
   const headerImagePosition = repeatHeaderImage?.extraAttributes?.position ?? "left";
   const preserveOriginalSize = repeatHeaderImage?.extraAttributes?.preserveOriginalSize;
   const height = repeatHeaderImage?.extraAttributes?.height ?? 80;
   const width = repeatHeaderImage?.extraAttributes?.width;
-
-  useEffect(() => {
-    const resolveAll = async () => {
-      const updated = await Promise.all(elements.map(row => resolveImageFields(row)));
-      setResolvedElements(updated);
-    };
-
-    resolveAll();
-  }, [elements]);
 
   let alignStyle = {};
   if (headerImagePosition === "center") {
@@ -714,13 +702,15 @@ export default function PDFDocument({ elements, responses, formName, revision, o
 
   return (
     <Document>
-      {resolvedElements.map((group, pageIndex) => (
+      {elements.map((group, pageIndex) => (
         <Page key={pageIndex} style={styles.page} wrap orientation={orientation || "portrait"} size={pageSize || "A3"}>
           {/* Header */}
           <View fixed style={styles.header}>
             {repeatablesInOrder.map((el) => {
               if (el.type === "ImageField") {
-                return <Image key={el.id} src={el.extraAttributes?.imageUrl} style={imageStyle} />;
+                return (
+                  <Image key={el.id} src={el.extraAttributes?.imageUrl} style={imageStyle} />
+                );
               }
               return (
                 <View key={`header-el-${el.id}`}>
