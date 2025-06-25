@@ -7,7 +7,7 @@ import { pdf } from "@react-pdf/renderer";
 import { FormElements } from "./FormElements";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
-
+import { prepareResolvedElements } from "./prepareResolvedElements"; 
 interface Props {
   elements: FormElementInstance[];
   responses: { [key: string]: unknown };
@@ -25,7 +25,7 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [pageSize, setPageSize] = useState<"A4" | "A3">("A4");
   const [loading, setLoading] = useState(false);
-
+  
   useEffect(() => {
     const fetchFormName = async () => {
       try {
@@ -69,12 +69,13 @@ export default function SubmissionRenderer({ submissionID, elements, responses }
 
     setPageGroups(groups);
   }, [elements]);
-
+  
   const handleExportPDF = async () => {
     setLoading(true);
+    const resolvedGroups = await prepareResolvedElements(pageGroups);
     const blob = await pdf(
       <PDFDocument
-        elements={pageGroups}
+        elements={resolvedGroups}
         responses={responses}
         formName={formName}
         revision={revision}
