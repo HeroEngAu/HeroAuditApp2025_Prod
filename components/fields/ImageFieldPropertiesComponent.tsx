@@ -106,61 +106,60 @@ export function PropertiesComponent({
     });
   }
 
-async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const label = element.extraAttributes?.label;
-  const img = new Image();
-  const reader = new FileReader();
+    const label = element.extraAttributes?.label;
+    const img = new Image();
+    const reader = new FileReader();
 
-  reader.onloadend = async () => {
-    img.onload = async () => {
-      const width = img.naturalWidth;
-      const height = img.naturalHeight;
+    reader.onloadend = async () => {
+      img.onload = async () => {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
 
-      try {
-        const key = `uploads/${Date.now()}-${file.name}`;
+        try {
+          const key = `public/uploads/${Date.now()}-${file.name}`;
 
-        // Upload the original file directly
-        await uploadData({
-          path: key,
-          data: file,
-          options: {
-            contentType: file.type,
-          },
-        }).result;
+          await uploadData({
+            path: key,
+            data: file,
+            options: {
+              contentType: file.type,
+            },
+          }).result;
 
-        const { url } = await getUrl({ path: key });
+          const { url } = await getUrl({ path: key });
 
-        const preserveOriginalSize = form.getValues("preserveOriginalSize");
-        const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
-        const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
+          const preserveOriginalSize = form.getValues("preserveOriginalSize");
+          const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
+          const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
 
-        updateElement(element.id, {
-          ...element,
-          extraAttributes: {
-            ...element.extraAttributes,
-            imageUrl: url.toString(),
-            preserveOriginalSize,
-            label,
-            width: finalWidth,
-            height: finalHeight,
-          },
-        });
+          updateElement(element.id, {
+            ...element,
+            extraAttributes: {
+              ...element.extraAttributes,
+              imageUrl: url.toString(),
+              preserveOriginalSize,
+              label,
+              width: finalWidth,
+              height: finalHeight,
+            },
+          });
 
-        form.setValue("width", finalWidth, { shouldDirty: false });
-      } catch (err) {
-        console.error("S3 Upload Error", err);
-      }
+          form.setValue("width", finalWidth, { shouldDirty: false });
+        } catch (err) {
+          console.error("S3 Upload Error", err);
+        }
+      };
+
+      img.src = reader.result as string;
     };
 
-    img.src = reader.result as string;
-  };
-
-  reader.readAsDataURL(file);
-}
- const fileInputRef = useRef<HTMLInputElement>(null);
+    reader.readAsDataURL(file);
+  }
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleUploadClick() {
     fileInputRef.current?.click();

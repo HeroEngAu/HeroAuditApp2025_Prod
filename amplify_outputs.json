@@ -948,7 +948,7 @@
         "bucket_name": "amplify-amplifyvitereactt-heroauditappdrivebucketa-qlqfyanpa3ox",
         "aws_region": "ap-southeast-2",
         "paths": {
-          "uploads/*": {
+          "public/uploads/*": {
             "groupsadmin": [
               "get",
               "list",
@@ -959,7 +959,7 @@
               "list",
               "write"
             ],
-            "groupsviewer": [
+            "guest": [
               "get",
               "list"
             ]
