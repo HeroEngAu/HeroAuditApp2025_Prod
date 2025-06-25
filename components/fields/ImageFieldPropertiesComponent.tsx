@@ -56,34 +56,45 @@ export function PropertiesComponent({
     form.reset(element.extraAttributes as propertiesFormSchemaType);
   }, [element, form]);
 
-  useEffect(() => {
-    const imageUrl = element.extraAttributes?.imageUrl;
-    if (!imageUrl) return;
-    const img = new Image();
-    img.onload = () => {
-      setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
-      const preserveOriginalSize = form.getValues("preserveOriginalSize");
-      const width = preserveOriginalSize ? img.naturalWidth : form.getValues("width") || 200;
-      const height = preserveOriginalSize ? img.naturalHeight : (img.naturalHeight / img.naturalWidth) * width;
+useEffect(() => {
+  const imageUrl = element.extraAttributes?.imageUrl;
+  if (!imageUrl || imageUrl.startsWith("http")) return;
 
-      updateElement(element.id, {
-        ...element,
-        extraAttributes: {
-          ...element.extraAttributes,
-          preserveOriginalSize,
-          position: form.getValues("position"),
-          repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
-          label: form.getValues("label"),
-          width,
-          height,
-        },
-      });
+  const loadImage = async () => {
+    try {
+      const { url } = await getUrl({ path: imageUrl }); // 🔑 gera URL real
+      const img = new Image();
+      img.onload = () => {
+        setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
 
-      form.setValue("width", width, { shouldDirty: false });
-    };
-    img.src = imageUrl;
-  }, [element.extraAttributes?.imageUrl]);
+        const preserveOriginalSize = form.getValues("preserveOriginalSize");
+        const width = preserveOriginalSize ? img.naturalWidth : form.getValues("width") || 200;
+        const height = preserveOriginalSize ? img.naturalHeight : (img.naturalHeight / img.naturalWidth) * width;
 
+        updateElement(element.id, {
+          ...element,
+          extraAttributes: {
+            ...element.extraAttributes,
+            preserveOriginalSize,
+            position: form.getValues("position"),
+            repeatOnPageBreak: form.getValues("repeatOnPageBreak"),
+            label: form.getValues("label"),
+            width,
+            height,
+          },
+        });
+
+        form.setValue("width", width, { shouldDirty: false });
+      };
+      img.crossOrigin = "anonymous";
+      img.src = url.toString(); // ✅ correto agora
+    } catch (err) {
+      console.error("Failed to load image from S3", err);
+    }
+  };
+
+  loadImage();
+}, [element.extraAttributes?.imageUrl]);
 
   function applyChanges(values: propertiesFormSchemaType) {
     const { imageUrl, position, repeatOnPageBreak, preserveOriginalSize, label, width } = values;
@@ -95,7 +106,7 @@ export function PropertiesComponent({
     updateElement(element.id, {
       ...element,
       extraAttributes: {
-        imageUrl: imageUrl || "",
+        imageUrl,
         position,
         repeatOnPageBreak,
         preserveOriginalSize,
@@ -104,61 +115,59 @@ export function PropertiesComponent({
         height,
       },
     });
+
+    form.setValue("height", height, { shouldDirty: false });
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    const label = element.extraAttributes?.label;
+async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const key = `public/uploads/${Date.now()}-${file.name}`;
+  const label = element.extraAttributes?.label;
+
+  try {
+    await uploadData({
+      path: key,
+      data: file,
+      options: {
+        contentType: file.type,
+      },
+    }).result;
+
     const img = new Image();
-    const reader = new FileReader();
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      const preserveOriginalSize = form.getValues("preserveOriginalSize");
+      const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
+      const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
+      const position = form.getValues("position");
 
-    reader.onloadend = async () => {
-      img.onload = async () => {
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
+      updateElement(element.id, {
+        ...element,
+        extraAttributes: {
+          ...element.extraAttributes,
+          imageUrl: key, // 🔑 S3 path
+          preserveOriginalSize,
+          label,
+          width: finalWidth,
+          height: finalHeight,
+          position,
+        },
+      });
 
-        try {
-          const key = `public/uploads/${Date.now()}-${file.name}`;
-
-          await uploadData({
-            path: key,
-            data: file,
-            options: {
-              contentType: file.type,
-            },
-          }).result;
-
-          const { url } = await getUrl({ path: key });
-
-          const preserveOriginalSize = form.getValues("preserveOriginalSize");
-          const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
-          const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
-
-          updateElement(element.id, {
-            ...element,
-            extraAttributes: {
-              ...element.extraAttributes,
-              imageUrl: url.toString(),
-              preserveOriginalSize,
-              label,
-              width: finalWidth,
-              height: finalHeight,
-            },
-          });
-
-          form.setValue("width", finalWidth, { shouldDirty: false });
-        } catch (err) {
-          console.error("S3 Upload Error", err);
-        }
-      };
-
-      img.src = reader.result as string;
+      form.setValue("width", finalWidth, { shouldDirty: false });
+      form.setValue("height", finalHeight, { shouldDirty: false });
     };
 
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file); // 👈 carrega localmente só pra medir
+  } catch (err) {
+    console.error("S3 Upload Error", err);
   }
+}
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleUploadClick() {
@@ -224,36 +233,51 @@ export function PropertiesComponent({
             placeholder="https://example.com/image.jpg"
             className="w-full border rounded px-3 py-1"
             defaultValue={form.getValues("imageUrl")}
-            onBlur={(e) => {
-              const url = e.target.value.trim();
-              if (!url) return;
+            onBlur={async (e) => {
+              const urlInput = e.target.value;
+              if (!urlInput) return;
 
-              const img = new Image();
-              img.crossOrigin = "anonymous";
+              try {
+                const { url } = await getUrl({ path: urlInput });
 
-              img.onload = () => {
-                const naturalHeight = img.naturalHeight;
-                const preserveOriginalSize = form.getValues("preserveOriginalSize");
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                  const width = img.naturalWidth;
+                  const height = img.naturalHeight;
 
-                updateElement(element.id, {
-                  ...element,
-                  extraAttributes: {
-                    ...element.extraAttributes,
-                    imageUrl: url,
-                    preserveOriginalSize,
-                  },
-                  height: preserveOriginalSize ? Math.max(naturalHeight, 200) : 200,
-                });
+                  const preserveOriginalSize = form.getValues("preserveOriginalSize");
+                  const finalWidth = preserveOriginalSize ? width : form.getValues("width") || 200;
+                  const finalHeight = preserveOriginalSize ? height : (height / width) * finalWidth;
 
-                form.setValue("imageUrl", url, { shouldDirty: true });
-              };
+                  updateElement(element.id, {
+                    ...element,
+                    extraAttributes: {
+                      ...element.extraAttributes,
+                      imageUrl: urlInput,
+                      preserveOriginalSize,
+                      width: finalWidth,
+                      height: finalHeight,
+                    },
+                  });
 
-              img.onerror = () => {
-                console.error("Could not load image from URL:", url);
-              };
+                  setNaturalSize({ width, height });
 
-              img.src = url;
+                  form.setValue("imageUrl", urlInput, { shouldDirty: true });
+                  form.setValue("width", finalWidth, { shouldDirty: false });
+                  form.setValue("height", finalHeight, { shouldDirty: false });
+                };
+
+                img.onerror = () => {
+                  console.error("Could not load image from URL:", url);
+                };
+
+                img.src = url.toString();
+              } catch (err) {
+                console.error("getUrl failed", err);
+              }
             }}
+
           />
           <FormDescription>
             Image shall be .png/.jpeg.
@@ -263,7 +287,10 @@ export function PropertiesComponent({
         <div className="space-y-1">
           <FormLabel>Image Position</FormLabel>
           <Select
-            onValueChange={(value) => form.setValue("position", value as "left" | "center" | "right")}
+            onValueChange={(value) => {
+              form.setValue("position", value as "left" | "center" | "right", { shouldDirty: true });
+              applyChanges(form.getValues()); // ✅ chama a função de atualização
+            }}
             value={form.watch("position")}
           >
             <SelectTrigger>
@@ -281,11 +308,10 @@ export function PropertiesComponent({
             <input
               type="checkbox"
               checked={!!form.watch("repeatOnPageBreak")}
-              onChange={(e) =>
-                form.setValue("repeatOnPageBreak", e.target.checked, {
-                  shouldDirty: true,
-                })
-              }
+              onChange={(e) => {
+                form.setValue("repeatOnPageBreak", e.target.checked, { shouldDirty: true });
+                applyChanges(form.getValues()); // ✅
+              }}
               className="mr-2"
             />
             <span>Repeat on page break</span>
@@ -296,11 +322,10 @@ export function PropertiesComponent({
             <input
               type="checkbox"
               checked={!!form.watch("preserveOriginalSize")}
-              onChange={(e) =>
-                form.setValue("preserveOriginalSize", e.target.checked, {
-                  shouldDirty: true,
-                })
-              }
+              onChange={(e) => {
+                form.setValue("preserveOriginalSize", e.target.checked, { shouldDirty: true });
+                applyChanges(form.getValues()); // ✅
+              }}
               className="mr-2"
             />
             <span>Keep original image size</span>
@@ -321,12 +346,12 @@ export function PropertiesComponent({
                   onChange={(e) => {
                     const newWidth = Number(e.target.value);
                     field.onChange(newWidth);
-
                     if (naturalSize) {
                       const ratio = naturalSize.height / naturalSize.width;
                       const newHeight = newWidth * ratio;
                       form.setValue("height", newHeight, { shouldDirty: true });
                     }
+                    applyChanges(form.getValues()); // ✅
                   }}
                   style={{
                     width: "50%",

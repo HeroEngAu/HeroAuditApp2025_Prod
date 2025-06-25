@@ -1,10 +1,10 @@
 "use client";
 
-import {
-  FormElementInstance,
-} from "../FormElements";
+import { FormElementInstance } from "../FormElements";
 import { Label } from "../ui/label";
 import { CustomInstance } from "./ImageField";
+import { getUrl } from "aws-amplify/storage";
+import { useEffect, useState } from "react";
 
 export function FormComponent({
   elementInstance,
@@ -12,35 +12,38 @@ export function FormComponent({
   elementInstance: FormElementInstance;
 }) {
   const element = elementInstance as CustomInstance;
-  const imageUrl = element.extraAttributes.imageUrl;
+  const s3Key = element.extraAttributes.imageUrl;
   const position = element.extraAttributes.position || "center";
   const preserveOriginalSize = element.extraAttributes.preserveOriginalSize;
   const label = element.extraAttributes.label;
   const width = element.extraAttributes.width;
   const height = element.extraAttributes.height;
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
-  const justifyClass =
-    position === "left"
-      ? "justify-start"
-      : position === "right"
-        ? "justify-end"
-        : "justify-center";
+  useEffect(() => {
+    if (!s3Key) return;
+    getUrl({ path: s3Key }).then(({ url }) => {
+      setSignedUrl(url.toString());
+    });
+  }, [s3Key]);
 
-  if (!imageUrl) return <p className="text-muted-foreground">No image selected</p>;
+  if (!s3Key) return <p className="text-muted-foreground">No image selected</p>;
+  if (!signedUrl) return <p className="text-muted-foreground">Loading image...</p>;
 
   return (
     <div className="flex flex-col gap-2 w-full items-start">
       <Label>{label}</Label>
 
-      <div className={`w-full flex ${justifyClass}`}>
+      <div className={`w-full flex ${position === "left" ? "justify-start" : position === "right" ? "justify-end" : "justify-center"}`}>
         <img
-          src={imageUrl}
+          src={signedUrl}
           alt="Uploaded"
-          width={width ?? (preserveOriginalSize ? undefined : 200)}
-          height={height ?? (preserveOriginalSize ? undefined : 80)}
-          sizes="100vw"
+          className="rounded-md border object-contain"
           style={{
-
+            maxWidth: preserveOriginalSize ? undefined : `${width}px`,
+            maxHeight: preserveOriginalSize ? undefined : `${height}px`,
+            width: width ?? (preserveOriginalSize ? undefined : 200),
+            height: preserveOriginalSize ? `${height}px` : "auto",
             objectFit: "contain",
           }}
         />
