@@ -21,19 +21,6 @@ export function DesignerComponent({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  let alignmentClass = "";
-  switch (position) {
-    case "left":
-      alignmentClass = "ml-0 mr-auto";
-      break;
-    case "right":
-      alignmentClass = "ml-auto mr-0";
-      break;
-    case "center":
-    default:
-      alignmentClass = "mx-auto";
-  }
-
   return (
     <div ref={containerRef} className="flex flex-col gap-2 w-full items-start">
       <Label>{label}</Label>
