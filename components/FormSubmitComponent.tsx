@@ -24,6 +24,33 @@ function FormSubmitComponent({ formUrl, content }: { content: FormElementInstanc
   const [formtagId, setFormtagId] = useState<string | null>(null);
   const router = useRouter();
 
+useEffect(() => {
+  let touchStartY = 0;
+
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const isPullDown = touchEndY - touchStartY > 50;
+
+    if (isPullDown && window.scrollY === 0) {
+      // usuário puxou para baixo no topo da página
+      saveProgress();
+    }
+  };
+
+  window.addEventListener("touchstart", handleTouchStart);
+  window.addEventListener("touchend", handleTouchEnd);
+
+  return () => {
+    window.removeEventListener("touchstart", handleTouchStart);
+    window.removeEventListener("touchend", handleTouchEnd);
+  };
+}, []);
+
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       saveProgress();

@@ -25,8 +25,8 @@ const extraAttributes = {
 
 export const propertiesSchema = z.object({
   rows: z.number().min(1).max(500),
-  columns: z.number().min(1).max(10),
-  label: z.string().min(0).max(50),
+  columns: z.number().min(1).max(50),
+  label: z.string().min(0).max(200),
   required: z.boolean().optional(),
   data: z.array(z.array(z.string())).optional(),
   columnHeaders: z.array(z.string()).optional(),

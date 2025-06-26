@@ -151,6 +151,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
 
       const rows = tableData.length;
       const columns = Math.max(...tableData.map((row: string[]) => row.length));
+      const isCompactMode = columns > 10;
       const columnHeaders = element.extraAttributes?.columnHeaders || [];
 
       const parseCell = (cellValue: string): string => {
@@ -239,7 +240,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           });
         });
 
-        const minWidth = 70;
+        const minWidth =  70;
         const maxWidth = 1200;
 
         return maxCharPerColumn.map((w) =>
@@ -248,9 +249,23 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
       };
 
       const columnWidths = estimateColumnWidths(tableData, columns, columnHeaders);
-
+      const compactStyles = {
+        table: {
+          borderColor: "#000",
+          width: "100%",
+        },
+        tableCell: {
+          borderWidth: 1,
+          borderColor: "#000",
+          padding: 1,
+          flexShrink: 0,
+        },
+        tableRow: {
+          flexDirection: "row",
+        },
+      };
       return (
-        <View style={styles.table} >
+        <View style={isCompactMode ? compactStyles.table : styles.table}>
           {/* Header */}
           <View style={styles.tableRow} wrap={false}>
             {(() => {
@@ -261,11 +276,51 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 const raw = columnHeaders[colIndex] || "";
                 const trimmed = raw.trim();
                 const match = trimmed.match(/^\[merge:right:(\d+)\](.*)$/);
-                const span = match ? parseInt(match[1], 10) : 1; // default span is 1
+                const span = match ? parseInt(match[1], 10) : 1;
                 const text = match ? match[2].trim() : parseCell(raw);
                 const mergedWidth = columnWidths
                   .slice(colIndex, colIndex + span)
                   .reduce((sum, w) => sum + w, 0);
+
+                // Check if this column is inside a previous merge (from the left)
+                let isMergedRightFromLeft = false;
+                for (let j = 0; j < colIndex; j++) {
+                  const left = columnHeaders[j]?.trim() || "";
+                  if (isMergedRight(left)) {
+                    const span = getMergeRightSpan(left);
+                    if (j + span > colIndex) {
+                      isMergedRightFromLeft = true;
+                      break;
+                    }
+                  }
+                }
+
+                let leftBorder = "1pt solid black";
+                let rightBorder = "1pt solid black";
+
+                if (isMergedRight(trimmed)) {
+                  rightBorder = "1pt solid black"; // start of merge
+                }
+
+                if (isMergedRightFromLeft) {
+                  leftBorder = "none"; // covered by merge from previous cell
+
+                  // only apply right border if this is the last in the merged range
+                  let showRightBorder = false;
+                  for (let j = 0; j < colIndex; j++) {
+                    const left = columnHeaders[j]?.trim() || "";
+                    if (isMergedRight(left)) {
+                      const span = getMergeRightSpan(left);
+                      const endCol = j + span - 1;
+                      if (colIndex <= endCol) {
+                        showRightBorder = colIndex === endCol;
+                        break;
+                      }
+                    }
+                  }
+
+                  rightBorder = showRightBorder ? "1pt solid black" : "none";
+                }
 
                 headerCells.push(
                   <View
@@ -273,27 +328,35 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     style={{
                       backgroundColor: "#eee",
                       width: mergedWidth,
-                      border: "1pt solid black",
-                      padding: 3,
+                      borderTop: "1pt solid black",
+                      borderBottom: "1pt solid black",
+                      borderLeft: leftBorder,
+                      borderRight: rightBorder,
+                      padding: isCompactMode ? 1 : 3,
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                     wrap={false}
                   >
-                    <Text style={{ fontSize: 10, textAlign: "center", fontWeight: 600 }}>
+                    <Text
+                      style={{
+                        fontSize: isCompactMode ? 5 : 10,
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontFamily: "DejaVuSans",
+                      }}
+                    >
                       {text}
                     </Text>
                   </View>
                 );
 
                 colIndex += span;
-
               }
 
               return headerCells;
             })()}
           </View>
-
 
           {/* Body */}
           {Array.from({ length: rows }).map((_, rowIndex) => {
@@ -308,91 +371,71 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                 wrap={false}
               >
 
-                {Array.from({ length: columns }).map((_, colIndex) => {
-                  const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
-                  const cellText = parseCell(rawCellValue);
-                  const rawTrimmed = rawCellValue.trim();
-                  const mergePrefixMatch = rawTrimmed.match(/^\[merge:(right|down):\d+\](.*)/);
-                  const cleanedValue = mergePrefixMatch ? mergePrefixMatch[2]?.trim() : rawTrimmed;
+                {(() => {
+                  const cells = [];
+                  let colIndex = 0;
 
-                  let isMergedRightFromLeft = false;
-                  for (let j = 0; j < colIndex; j++) {
-                    const leftValue = tableData[rowIndex]?.[j]?.trim() || "";
-                    if (isMergedRight(leftValue)) {
-                      const span = getMergeRightSpan(leftValue);
-                      if (j + span > colIndex) {
-                        isMergedRightFromLeft = true;
-                        break;
-                      }
-                    }
-                  }
+                  while (colIndex < columns) {
+                    const rawCellValue = tableData[rowIndex]?.[colIndex] || "";
+                    const cellText = parseCell(rawCellValue);
+                    const rawTrimmed = rawCellValue.trim();
+                    const mergePrefixMatch = rawTrimmed.match(/^\[merge:(right|down):\d+\](.*)/);
+                    const span = isMergedRight(rawTrimmed) ? getMergeRightSpan(rawTrimmed) : 1;
 
-                  let skipRendering = false;
-                  let showBottomBorder = false;
+                    const cleanedValue = mergePrefixMatch ? mergePrefixMatch[2]?.trim() : rawTrimmed;
 
-                  for (let startRow = 0; startRow < rowIndex; startRow++) {
-                    const cellAbove = tableData[startRow]?.[colIndex]?.trim() || "";
-                    if (isMergedDown(cellAbove)) {
-                      const span = getMergeDownSpan(cellAbove);
-                      const endRow = startRow + span - 1;
+                    const width = columnWidths
+                      .slice(colIndex, colIndex + span)
+                      .reduce((sum, w) => sum + w, 0);
 
-                      if (rowIndex <= endRow) {
-                        skipRendering = true;
-                        showBottomBorder = rowIndex === endRow;
-                        break;
-                      }
-                    }
-                  }
-
-                  if (skipRendering) {
-                    return (
-                      <View
-                        key={colIndex}
-                        style={{
-                          width: columnWidths[colIndex],
-                          borderLeft: "1pt solid black",
-                          borderTop: "none",
-                          borderRight: "1pt solid black",
-                          borderBottom: showBottomBorder ? "1pt solid black" : "none",
-                        }}
-                        wrap={false}
-                      />
-                    );
-                  }
-                  let rightBorder = "1pt solid black";
-                  if (isMergedRight(rawCellValue)) {
-                    rightBorder = "none";
-                  }
-
-                  if (isMergedRightFromLeft) {
-                    let showRightBorder = false;
-
-                    for (let startCol = 0; startCol < colIndex; startCol++) {
-                      const leftValue = tableData[rowIndex]?.[startCol]?.trim() || "";
+                    let isMergedRightFromLeft = false;
+                    for (let j = 0; j < colIndex; j++) {
+                      const leftValue = tableData[rowIndex]?.[j]?.trim() || "";
                       if (isMergedRight(leftValue)) {
-                        const span = getMergeRightSpan(leftValue);
-                        const endCol = startCol + span - 1;
-                        if (colIndex <= endCol) {
-                          showRightBorder = colIndex === endCol;
+                        const leftSpan = getMergeRightSpan(leftValue);
+                        if (j + leftSpan > colIndex) {
+                          isMergedRightFromLeft = true;
                           break;
                         }
                       }
                     }
 
-                    return (
-                      <View
-                        key={colIndex}
-                        style={{
-                          width: columnWidths[colIndex],
-                          borderTop: "1pt solid black",
-                          borderBottom: "1pt solid black",
-                          borderLeft: "none",
-                          borderRight: showRightBorder ? "1pt solid black" : "none",
-                        }}
-                        wrap={false}
-                      />
-                    );
-                  }
+                    let skipRendering = false;
+                    let showBottomBorder = false;
+
+                    for (let startRow = 0; startRow < rowIndex; startRow++) {
+                      const cellAbove = tableData[startRow]?.[colIndex]?.trim() || "";
+                      if (isMergedDown(cellAbove)) {
+                        const span = getMergeDownSpan(cellAbove);
+                        const endRow = startRow + span - 1;
+                        if (rowIndex <= endRow) {
+                          skipRendering = true;
+                          showBottomBorder = rowIndex === endRow;
+                          break;
+                        }
+                      }
+                    }
+
+                    if (skipRendering || isMergedRightFromLeft) {
+                      cells.push(
+                        <View
+                          key={`cell-${rowIndex}-${colIndex}`}
+                          style={{
+                            width,
+                            borderTop: skipRendering ? "none": "1pt solid black",
+                            borderBottom: showBottomBorder ? "1pt solid black" : "none",
+                            borderLeft: isMergedRightFromLeft ? "none" : "1pt solid black",
+                            borderRight: skipRendering ? "1pt solid black" : "none",
+                          }}
+                          wrap={false}
+                        />
+                      );
+                      colIndex++;
+                      continue;
+                    }
+
+                    let rightBorder = "1pt solid black";
+                    if (isMergedRight(rawCellValue)) rightBorder = "1pt solid black";
 
                   const isEuropeanNumber =
                     /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(cleanedValue) ||
@@ -417,69 +460,75 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(cleanedValue) ||
                     /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(cleanedValue);
 
-                  let bottomBorder = "1pt solid black";
-
-                  if (isMergedDown(rawCellValue)) {
-                    const span = getMergeDownSpan(rawCellValue);
-                    const endRow = rowIndex + span - 1;
-                    if (endRow !== rowIndex + span - 1 || rowIndex !== rows - 1) {
-                      bottomBorder = "none";
+                    let bottomBorder = "1pt solid black";
+                    if (isMergedDown(rawCellValue)) {
+                      const span = getMergeDownSpan(rawCellValue);
+                      const endRow = rowIndex + span - 1;
+                      if (endRow !== rowIndex + span - 1 || rowIndex !== rows - 1) {
+                        bottomBorder = "none";
+                      }
                     }
+
+                    cells.push(
+                      <View
+                        key={`cell-${rowIndex}-${colIndex}`}
+                        style={[
+                          isCompactMode ? compactStyles.tableCell : styles.tableCell,
+                          {
+                            width,
+                            borderLeft: "1pt solid black",
+                            borderRight: rightBorder,
+                            borderTop: "1pt solid black",
+                            borderBottom: bottomBorder,
+                            justifyContent: "center",
+                          },
+                        ]}
+                        wrap={false}
+                      >
+                        {isImage && imageBase64 ? (
+                          <Image
+                            src={imageBase64}
+                            style={{
+                              height: 60,
+                              objectFit: "contain",
+                              marginVertical: 2,
+                            }}
+                          />
+                        ) : (
+                          (() => {
+                            const displayValue = cellText === "SUMMARY" ? "-" : cellText;
+                            const isSpecial = cellText === "PASS" || cellText === "FAIL";
+
+                            return (
+                              <Text
+                                style={{
+                                  fontFamily: "DejaVuSans",
+                                  minHeight: isCompactMode ? 20 : "auto",
+                                  fontSize: isCompactMode ? 4 : 9,
+                                  textAlign: isCenteredCell || isHeaderRow ? "center" : "justify",
+                                  fontWeight: isHeaderRow ? 600 : isSpecial ? 600 : undefined,
+                                  color:
+                                    cellText === "PASS"
+                                      ? "green"
+                                      : cellText === "FAIL"
+                                        ? "red"
+                                        : "#000",
+                                }}
+                              >
+                                {displayValue}
+                              </Text>
+                            );
+                          })()
+                        )}
+                      </View>
+                    );
+
+                    colIndex += span;
                   }
 
-                  return (
-                    <View
-                      key={colIndex}
-                      style={[
-                        styles.tableCell,
-                        {
-                          width: columnWidths[colIndex],
-                          borderLeft: "1pt solid black",
-                          borderRight: rightBorder,
-                          borderTop: "1pt solid black",
-                          borderBottom: bottomBorder,
-                          justifyContent: "center",
-                        },
-                      ]}
-                      wrap={false}
-                    >
-                      {isImage && imageBase64 ? (
-                        <Image
-                          src={imageBase64}
-                          style={{
-                            height: 60,
-                            objectFit: "contain",
-                            marginVertical: 2,
-                          }}
-                        />
-                      ) : (
-                        (() => {
-                          const displayValue = cellText === "SUMMARY" ? "-" : cellText;
-                          const isSpecial = cellText === "PASS" || cellText === "FAIL";
+                  return cells;
+                })()}
 
-                          return (
-                            <Text
-                              style={{
-                                fontFamily: 'DejaVuSans',
-                                fontSize: 9,
-                                textAlign: isCenteredCell || isHeaderRow ? "center" : "justify",
-                                fontWeight: isHeaderRow ? 600 : isSpecial ? 600 : undefined,
-                                color: cellText === "PASS"
-                                  ? "green"
-                                  : cellText === "FAIL"
-                                    ? "red"
-                                    : "#000",
-                              }}
-                            >
-                              {displayValue}
-                            </Text>
-                          );
-                        })()
-
-                      )}
-                    </View>
-                  );
-                })}
               </View>
             );
           })}

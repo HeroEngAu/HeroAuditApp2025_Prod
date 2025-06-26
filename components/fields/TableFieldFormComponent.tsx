@@ -239,7 +239,7 @@ export function FormComponent({
                 if (occupiedCols.has(col)) return null;
 
                 const headerValue = columnHeaders[col] || `Col ${col + 1}`;
-                const match = headerValue.match(/^\[merge:right:(\d+)\](.*)/);
+                const match = headerValue.replace(/\r\n/g, "\n").match(/^\[merge:right:(\d+)\]([\s\S]*)/);
                 const span = match ? parseInt(match[1], 10) : 1;
                 const text = match ? match[2].trim() : headerValue;
 
@@ -251,8 +251,13 @@ export function FormComponent({
                   <TableHead
                     key={col}
                     colSpan={span}
-                    className="bg-gray-100 whitespace-pre-wrap break-words"
-                    style={{ minWidth: "50px" }}
+                    className="bg-gray-100 break-words text-left align-top"
+                    style={{
+                      minWidth: "50px",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word", 
+                      lineHeight: "1.2",       
+                    }}
                   >
                     {text}
                   </TableHead>
@@ -301,7 +306,7 @@ export function FormComponent({
                 const dateValue = isDate ? rawContent.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
                 const isPassFailOrSummary = ["[PASS]", "[FAIL]", "[SUMMARY]"].includes(rawContent);
                 const isOnlyMergeTag = mergeMatch && content.trim() === "";
-
+                
                 if (isSelect) {
                   try {
                     const match = cellValue.match(/^\[select:"(.*?)":(\[.*\])\]$/);
