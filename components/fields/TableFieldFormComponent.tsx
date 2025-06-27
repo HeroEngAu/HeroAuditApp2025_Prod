@@ -240,6 +240,7 @@ export function FormComponent({
 
                 const headerValue = columnHeaders[col] || `Col ${col + 1}`;
                 const match = headerValue.replace(/\r\n/g, "\n").match(/^\[merge:right:(\d+)\]([\s\S]*)/);
+
                 const span = match ? parseInt(match[1], 10) : 1;
                 const text = match ? match[2].trim() : headerValue;
 
@@ -255,8 +256,9 @@ export function FormComponent({
                     style={{
                       minWidth: "50px",
                       whiteSpace: "pre-wrap",
-                      wordBreak: "break-word", 
-                      lineHeight: "1.2",       
+                      wordBreak: "break-word",
+                      lineHeight: "1.2",
+                      fontWeight: "600",
                     }}
                   >
                     {text}
@@ -271,7 +273,7 @@ export function FormComponent({
           {Array.from({ length: rows }, (_, row) => (
             <TableRow
               key={row}
-              className={`whitespace-pre-wrap break-words ${headerRowIndexes.includes(row) ? "bg-gray-100 text-muted-foreground font-medium" : ""
+              className={`whitespace-pre-wrap break-words ${headerRowIndexes.includes(row) ? "whitespace-pre-wrap break-words bg-gray-100 text-muted-foreground font-medium" : " whitespace-pre-wrap break-words"
                 }`}
             >
               {Array.from({ length: columns }, (_, col) => {
@@ -282,7 +284,7 @@ export function FormComponent({
                   return null;
                 }
 
-                const mergeMatch = cellValue.match(/^\[merge:(right|down):(\d+)\](.*)/);
+                const mergeMatch = cellValue.replace(/\r\n/g, "\n").match(/^\[merge:(right|down):(\d+)\]([\s\S]*)/);
                 const direction = mergeMatch?.[1];
                 const span = mergeMatch ? parseInt(mergeMatch[2]) : 1;
                 const content = mergeMatch ? mergeMatch[3] : cellValue;
@@ -306,7 +308,7 @@ export function FormComponent({
                 const dateValue = isDate ? rawContent.match(/^\[date:(.*?)\]$/)?.[1] ?? "" : "";
                 const isPassFailOrSummary = ["[PASS]", "[FAIL]", "[SUMMARY]"].includes(rawContent);
                 const isOnlyMergeTag = mergeMatch && content.trim() === "";
-                
+
                 if (isSelect) {
                   try {
                     const match = cellValue.match(/^\[select:"(.*?)":(\[.*\])\]$/);
@@ -476,13 +478,26 @@ export function FormComponent({
 
                     ) : (!readOnly && (editableCells[row][col] || isOnlyMergeTag)) ? (
                       <Textarea
-                        className="w-full min-h-[60px] p-2 border rounded resize-y"
+                        className="whitespace-pre-wrap break-words w-full min-h-[60px] p-2 border rounded resize-y"
                         value={content}
                         onChange={(e) => handleCellChange(row, col, e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      <div className="whitespace-pre-wrap break-words">{content}</div>
+                      <div
+                        className="break-words"
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                          lineHeight: "1.2",
+                          fontWeight: headerRowIndexes.includes(row) ? "600" : undefined,
+                          textAlign: headerRowIndexes.includes(row) ? "center" : "left"
+                        }}
+                      >
+                        {headerRowIndexes.includes(row)
+                          ? content.split("\n").map((line, i) => <div key={i}>{line}</div>)
+                          : content}
+                      </div>
                     )}
                   </TableCell>
                 );

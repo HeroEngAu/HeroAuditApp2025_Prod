@@ -216,19 +216,20 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
         columnHeaders: string[] = []
       ): number[] => {
         const maxCharPerColumn = Array(columnCount).fill(0);
-
+        const isDateColumn = Array(columnCount).fill(false);
         const allRows = [columnHeaders.slice(0, columnCount), ...tableData];
 
         allRows.forEach((row) => {
           row.forEach((cell, colIndex) => {
             const parsed = parseCell(cell);
-            const length = parsed.length;
-            const lengthWithMin = Math.max(length + 13, parsed.length + 13);
+            const lengthWithMin = parsed.length + 13;
             let px = 13;
-            if (/^[A-Z0-9\s\W]+$/.test(parsed)) {
-              px = 15;
-            } else if (parsed.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+
+            if (cell.trim().startsWith("[date:")) {
+              isDateColumn[colIndex] = true;
               px = 19;
+            } else if (/^[A-Z0-9\s\W]+$/.test(parsed)) {
+              px = 15;
             } else if (!isNaN(Number(parsed))) {
               px = 14;
             }
@@ -240,13 +241,18 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
           });
         });
 
-        const minWidth =  70;
+        const baseMinWidth = 70;
+        const dateMinWidth = 130;
         const maxWidth = 1200;
 
-        return maxCharPerColumn.map((w) =>
-          Math.min(Math.max(w, minWidth), maxWidth)
+        return maxCharPerColumn.map((w, colIndex) =>
+          Math.min(
+            Math.max(w, isDateColumn[colIndex] ? dateMinWidth : baseMinWidth),
+            maxWidth
+          )
         );
       };
+
 
       const columnWidths = estimateColumnWidths(tableData, columns, columnHeaders);
       const compactStyles = {
@@ -422,7 +428,7 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                           key={`cell-${rowIndex}-${colIndex}`}
                           style={{
                             width,
-                            borderTop: skipRendering ? "none": "1pt solid black",
+                            borderTop: skipRendering ? "none" : "1pt solid black",
                             borderBottom: showBottomBorder ? "1pt solid black" : "none",
                             borderLeft: isMergedRightFromLeft ? "none" : "1pt solid black",
                             borderRight: skipRendering ? "1pt solid black" : "none",
@@ -437,28 +443,28 @@ function renderFieldValue(element: FormElementInstance, value: unknown) {
                     let rightBorder = "1pt solid black";
                     if (isMergedRight(rawCellValue)) rightBorder = "1pt solid black";
 
-                  const isEuropeanNumber =
-                    /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(cleanedValue) ||
-                    /^[0-9]+,[0-9]+$/.test(cleanedValue) ||
-                    /^[0-9]+,[0-9]{3}$/.test(cleanedValue) ||
-                    /^-?\d+(?:\.\d{3})*,\d+$/.test(cleanedValue);
-                  const isImage = cleanedValue.startsWith("[image:");
-                  const imageBase64 = cleanedValue.match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
-                  const isCenteredCell =
-                    ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(cleanedValue) ||
-                    cleanedValue.startsWith("[select") ||
-                    cleanedValue.startsWith("[number:") ||
-                    cleanedValue.startsWith("[date:") ||
-                    !isNaN(Number(cleanedValue)) ||
-                    isEuropeanNumber ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
-                    /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
-                    /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
-                    /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
-                    !isNaN(Number(cleanedValue)) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(cleanedValue) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(cleanedValue) ||
-                    /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(cleanedValue);
+                    const isEuropeanNumber =
+                      /^[0-9]{1,3}(\.[0-9]{3})*,[0-9]+$/.test(cleanedValue) ||
+                      /^[0-9]+,[0-9]+$/.test(cleanedValue) ||
+                      /^[0-9]+,[0-9]{3}$/.test(cleanedValue) ||
+                      /^-?\d+(?:\.\d{3})*,\d+$/.test(cleanedValue);
+                    const isImage = cleanedValue.startsWith("[image:");
+                    const imageBase64 = cleanedValue.match(/^\[image:(data:image\/[a-zA-Z]+;base64,.*?)\]$/)?.[1];
+                    const isCenteredCell =
+                      ["[checkbox:true]", "[checkbox:false]", "[checkbox]"].includes(cleanedValue) ||
+                      cleanedValue.startsWith("[select") ||
+                      cleanedValue.startsWith("[number:") ||
+                      cleanedValue.startsWith("[date:") ||
+                      !isNaN(Number(cleanedValue)) ||
+                      isEuropeanNumber ||
+                      /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                      /^[0-9]+(,[0-9]+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                      /^-?\d+(\.\d+)?\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                      /^-?\d+,\d+\s*[a-zA-Z]{1,3}$/.test(cleanedValue) ||
+                      !isNaN(Number(cleanedValue)) ||
+                      /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{1}$/.test(cleanedValue) ||
+                      /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{2}$/.test(cleanedValue) ||
+                      /^[0-9]+(\.[0-9]+)?\s*[a-zA-Z]{3}$/.test(cleanedValue);
 
                     let bottomBorder = "1pt solid black";
                     if (isMergedDown(rawCellValue)) {
