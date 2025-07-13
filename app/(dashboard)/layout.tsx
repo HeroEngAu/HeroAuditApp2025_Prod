@@ -10,6 +10,8 @@ import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
 import { fetchUserAttributes, signOut } from 'aws-amplify/auth';
 
+
+
 Amplify.configure(outputs);
 
 function getInitials(name: string) {
@@ -17,18 +19,19 @@ function getInitials(name: string) {
   if (parts.length === 1) return parts[0][0].toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
-
+type ErrorWithMessage = {
+  message: string;
+};
 
 function Layout({ children }: { children: ReactNode }) {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [company, setCompany] = useState('');
-  type ErrorWithMessage = {
-    message: string;
-  };
 
+
+  // ✅ Load user attributes
   useEffect(() => {
     async function loadAttributes() {
       try {
@@ -39,25 +42,25 @@ function Layout({ children }: { children: ReactNode }) {
       } catch (err) {
         const e = err as Partial<ErrorWithMessage>;
         if (
-          typeof err === "object" &&
+          typeof err === 'object' &&
           err !== null &&
-          "message" in err &&
-          typeof e.message === "string" &&
-          e.message.includes("NotAuthorizedException")
+          'message' in err &&
+          typeof e.message === 'string' &&
+          e.message.includes('NotAuthorizedException')
         ) {
-          console.log("Token inválido, redirecionando para login...");
-          // Exemplo: window.location.href = '/login';
+          console.log('Invalid Token, redirecting to login...');
+          // Example: window.location.href = '/login';
         } else {
-          console.error("Failed to fetch user attributes:", err);
+          console.error('Failed to fetch user attributes:', err);
         }
       }
     }
+
     loadAttributes();
   }, []);
 
 
-
-  // Close dropdown if clicked outside
+  // ✅ Handle outside clicks for dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -67,15 +70,17 @@ function Layout({ children }: { children: ReactNode }) {
         setDropdownOpen(false);
       }
     }
+
     if (dropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownOpen]);
 
-  const userInitials = userName ? getInitials(userName) : "";
+  const userInitials = userName ? getInitials(userName) : '';
 
   return (
     <div className="flex flex-col min-h-screen min-w-full bg-background max-h-screen">
@@ -135,3 +140,6 @@ function Layout({ children }: { children: ReactNode }) {
 }
 
 export default Layout;
+
+
+

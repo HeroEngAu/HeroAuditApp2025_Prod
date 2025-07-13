@@ -5,28 +5,9 @@ import outputs from "../amplify_outputs.json";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 
-//import { getCurrentUser } from "aws-amplify/auth"; // Ensure getCurrentUser is imported correctly
-//import { FormDescription } from "../components/ui/form";
-///import { vi } from "date-fns/locale";
-//import { sub } from "date-fns";
-//import { string } from 'zod';
-//import { formSchemaType } from "../schemas/form";
-
 Amplify.configure(outputs);
 
 const client = generateClient<Schema>();
-
-// To add a user to a group, call this function where needed (not at the top level)
-
-/*await client.mutations.addUserToGroup({
-    groupName: "ADMINS",
-    userId: "89bef458-4041-7049-9e16-8fe6335c828e",
-});*/
-
-// UserNotFoundErr class for custom error handling
-//class UserNotFoundErr extends Error { }
-// /pages/api/presign.ts (Next.js example)
-
 
 type Client = {
   id: string | null;
@@ -36,6 +17,9 @@ type Client = {
   updatedAt?: string;
   __typename?: string;
 };
+
+
+
 
 export async function GetClients() {
   try {
@@ -158,12 +142,69 @@ export async function UpdateFormContent(id: string, content: any) {
   }
 }
 
+export async function getProjects(timeout = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const apiHeaders = new Headers({
+    "Content-Type": "application/json",
+    "x-api-key": process.env.API_KEY || "da2-7miwp2dilra2bk3647tqtsr72m",
+  });
+
+  const query = `
+    query {
+      getProjects {
+        projectid
+        projectname
+        projectcode
+        clientid
+        clientname
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(
+      "https://xcnsqvquonfnta6nm6eqrcgske.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+      {
+        method: "POST",
+        headers: apiHeaders,
+        cache: "no-store",
+        body: JSON.stringify({ query }),
+        signal: controller.signal,
+      }
+    );
+    clearTimeout(id);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error("GraphQL query failed.");
+    }
+
+    if (!result.data || !Array.isArray(result.data.getProjects)) {
+      throw new Error("Invalid response structure.");
+    }
+
+    return result.data.getProjects;
+  } catch (error) {
+    clearTimeout(id);
+   
+    return [];
+  }
+}
+
+
+
 // Define your server-side action
 export async function saveFormAction(formData: FormData) {
   const id = formData.get("id") as string;
   const content = formData.get("content") as string;
-
-  // Call your existing server-side function (UpdateFormContent)
   await UpdateFormContent(id, content);
 }
 
