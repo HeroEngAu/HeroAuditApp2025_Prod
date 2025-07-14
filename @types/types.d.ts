@@ -19,3 +19,11 @@ export type ClientData = {
   code: string;
 };
 
+export type Client = {
+  id: string | null;
+  ClientName: string | null;
+  ClientCode: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  __typename?: string;
+};

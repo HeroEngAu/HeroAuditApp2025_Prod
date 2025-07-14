@@ -4,41 +4,10 @@ import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
-
-//import { getCurrentUser } from "aws-amplify/auth"; // Ensure getCurrentUser is imported correctly
-//import { FormDescription } from "../components/ui/form";
-///import { vi } from "date-fns/locale";
-//import { sub } from "date-fns";
-//import { string } from 'zod';
-//import { formSchemaType } from "../schemas/form";
+import {Client} from "../@types/types";
 
 Amplify.configure(outputs);
-
 const client = generateClient<Schema>();
-
-// To add a user to a group, call this function where needed (not at the top level)
-
-/*await client.mutations.addUserToGroup({
-    groupName: "ADMINS",
-    userId: "89bef458-4041-7049-9e16-8fe6335c828e",
-});*/
-
-// UserNotFoundErr class for custom error handling
-//class UserNotFoundErr extends Error { }
-// /pages/api/presign.ts (Next.js example)
-
-
-type Client = {
-  id: string | null;
-  ClientName: string | null;
-  ClientCode: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  __typename?: string;
-};
-
-
-
 export async function GetClients() {
   try {
     const allClients: Client[] = [];
@@ -1022,7 +991,7 @@ export async function GetNextFormName(clientId: string) {
   const count = allForms.length;
   const paddedNumber = count.toString().padStart(4, "0");
 
-  return `${code}-FRM-${paddedNumber}`;
+  return `${code}FRM-${paddedNumber}`;
 }
 
 
