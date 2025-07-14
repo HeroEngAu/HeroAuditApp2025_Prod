@@ -22,17 +22,13 @@ import {
 import { useTheme } from "next-themes";
 import { fetchAuthSession } from "aws-amplify/auth";
 import useUserAttributes from "./userAttributes";
-import { ClientProvider, useClientContext } from '../components/context/clientContext';
+import { ClientData } from "../@types/types";
 
 interface CreateFormDialogProps {
   onFormCreated?: () => void;
 }
 
-type ClientData = {
-  id: string;
-  name: string;
-  code: string;
-};
+
 
 const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   onFormCreated,
@@ -40,6 +36,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const router = useRouter();
   const [clients, setClients] = useState<ClientData[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
+
   const [name, setName] = useState("");
   const [equipmentName, setEquipment] = useState("");
   const [description, setDescription] = useState("");
@@ -50,8 +47,6 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [userGroup, setUserGroup] = useState<string | null>(null);
   const { attributes } = useUserAttributes();
-   const { clientNames } = useClientContext();
-   
   const userId = attributes?.sub;
 
     useEffect(() => {
@@ -88,7 +83,13 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
   }, [selectedClient]);
 
 
- 
+  useEffect(() => {
+    const fetchClients = async () => {
+      const clientsData = await GetClients();
+      setClients(clientsData);
+    };
+    fetchClients();
+  }, []);
 
   useEffect(() => {
     const selected = clients.find((c) => c.id === selectedClient);
@@ -157,8 +158,7 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
 
 
   return (
-    <ClientProvider>
-         <View>
+    <View>
       {userGroup !== "viewer" && (
         <Card
           onClick={() => setIsOpen(true)} // Trigger the function when the card is clicked
@@ -299,8 +299,6 @@ const CreateFormDialog: React.FC<CreateFormDialogProps> = ({
         </View>
       )}
     </View>
-    </ClientProvider>
- 
   );
 };
 

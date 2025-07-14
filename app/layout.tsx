@@ -1,14 +1,14 @@
 'use client';
 
 import './globals.css';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   ThemeProvider as AmplifyThemeProvider,
   Theme,
   ColorMode,
   SelectField,
+  Authenticator,
 } from '@aws-amplify/ui-react';
-import { Authenticator } from '@aws-amplify/ui-react';
 import DesignerContextProvider from '../components/context/DesignerContextProvider';
 import { ThemeProvider as NextThemeProvider } from '../components/providers/ThemeProvider';
 import { Toaster } from '../components/ui/toaster';
@@ -18,14 +18,15 @@ import { Amplify } from 'aws-amplify';
 import outputs from '../amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css';
 import RouteLoader from '../components/RouteLoader';
+import { ProjectProvider, useProjectContext } from '../components/context/projectContext';
+import { GetClients } from '../actions/form';
+import { generateClient } from 'aws-amplify/data';
+import { type Schema } from '../amplify/data/resource';
 
-// ✅ Import the ClientProvider and hook
-import { ClientProvider, useClientContext } from '../components/context/clientContext';
-
+const dataClient = generateClient<Schema>();
 Amplify.configure(outputs);
 
 const inter = Inter({ subsets: ['latin'] });
-
 const colorMode: ColorMode = 'dark';
 
 const theme: Theme = {
@@ -87,9 +88,135 @@ function CustomHeader() {
   );
 }
 
-// ✅ This safely uses the context AFTER provider is mounted
+function SyncProjects() {
+  const { projects } = useProjectContext();
+
+  useEffect(() => {
+    async function syncData() {
+      if (!projects || projects.length === 0) return;
+
+      try {
+        const clientMap = new Map<number, { name: string; code: string }>();
+        const projectMap = new Map<number, { projectName: string; projectCode: string; clientID: number }>();
+
+        projects.forEach((p) => {
+          projectMap.set(p.projectid, {
+            projectName: p.projectname,
+            projectCode: p.projectcode,
+            clientID: p.clientid,
+          });
+
+          if (!clientMap.has(p.clientid)) {
+            clientMap.set(p.clientid, {
+              name: p.clientname,
+              code: p.projectcode.slice(0, 5),
+            });
+          }
+        });
+
+        const existingClients = (await dataClient.models.Client.list()).data ?? [];
+        const existingProjects = (await dataClient.models.Project.list()).data ?? [];
+
+        const existingClientIDs = new Set(existingClients.map((c) => c.id));
+        const existingProjectIDs = new Set(existingProjects.map((p) => p.id));
+
+        for (const [id, { name, code }] of Array.from(clientMap.entries())) {
+          if (!existingClientIDs.has(id.toString())) {
+            await dataClient.models.Client.create({
+              id: id.toString(),
+              ClientName: name,
+              ClientCode: code,
+            });
+
+          }
+        }
+
+        for (const [id, { projectName, projectCode, clientID }] of Array.from(projectMap.entries())) {
+          if (!existingProjectIDs.has(id.toString())) {
+            await dataClient.models.Project.create({
+              id: id.toString(),
+              projectName,
+              projectCode,
+              clientID: clientID.toString(),
+            });
+  
+          } else {
+            await dataClient.models.Project.update({
+              id: id.toString(),
+              projectName,
+              projectCode,
+              clientID: clientID.toString(),
+            });
+            //console.log(`ℹ️ Project updated: ${projectName}`);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error syncing data:', error);
+      }
+    }
+
+    syncData();
+    console.log('Data synced successfully');
+  }, [projects]);
+
+  return null;
+}
+
 function CustomFormFields() {
-  const { clientNames } = useClientContext();
+  const { projects } = useProjectContext();
+  const [clientOptions, setClientOptions] = useState<{ id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadClients() {
+      setLoading(true);
+      try {
+        if (projects && projects.length > 0) {
+          const projectClients = new Map<string, string>();
+          projects.forEach((p) => {
+            if (p.clientid && p.clientname && p.projectcode) {
+              projectClients.set(p.clientid.toString(), p.clientname);
+            }
+          });
+
+          const sorted = Array.from(projectClients.entries())
+            .sort((a, b) => a[1].localeCompare(b[1]))
+            .map(([id, name]) => ({ id, name }));
+
+          setClientOptions(sorted);
+
+          const { data: existingClients = [] } = await dataClient.models.Client.list({});
+          const existingClientIDs = new Set(existingClients.map((c) => c.id));
+
+          for (const { id, name } of sorted) {
+            if (!existingClientIDs.has(id)) {
+              try {
+                await dataClient.models.Client.create({
+                  id,
+                  ClientName: name,
+                  ClientCode: name.toLowerCase().replace(/\s+/g, '_'),
+                });
+        
+              } catch (err) {
+                console.warn(`❌ Error adding client "${name}":`, err);
+              }
+            }
+          }
+        } else {
+          const fallback = await GetClients();
+          const mapped = fallback.map((c) => ({ id: c.id, name: c.name }));
+          setClientOptions(mapped);
+        }
+      } catch (err) {
+        console.error('Error in loadClients:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadClients();
+    console.log('Client options loaded:', clientOptions);
+  }, [projects]);
 
   return (
     <>
@@ -97,12 +224,13 @@ function CustomFormFields() {
       <SelectField
         label="Company"
         name="custom:Company"
-        placeholder="Select a company"
-        isRequired={true}
+        placeholder={loading ? 'Loading companies...' : 'Select a company'}
+        isRequired
+        disabled={loading}
       >
-        {clientNames.map((name) => (
-          <option key={name} value={name}>
-            {name}
+        {clientOptions.map((client) => (
+          <option key={client.id} value={client.name}>
+            {client.name}
           </option>
         ))}
       </SelectField>
@@ -122,8 +250,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="icon" type="image/png" href="/icon-192x192.png" />
       </head>
       <body className={inter.className}>
-        {/* ✅ Wrap your whole app in the ClientProvider */}
-        <ClientProvider>
+        <ProjectProvider>
           <NextTopLoader />
           <RouteLoader />
           <AmplifyThemeProvider theme={theme} colorMode={colorMode}>
@@ -138,6 +265,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       },
                     }}
                   >
+                    {/* ✅ Corrected Component Usage */}
+                    <SyncProjects />
                     {children}
                     <Toaster />
                   </Authenticator>
@@ -145,7 +274,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </NextThemeProvider>
             </DesignerContextProvider>
           </AmplifyThemeProvider>
-        </ClientProvider>
+        </ProjectProvider>
       </body>
     </html>
   );

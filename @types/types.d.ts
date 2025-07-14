@@ -1,5 +1,3 @@
-// types/index.ts
-
 export interface Project {
   projectid: number;
   projectname: string;
@@ -9,12 +7,15 @@ export interface Project {
 }
 
 export interface ClientContextType {
-  clientNames: string[];
   projects: Project[];
   loading: boolean;
   error?: string;
+  clientMap: Record<number, string>; // clientid → clientname
 }
 
-// You can continue adding more interfaces here
-// export interface Form { ... }
-// export interface Submission { ... }
+export type ClientData = {
+  id: string;
+  name: string;
+  code: string;
+};
+

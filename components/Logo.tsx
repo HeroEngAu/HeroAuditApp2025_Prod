@@ -17,8 +17,8 @@ function Logo() {
       <Image
         src="/logo.png"
         alt="HeroAudit Logo"
-        width={150}
-        height={70}
+        width={75}
+        height={35}
         priority
       />
     </div>
