@@ -26,13 +26,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         
-        <Suspense
-          fallback={[1, 2, 3, 4].map((el) => (
-            <FormCardSkeleton key={el} />
-          ))}
-        >
+       
           <FilteredFormCards searchTerm={searchTerm} />
-        </Suspense>
+        
       </div>
        </div>
   );
