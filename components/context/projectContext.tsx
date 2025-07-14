@@ -5,7 +5,7 @@ import {
   useState,
   ReactNode,
 } from 'react';
-import { getProjects} from '../../actions/form';
+import { getProjects } from '../../actions/form';
 import { Project } from '../../@types/types';
 
 type ProjectContextType = {
@@ -36,9 +36,14 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
         if (!Array.isArray(data)) throw new Error('Expected an array of projects');
         setProjects(data);
         localStorage.setItem('projects', JSON.stringify(data));
-      } catch (err: any) {
-        console.error('Failed to fetch projects:', err);
-        setError(err.message ?? 'Unknown error');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+          console.error('Failed to fetch projects:', error);
+        } else {
+          setError('Unknown error');
+          console.error('Failed to fetch projects:', error);
+        }
       } finally {
         setLoading(false);
       }

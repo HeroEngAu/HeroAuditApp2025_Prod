@@ -215,7 +215,6 @@ function CustomFormFields() {
     }
 
     loadClients();
-    console.log('Client options loaded:', clientOptions);
   }, [projects]);
 
   return (

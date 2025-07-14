@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { CustomInstance } from "./TableField";
 import { CameraCell } from "../CameraCell"
 import { Textarea } from "../ui/textarea";
+import Image from "next/image"; // ✅ Import next/image
 
 export function FormComponent({
   elementInstance,
@@ -125,10 +126,13 @@ export function FormComponent({
     return (
       <>
         <button onClick={() => setIsOpen(true)}>
-          <img
+          <Image
             src={src}
             alt="Captured"
-            className="max-w-[50px] max-h-[50px] object-contain border rounded hover:ring-2 hover:ring-blue-500 transition"
+            width={50}
+            height={50}
+            unoptimized
+            className="object-contain border rounded hover:ring-2 hover:ring-blue-500 transition"
           />
         </button>
 
@@ -137,11 +141,14 @@ export function FormComponent({
             className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
             onClick={() => setIsOpen(false)}
           >
-            <img
-              src={src}
-              alt="Full"
-              className="max-w-[100%] max-h-[100%] object-contain rounded shadow-lg"
-            />
+           <Image
+            src={src}
+            alt="Captured"
+            width={50}
+            height={50}
+            unoptimized
+            className="object-contain border rounded hover:ring-2 hover:ring-blue-500 transition"
+          />
           </div>
         )}
       </>

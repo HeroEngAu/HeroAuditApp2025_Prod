@@ -5,6 +5,7 @@ import { Label } from "../ui/label";
 import { CustomInstance } from "./ImageField";
 import { getUrl } from "aws-amplify/storage";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export function FormComponent({
   elementInstance,
@@ -35,9 +36,12 @@ export function FormComponent({
       <Label>{label}</Label>
 
       <div className={`w-full flex ${position === "left" ? "justify-start" : position === "right" ? "justify-end" : "justify-center"}`}>
-        <img
+        <Image
           src={signedUrl}
           alt="Uploaded"
+          unoptimized
+          width={width ?? 200}
+          height={height ?? 200}
           className="rounded-md border object-contain"
           style={{
             maxWidth: preserveOriginalSize ? undefined : `${width}px`,

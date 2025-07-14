@@ -1,9 +1,12 @@
+'use client';
+
 import { useState } from "react";
 import { MdPhotoCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { FormElementInstance, SubmitFunction } from "../FormElements";
 import React from "react";
 import { Button } from "../ui/button";
+import Image from 'next/image';
 
 type Props = {
     elementInstance: FormElementInstance;
@@ -26,9 +29,9 @@ type ReactCameraProRef = {
     takePhoto: () => string;
 };
 
-function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string> {
+function resizeAndCompressImage(base64: string, maxWidth = 300): Promise<string> {
     return new Promise((resolve, reject) => {
-        const img = new Image();
+        const img = document.createElement('img');
         img.onload = () => {
             const scale = maxWidth / img.width;
             const canvas = document.createElement("canvas");
@@ -39,7 +42,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 500): Promise<string>
             if (!ctx) return reject("Canvas context error");
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.5);
             resolve(compressedBase64);
         };
         img.onerror = reject;
@@ -100,7 +103,14 @@ export function FormComponent({
         return (
             <div className="flex flex-col items-center py-4">
                 <p className="mb-2">Captured photo:</p>
-                <img src={photo} alt="Captured" className="max-w-xs rounded border" />
+                <Image
+                    src={photo}
+                    alt="Captured"
+                    width={300}
+                    height={200}
+                    unoptimized={true}
+                    className="max-w-xs rounded border"
+                />
             </div>
         );
     }
@@ -109,15 +119,16 @@ export function FormComponent({
         <div className="flex flex-col items-center gap-4">
             {!cameraOpen && !readOnly && (
                 <>
-                <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
-                <button
-                    type="button"
-                    onClick={openCamera}
-                    className="flex items-center gap-2 px-3 py-2 rounded border border-gray-400 text-gray-700 cursor-default select-none"
-                >
-                    <MdPhotoCamera size={20} />
-                    Open Camera
-                </button></>
+                    <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
+                    <button
+                        type="button"
+                        onClick={openCamera}
+                        className="flex items-center gap-2 px-3 py-2 rounded border border-gray-400 text-gray-700 cursor-default select-none"
+                    >
+                        <MdPhotoCamera size={20} />
+                        Open Camera
+                    </button>
+                </>
             )}
 
             {cameraOpen && (
@@ -158,7 +169,6 @@ export function FormComponent({
                         >
                             Switch Camera
                         </Button>
-
                     </div>
                 </div>
             )}
@@ -169,7 +179,14 @@ export function FormComponent({
                         <p className="text-sm font-medium text-gray-700 mb-1">{cameraElement.extraAttributes?.label}</p>
                     )}
                     <p className="mb-2">Photo preview:</p>
-                    <img src={photo} alt="Captured" className="max-w-xs rounded border" />
+                    <Image
+                        src={photo}
+                        alt="Captured"
+                        width={300}
+                        height={200}
+                        unoptimized={true}
+                        className="max-w-xs rounded border"
+                    />
                 </div>
             )}
         </div>

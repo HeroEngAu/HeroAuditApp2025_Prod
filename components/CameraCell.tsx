@@ -1,8 +1,11 @@
+'use client';
+
 import { useState } from "react";
 import { MdCamera } from "react-icons/md";
 import { Camera as ReactCameraPro } from "react-camera-pro";
 import { Button } from "./ui/button";
 import React from "react";
+import Image from 'next/image';
 
 type Props = {
     row: number;
@@ -13,7 +16,7 @@ type Props = {
 
 function resizeAndCompressImage(base64: string, maxWidth = 300): Promise<string> {
     return new Promise((resolve, reject) => {
-        const img = new Image();
+        const img = document.createElement('img');
         img.onload = () => {
             const scale = maxWidth / img.width;
             const canvas = document.createElement("canvas");
@@ -31,6 +34,7 @@ function resizeAndCompressImage(base64: string, maxWidth = 300): Promise<string>
         img.src = base64;
     });
 }
+
 
 type ReactCameraProRef = {
     takePhoto: () => string;
@@ -62,16 +66,17 @@ export function CameraCell({ row, col, handleCellChange, readOnly }: Props) {
     if (readOnly) {
         if (photo) {
             return (
-                <img
+                <Image
                     src={photo}
                     alt="Captured"
-                    className="max-w-[100px] max-h-[100px] object-contain border rounded"
+                    width={100}
+                    height={100}
+                    unoptimized={true}
+                    className="object-contain border rounded"
                 />
             );
         } else {
-            return (
-                <p>No picture was taken.</p>
-            );
+            return <p>No picture was taken.</p>;
         }
     }
 
@@ -94,7 +99,7 @@ export function CameraCell({ row, col, handleCellChange, readOnly }: Props) {
             </div>
             <div className="flex gap-2 mt-2">
                 <Button onClick={takePhoto}>Take Photo</Button>
-                <Button onClick={() => setFacingMode((prev) => prev === "user" ? "environment" : "user")}>
+                <Button onClick={() => setFacingMode((prev) => (prev === "user" ? "environment" : "user"))}>
                     Switch
                 </Button>
                 <Button onClick={() => setOpen(false)}>Cancel</Button>
