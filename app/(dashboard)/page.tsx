@@ -1,7 +1,12 @@
 import '../globals.css';
+//import { GetFormStats } from "../../actions/form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import { ReactNode, Suspense } from "react";
+/*import { LuView } from "react-icons/lu";
+import { FaWpforms } from "react-icons/fa";
+import { HiCursorClick } from "react-icons/hi";
+import { TbArrowBounce } from "react-icons/tb";*/
 import { Separator } from "../../components/ui/separator";
 import { Amplify } from "aws-amplify"
 import outputs from "../../amplify_outputs.json"
@@ -26,9 +31,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         
-       
+        <Suspense
+          fallback={[1, 2, 3, 4].map((el) => (
+            <FormCardSkeleton key={el} />
+          ))}
+        >
           <FilteredFormCards searchTerm={searchTerm} />
-        
+        </Suspense>
       </div>
        </div>
   );
