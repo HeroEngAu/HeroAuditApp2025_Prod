@@ -33,7 +33,6 @@ function ResumeTestRenderer({
   const userId = attributes?.sub;
   const router = useRouter();
 
-  // Save progress function
   const saveProgress = useCallback(async () => {
     if (!formtag2Id) {
       toast({
@@ -69,11 +68,32 @@ function ResumeTestRenderer({
     }
   }, [formId, formtag2Id, elements]);
 
-  // Validate the form fields
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      saveProgress();
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        saveProgress();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [saveProgress]);
+
   const validateForm = useCallback(() => {
     if (!userId) return false;
 
-    formErrors.current = {}; // Reset errors
+    formErrors.current = {}; // Reset
 
     for (const field of elements) {
       const actualValue = formValues.current[field.id] || "";
@@ -82,17 +102,17 @@ function ResumeTestRenderer({
         formErrors.current[field.id] = true;
       }
     }
+
     return Object.keys(formErrors.current).length === 0;
   }, [elements, userId]);
 
-  // Update form value on change
   const submitValue = useCallback((key: string, value: string) => {
     formValues.current[key] = value;
   }, []);
 
-  // Submit form handler
   const submitForm = async () => {
     formErrors.current = {};
+
     if (!validateForm()) {
       setRenderKey(Date.now());
       toast({
