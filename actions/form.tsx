@@ -991,7 +991,7 @@ export async function GetNextFormName(clientId: string) {
   const count = allForms.length;
   const paddedNumber = count.toString().padStart(4, "0");
 
-  return `${code}FRM-${paddedNumber}`;
+  return `${code}-FRM-${paddedNumber}`;
 }
 
 
