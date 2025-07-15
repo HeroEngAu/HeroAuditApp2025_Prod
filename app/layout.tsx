@@ -94,8 +94,11 @@ function SyncProjects() {
 
   useEffect(() => {
     async function syncData() {
-      if (!projects || projects.length === 0) return;
-
+      
+      if (!projects || projects.length === 0) {
+        alert('Syncing projects failed: No projects found, using fallback data');
+        return;
+      } 
       try {
         const clientMap = new Map<number, { name: string; code: string }>();
         const projectMap = new Map<number, { projectName: string; projectCode: string; clientID: number }>();

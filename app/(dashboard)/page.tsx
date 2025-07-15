@@ -1,12 +1,7 @@
 import '../globals.css';
-//import { GetFormStats } from "../../actions/form";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import { ReactNode, Suspense } from "react";
-/*import { LuView } from "react-icons/lu";
-import { FaWpforms } from "react-icons/fa";
-import { HiCursorClick } from "react-icons/hi";
-import { TbArrowBounce } from "react-icons/tb";*/
 import { Separator } from "../../components/ui/separator";
 import { Amplify } from "aws-amplify"
 import outputs from "../../amplify_outputs.json"
