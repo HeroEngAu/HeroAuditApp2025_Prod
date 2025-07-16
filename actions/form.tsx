@@ -5,7 +5,7 @@ import outputs from "../amplify_outputs.json";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 import {Client} from "../@types/types";
-import { secret } from '@aws-amplify/backend';
+
 
 
 Amplify.configure(outputs);
