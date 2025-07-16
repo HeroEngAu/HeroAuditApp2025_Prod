@@ -1,6 +1,15 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-
+import { getProjects } from "../../amplify/functions/get-projects/resource";
 const schema = a.schema({
+  getProjects: a
+    .query()
+    .returns(a.string()) // ✅ returns serialized JSON string
+    .authorization(allow => [allow.guest()]) // adjust auth as needed
+    .handler(a.handler.function(getProjects)),
+
+  // Your models...
+  // Form, Client, Project, etc.
+
   Form: a
     .model({
       userId: a.string(),

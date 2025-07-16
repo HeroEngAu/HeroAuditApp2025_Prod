@@ -936,7 +936,15 @@
         }
       },
       "enums": {},
-      "nonModels": {}
+      "nonModels": {},
+      "queries": {
+        "getProjects": {
+          "name": "getProjects",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false
+        }
+      }
     }
   },
   "storage": {

@@ -5,6 +5,8 @@ import outputs from "../amplify_outputs.json";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 import {Client} from "../@types/types";
+import { secret } from '@aws-amplify/backend';
+
 
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
@@ -1419,59 +1421,23 @@ export async function TurnEditable(formId: string) {
   }
 }
 
-export async function getProjects(timeout = 8000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  const apiHeaders = new Headers({
-    "Content-Type": "application/json",
-    "x-api-key": process.env.API_KEY || "da2-7miwp2dilra2bk3647tqtsr72m",
-  });
-
-  const query = `
-    query {
-      getProjects {
-        projectid
-        projectname
-        projectcode
-        clientid
-        clientname
-      }
-    }
-  `;
-
+export async function getProjects() {
   try {
-    const response = await fetch(
-      "https://xcnsqvquonfnta6nm6eqrcgske.appsync-api.ap-southeast-2.amazonaws.com/graphql",
-      {
-        method: "POST",
-        headers: apiHeaders,
-        cache: "no-store",
-        body: JSON.stringify({ query }),
-        signal: controller.signal,
-      }
-    );
-    clearTimeout(id);
+    const response = await client.queries.getProjects();
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+    if (typeof response !== 'string') {
+      throw new Error('Expected a string response from getProjects');
     }
 
-    const result = await response.json();
+    const data = JSON.parse(response);
 
-    if (result.errors) {
-      console.error("GraphQL errors:", result.errors);
-      throw new Error("GraphQL query failed.");
+    if (!Array.isArray(data)) {
+      throw new Error('Expected response to be an array');
     }
 
-    if (!result.data || !Array.isArray(result.data.getProjects)) {
-      throw new Error("Invalid response structure.");
-    }
-
-    return result.data.getProjects;
+    return data;
   } catch (error) {
-    clearTimeout(id);
-
+    console.error('Failed to fetch projects:', error);
     return [];
   }
 }

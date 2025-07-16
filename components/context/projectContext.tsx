@@ -6,12 +6,8 @@ import {
 } from 'react';
 import { getProjects } from '../../actions/form';
 import { Project } from '../../@types/types';
+import {ProjectContextType} from '../../@types/types';
 
-type ProjectContextType = {
-  projects: Project[];
-  loading: boolean;
-  error?: string;
-};
 
 export const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 

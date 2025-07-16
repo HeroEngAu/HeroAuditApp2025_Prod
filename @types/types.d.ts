@@ -27,3 +27,9 @@ export type Client = {
   updatedAt?: string;
   __typename?: string;
 };
+
+export type ProjectContextType = {
+  projects: Project[];
+  loading: boolean;
+  error?: string;
+};
